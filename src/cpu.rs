@@ -12,8 +12,8 @@ const HALF_CARRY_FLAG_BYTE_POSITION: u8 = 5;
 const CARRY_FLAG_BYTE_POSITION: u8 = 4;
 
 // from flag to 8 bit unsigned
-impl std::convert::From<FlagsRegister> for u8 {
-    fn from(flag: FlagsRegister) -> u8 {
+impl std::convert::From<&FlagsRegister> for u8 {
+    fn from(flag: &FlagsRegister) -> u8 {
         (if flag.zero        {1} else {0}) << ZERO_FLAG_BYTE_POSITION |
         (if flag.subtract    {1} else {0}) << SUBTRACT_FLAG_BYTE_POSTION |
         (if flag.half_carry  {1} else {0}) << HALF_CARRY_FLAG_BYTE_POSITION |
@@ -38,8 +38,25 @@ impl std::convert::From<u8> for FlagsRegister {
     }
 }
 
+pub enum Register {
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    H,
+    L,
+    AF,
+    BC,
+    DE,
+    HL,
+    SP,
+    PC,
+}
+
 // all registars are 8 bit unsigned ints
-struct Registers {
+struct RegisterData {
     a: u8,            // accumulator registar
     b: u8,            // 8 bit registar
     c: u8,            // 8 bit registar
@@ -48,62 +65,95 @@ struct Registers {
     f: FlagsRegister, // flag registar
     h: u8,            // 8 bit registar
     l: u8,            // 8 bit registar
+    sp: u16,          // stack pointer
+    pc: u16,          // program counter
 }
 
 // 16 bit instructions use af, bc, de, and hl combonied to store 16 bits
-impl Registers {
-
-    // combine b and c, where b is the upper bits and c are the lower bits by left shifting the
-    // upper bits and then OR with the lower bits
-    fn get_bc(&self) -> u16 {
-        (self.b as u16) << 8 | self.c as u16
+impl RegisterData {   
+    pub fn new() -> RegisterData {
+        RegisterData {
+            a: 0, 
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            f: FlagsRegister {zero: false, subtract: false, half_carry: false, carry: false},
+            h: 0,
+            l: 0,
+            sp: 0xFFFE,
+            pc: 0x000,
+        }
+    }
+    
+    // reads as u8 register info
+    pub fn read(&self, reg: Register) -> u8 {
+        match reg {
+            Register::A => self.a,
+            Register::B => self.b,
+            Register::C => self.c,
+            Register::D => self.d,
+            Register::E => self.e,
+            Register::F => u8::from(&self.f),
+            Register::H => self.h,
+            Register::L => self.l,
+            _ => panic!("Register not found: 8-bit")
+        }
+    }
+    
+    // reads as u16 register info
+    pub fn read_u16(&self, reg: Register) -> u16 {
+        match reg {
+           Register::AF => (self.a as u16) << 8 | (u8::from(&self.f) as u16),
+           Register::BC => (self.b as u16) << 8 | (self.c as u16),
+           Register::DE => (self.d as u16) << 8 | (self.e as u16), 
+           Register::HL => (self.h as u16) << 8 | (self.l as u16), 
+           Register::SP => self.sp,
+           Register::PC => self.pc,
+           _ => panic!("Register not found for read: 16-bit")
+        }
     }
 
-    // set the upper 8 bits of value to b and the lower 8 bits of value toc
-    fn set_bc(&mut self, value: u16) {
-        self.b = ((value & 0xFF00) >> 8) as u8;
-        self.c = (value & 0x00FF) as u8;
+    pub fn write(&mut self, reg: Register, value: u8) {
+        match reg {
+           Register::A => self.a = value, 
+           Register::B => self.b = value, 
+           Register::C => self.c = value, 
+           Register::D => self.d = value, 
+           Register::E => self.e = value, 
+           Register::F => self.f = value.into(), 
+           Register::H => self.h = value, 
+           Register::L => self.l = value, 
+           _ => panic!("Register can not be found for write: 8-bit")
+        }
     } 
 
-    fn set_de(&mut self, value: u16) {
-        self.d = ((value & 0xFF00) >> 8) as u8;
-        self.e = (value & 0x00FF) as u8;
-    }
+    pub fn write_u16(&mut self, reg: Register, value: u16) {
 
-    fn get_de(&self) -> u16 {                    
-        (self.d as u16) << 8 | self.e as u16
-    }
+        //TODO: impliment the hi and low
+        let hi = ;
+        let lo = 0;
 
-    fn set_hl(&mut self, value: u16) {
-        self.h = ((value & 0xFF00) >> 8) as u8;
-        self.l = (value & 0x00FF) as u8;
-    }
-
-    fn get_hl(&self) -> u16 {                    
-        (self.h as u16) << 8 | self.l as u16
-    }
-}
-
-// INSTRUCTIONS 
-
-// registars that can be targeted by Arithmetic Instructions
-enum ArithmeticTarget {
-    A, B, C, D, E, H, L
-}
-
-// place where all instructions will be defined 
-enum Instruction {
-    ADD(ArithmeticTarget)
-} 
-
-impl CPU {
-    fn execute(&mut self, instruction: Instruction) {
-        match instruction {
-            Instruction::ADD(target) => {
-                match target {
-                    Arithmet
-                }
-            }
+        match reg {
+            Register::AF => {
+                self.a = hi;
+                self.f = lo.into();
+            },
+            Register::BC => {
+                self.b = hi;
+                self.c = lo;
+            },
+            Register::DE => {
+                self.d = hi;
+                self.e = lo;
+            },
+            Register::HL => {
+                self.h = hi;
+                self.e = lo;
+            },
+            Register::SP => self.sp = value,
+            Register::PC => self.pc = value,
+            _ => panic!("Register can not be found for write 16-bit")
         }
     }
 }
