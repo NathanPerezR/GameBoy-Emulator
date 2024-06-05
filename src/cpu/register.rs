@@ -1,3 +1,4 @@
+// enum for the 8 bit registers
 pub enum Register8 {
     A,
     B,
@@ -9,6 +10,7 @@ pub enum Register8 {
     L,
 }
 
+// enum for the 16 bit registers (upper 8 bits first reg, lower 8 second letter)
 pub enum Register16 {
     AF,
     BC,
@@ -78,6 +80,7 @@ impl RegisterData {
         }
     }
 
+    // write a 8 bit value to a register
     pub fn write_u8(&mut self, reg: Register8, value: u8) {
         use self::Register8::*;
         match reg {
@@ -91,7 +94,8 @@ impl RegisterData {
            L => self.l = value, 
         }
     } 
-
+    
+    // write a 16 bit value to 2 8-bit registers
     pub fn write_u16(&mut self, reg: Register16, value: u16) {
 
         let hi: u8 = (value >> 8) as u8; 
