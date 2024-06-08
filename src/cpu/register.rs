@@ -1,4 +1,5 @@
 // enum for the 8 bit registers
+#[derive(Clone,Copy,Debug)]
 pub enum Register8 {
     A,
     B,
@@ -11,6 +12,7 @@ pub enum Register8 {
 }
 
 // enum for the 16 bit registers (upper 8 bits first reg, lower 8 second letter)
+#[derive(Clone,Copy,Debug)]
 pub enum Register16 {
     AF,
     BC,
