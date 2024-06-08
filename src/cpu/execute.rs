@@ -43,5 +43,24 @@ impl Cpu {
 
     }
 
+    pub fn sbc_8<I: Copy>(&mut self, in8: I) {
+
+    } 
+
+    pub fn and_8<I: Copy>(&mut self, in8: I) {
+
+    }
+
+    pub fn or_8<I: Copy>(&mut self, in8: I) {
+
+    }
+    
+    pub fn xor_8<I: Copy>(&mut self, in8: I) {
+
+    } 
+
+    pub fn cp_8<I: Copy>(&mut self, in8: I) {
+
+    }
 
 } 

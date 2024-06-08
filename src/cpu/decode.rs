@@ -248,6 +248,79 @@ impl Cpu {
             0x96 => self.sub_8(Address::HL),
             0xD6 => self.sub_8(Immediate8),
 
+            // SUB A, n
+            // Subcrate n + carry flag from A
+            // n = A B C D E H L (HL) #
+            // set Z if result 0, set N, Set h if no borrow from bit 4, set C if no borrow
+            0x9F => self.sbc_8(A),
+            0x98 => self.sbc_8(B),
+            0x99 => self.sbc_8(C),
+            0x9A => self.sbc_8(D),
+            0x9B => self.sbc_8(E),
+            0x9C => self.sbc_8(H),
+            0x9D => self.sbc_8(L),
+            0x9E => self.sbc_8(Address::HL),
+
+            // AND n,
+            // Logically ANd n with A, result in A
+            // n = A B C D E H L (HL) #
+            // z if result 0, n reset, h set, c reset
+            0xA7 => self.and_8(A),
+            0xA0 => self.and_8(B),
+            0xA1 => self.and_8(C),
+            0xA2 => self.and_8(D),
+            0xA3 => self.and_8(E),
+            0xA4 => self.and_8(H),
+            0xA5 => self.and_8(L),
+            0xA6 => self.and_8(Address::HL),
+            0xE6 => self.and_8(Immediate8),
+
+            // OR n,
+            // Logical Or n with register A, result in A
+            // n = A B C D E H L (HL) #
+            // z set if result is 0, n reset, h reset, c reset
+            0xB7 => self.or_8(A), 
+            0xB0 => self.or_8(B), 
+            0xB1 => self.or_8(C), 
+            0xB2 => self.or_8(D), 
+            0xB3 => self.or_8(E), 
+            0xB4 => self.or_8(H), 
+            0xB5 => self.or_8(L), 
+            0xB6 => self.or_8(Address::HL), 
+            0xF6 => self.or_8(Immediate8),
+
+            // XOR n,
+            // Logical exclusive or n with register A, result in A
+            // n = A B C D E H L (HL) #
+            // Z if result is 0, reset N H and C
+            0xAF => self.xor_8(A),
+            0xA8 => self.xor_8(B),
+            0xA9 => self.xor_8(C),
+            0xAA => self.xor_8(D),
+            0xAB => self.xor_8(E),
+            0xAC => self.xor_8(H),
+            0xAD => self.xor_8(L),
+            0xAE => self.xor_8(Address::HL),
+            0xEE => self.xor_8(Immediate8),
+
+            // CP, n
+            // compare A with n.  Basically an A-n subtraction instruction but the results are
+            // thrown away
+            // use with n = A B C D E H L (HL) #
+            // FLAGS AFFECTED: 
+            // Z: Set if A is Zero (A == n)
+            // N: Set
+            // H: Set if no borrow from bit 4 
+            // C Set for no borrow  (A < n)
+            0xBF => self.cp_8(A),
+            0xB8 => self.cp_8(B),
+            0xB9 => self.cp_8(C),
+            0xBA => self.cp_8(D),
+            0xBB => self.cp_8(E),
+            0xBC => self.cp_8(H),
+            0xBD => self.cp_8(L),
+            0xBE => self.cp_8(Address::HL),
+            0xFE => self.cp_8(Immediate8),
             _ => panic!("non covered pattern found!")
         }
     }
