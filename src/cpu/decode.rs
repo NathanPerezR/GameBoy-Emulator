@@ -321,7 +321,133 @@ impl Cpu {
             0xBD => self.cp_8(L),
             0xBE => self.cp_8(Address::HL),
             0xFE => self.cp_8(Immediate8),
+
+            // INC n 
+            // Increment register n 
+            // n = A B C D E H L (HL)
+            // set z if result is zero, resset n, set h if carry from bit three, c not affected
+            0x3C => self.inc_8(A),
+            0x04 => self.inc_8(B),
+            0x0C => self.inc_8(C),
+            0x14 => self.inc_8(D),
+            0x1C => self.inc_8(E),
+            0x24 => self.inc_8(H),
+            0x2C => self.inc_8(L),
+            0x34 => self.inc_8(Address::HL),
+
+            // DEC n
+            // decrement register n 
+            // n = A B C D E H L (HL)
+            // Z set if result is 0, N set, H set if no borrow from bit 4, C not affected
+            0x3D => self.dec_8(A),
+            0x05 => self.dec_8(B),
+            0x0D => self.dec_8(C),
+            0x15 => self.dec_8(D),
+            0x1D => self.dec_8(E),
+            0x25 => self.dec_8(H),
+            0x2D => self.dec_8(L),
+            0x35 => self.dec_8(Address::HL),
+
+
+
+            // 16-BIT ARITHMETIC 
+            
+            // ADD HL, n
+            // add n to HL 
+            // n = BC DE HL SP 
+            // Z Not affected, N reset, H Set if carry from bit 11
+            0x09 => self.add_HL_16(BC),
+            0x19 => self.add_HL_16(DE),
+            0x29 => self.add_HL_16(HL),
+            0x39 => self.add_HL_16(SP),
+
+            // ADD SP, n
+            // add n to stack pointer
+            // n = one byte signed immediate value (#)
+            // z reset, n reset, h set or reset, c set or reset 
+            0xE8 => self.add_SP_16(),
+
+            // INC nn 
+            // increment register nn 
+            // use with 
+            // nn = BC DE HL SP
+            0x03 => self.inc_16(BC),
+            0x13 => self.inc_16(DE),
+            0x23 => self.inc_16(HL),
+            0x33 => self.inc_16(SP),
+
+            // DEC nn 
+            // decrement register nn 
+            // nn = BC DE HL SP
+            0x0B => self.dec_16(BC),
+            0x1B => self.dec_16(DE),
+            0x2B => self.dec_16(HL),
+            0x3B => self.dec_16(SP),
+
+            // SWAP n
+            // Swap uper and lower nibles of n
+            // n = A B C D E H L (HL)
+            // Z set if zero, n h c all reset
+            0x37 => self.swap_8(A),
+            0x30 => self.swap_8(B),
+            0x31 => self.swap_8(C),
+            0x32 => self.swap_8(D),
+            0x33 => self.swap_8(E),
+            0x34 => self.swap_8(H),
+            0x35 => self.swap_8(L),
+            0x36 => self.swap_8(Address::HL),
+
+            // DAA 
+            // Decimal adjust register A.  This instruction adjusts register A so that the correct
+            // representation of Binary coded decimal (BCD) is obtained 
+            // Z set if A is zero N Not affected H Reset C Set or reset according to op
+            0x27 => self.daa(),
+
+            // CPL
+            // Complement A Register (flip all bits)
+            // z and c not affected, set n and h
+            0x2F => self.cpl(),
+            
+            // CCF 
+            // complement carry flag 
+            // if c flag is set then reset 
+            // is c flag is reset then set 
+            // z not affected, n reset, h reset, c Complement
+            0x3F => self.ccf(),
+
+            // SCF 
+            // set carry flag
+            // z not affect, n reset, h reset, c set
+            0x37 => self.scf(),
+
+            // NOP 
+            // No operation 
+            0x00 => self.nop(), 
+
             _ => panic!("non covered pattern found!")
+        }
+    }
+
+    pub fn cb_decode_exe_fetch(&mut self) {
+
+        match self.opcode {
+            // MISCELLANEOUS
+           
+            // SWAP n
+            // Swap uper and lower nibles of n
+            // n = A B C D E H L (HL)
+            // Z set if zero, n h c all reset
+            0x37 => self.swap_8(A),
+            0x30 => self.swap_8(B),
+            0x31 => self.swap_8(C),
+            0x32 => self.swap_8(D),
+            0x33 => self.swap_8(E),
+            0x34 => self.swap_8(H),
+            0x35 => self.swap_8(L),
+            0x36 => self.swap_8(Address::HL),
+
+            _ => panic!("cb opcode not found ")
+            
         }
     }
 }

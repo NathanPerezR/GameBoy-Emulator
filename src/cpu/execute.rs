@@ -62,5 +62,52 @@ impl Cpu {
     pub fn cp_8<I: Copy>(&mut self, in8: I) {
 
     }
+    
+    pub fn inc_8<I: Copy>(&mut self, in8: I) {
 
+    }
+
+    pub fn dec_8<I: Copy>(&mut self, in8: I) {
+
+    }
+
+    pub fn add_HL_16<I: Copy>(&mut self, in16: I) {
+
+    }
+    
+    pub fn add_SP_16<I: Copy>(&mut self) {
+        
+    }
+
+    pub fn inc_16<I: Copy>(&mut self, in16: I) {
+    
+    }
+
+    pub fn dec_16<I: Copy>(&mut self, in16: I) {
+
+    } 
+
+    pub fn swap_8<I: Copy>(&mut self, in8: I) {
+
+    }
+
+    pub fn daa(&mut self) {
+
+    }
+
+    pub fn cpl(&mut self) {
+
+    }
+
+    pub fn ccf(&mut self) {
+
+    }
+
+    pub fn scf(&mut self) {
+
+    }
+
+    pub fn nop(&mut self) {
+
+    }
 } 
