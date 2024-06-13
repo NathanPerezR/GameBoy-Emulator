@@ -110,4 +110,48 @@ impl Cpu {
     pub fn nop(&mut self) {
 
     }
+
+    pub fn halt(&mut self) {
+
+    }
+
+    pub fn stop(&mut self) {
+
+    }
+    
+    pub fn di(&mut self) {
+
+    }
+
+    pub fn ei(&mut self) {
+
+    }
+
+    pub fn rlca(&mut self) {
+
+    }
+
+    pub fn rla(&mut self) {
+
+    }
+
+    pub fn rrca(&mut self) {
+        
+    }
+
+    pub fn rra(&mut self) {
+
+    }
+
+    pub fn rlc_8<I: Copy>(&mut self, in8: I) {
+
+    }
+
+    pub fn rl_8<I: Copy>(&mut self, in8: I) {
+
+    }
+
+    pub fn rrc_8<I: Copy>(&mut self, in8: I) {
+
+    }
 } 

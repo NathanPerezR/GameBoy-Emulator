@@ -424,6 +424,49 @@ impl Cpu {
             // No operation 
             0x00 => self.nop(), 
 
+            // HALT
+            // Power down CPUY until an interrupt occurs
+            0x76 => self.halt(),
+
+            // STOP 
+            // Halt CPU & LCD display until button press
+            0x10 => self.stop(),
+
+            // DI
+            // disables interrupts but not immdiately.  Disabled after DI is executed
+            0xF3 => self.di(),
+
+            // EI 
+            // enable interrupts.  This instruction enables interrupts 
+            0xFB => self.ei(), 
+
+            //ROTATES AND SHIFTS 
+            
+            // RLCA Rotate A left, Old bit 7 to carry flag
+            // z set if result is 0 
+            // n reset 
+            // h reset 
+            // c contains old 7 bit data 
+            0x07 => self.rlca(), 
+            
+            // RLA 
+            // Rotate A left through carry flag 
+            // z set if result is 0, n reset, h reset, c conatins old 7 bit data 
+            0x17 => self.rla(), 
+
+            // RRCA 
+            // rotate A right, old 0 bit to carry flag 
+            // z set if result is zero, reset n and h, c conatins old bit 0 data 
+            0x0F => self.rrca(), 
+
+            // RRA 
+            // rotate A right through carry flag 
+            // z set if result is zero, n and h reset, c contains old 0 bit data  
+            0x1F => self.rra(), 
+
+
+
+            
             _ => panic!("non covered pattern found!")
         }
     }
@@ -445,6 +488,48 @@ impl Cpu {
             0x34 => self.swap_8(H),
             0x35 => self.swap_8(L),
             0x36 => self.swap_8(Address::HL),
+
+            // RLC n 
+            // use with n = A B C D E H L (HL)
+            // z set if result is zero, n reset, h reset, c contains old bit 7 data 
+            0x07 => self.rlc_8(A),
+            0x00 => self.rlc_8(B),
+            0x01 => self.rlc_8(C),
+            0x02 => self.rlc_8(D),
+            0x03 => self.rlc_8(E),
+            0x04 => self.rlc_8(H),
+            0x05 => self.rlc_8(L),
+            0x06 => self.rlc_8(Address::HL),
+
+            // RL n 
+            // rotate n left through carry flag 
+            // use wtih n = A B C D E H L (HL)
+            // z set if result 0, n reset, h reset, c contains old 7 bit data 
+            0x17 => self.rl_8(A),
+            0x10 => self.rl_8(B),
+            0x11 => self.rl_8(C),
+            0x12 => self.rl_8(D),
+            0x13 => self.rl_8(E),
+            0x14 => self.rl_8(H),
+            0x15 => self.rl_8(L),
+            0x16 => self.rl_8(Address::HL),
+
+            // RRC n 
+            // Rotate n right. Old bit 0 to Carry flag 
+            // n = A B C D E H L (HL)
+            // z set if result is zero, n reset, h reset, c contains old bit 0 data 
+            0x0F => self.rrc_8(A), 
+            0x08 => self.rrc_8(B), 
+            0x09 => self.rrc_8(C), 
+            0x0A => self.rrc_8(D), 
+            0x0B => self.rrc_8(E), 
+            0x0C => self.rrc_8(H), 
+            0x0D => self.rrc_8(L), 
+            0x0E => self.rrc_8(Address::HL), 
+
+            //TODO: 
+            // RR n, 
+            // Rotate n right through Carry flag 
 
             _ => panic!("cb opcode not found ")
             
