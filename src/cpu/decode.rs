@@ -15,6 +15,14 @@ pub enum Address {
     ZeroPageC,
 }
 
+#[derive(Clone, Copy, Debug)]
+pub enum Condition { 
+    NZ, // Z flag reset 
+    Z,  // Z flag set 
+    NC, // C flag is reset 
+    C,  // C flag is set 
+}
+
 // identifys when an 8 bit number is taken as input
 #[derive(Clone,Copy,Debug)]
 pub struct Immediate8;
@@ -463,10 +471,63 @@ impl Cpu {
             // rotate A right through carry flag 
             // z set if result is zero, n and h reset, c contains old 0 bit data  
             0x1F => self.rra(), 
-
-
-
             
+
+
+            // JUMPS 
+            // Jump to address nn 
+            // use with nn = two bte immeditate value (LS byte first)
+            0xC3 => self.jp(Immediate8),  // TODO 
+
+            // JP cc, nn 
+            // Jump to address n if the following condition is true 
+            // cc == NZ, jump if Z flag is reset 
+            // cc = Z, jump if Z flag is set 
+            // cc = NC, Jump if C flag is reset, 
+            // cc = C, Jump if C flag is set, 
+            // use with nn == two byte immediate value (LS Byte First )
+            0xC2 => self.jp_cc(Condition::NZ),
+            0xC2 => self.jp_cc(Condition::Z),
+            0xD2 => self.jp_cc(Condition::NC), 
+            0xDA => self.jp_cc(Condition::C), 
+            
+            // JP (HL)
+            // Jump to addres scontained in HL 
+            0xE9 => self.jp_hl(),
+
+            // JP n 
+            // add n to current address and jump to it 
+            // n = one byte signed immediate value 
+            0x18 => self.jr(),
+
+            // JR cc, n 
+            // If the following condition is ture then add n to current address and jump to it 
+            // n = one byte immeditate value 
+            // cc == NZ, jump if Z flag is set 
+            // cc = Z, jump if Z flag is set 
+            // cc = NC, Jump if C flag is reset 
+            // cc = C, Jump if C flag is set 
+            0x20 => jr_cc(Condition::NZ),
+            0x28 => jr_cc(Condition::Z), 
+            0x30 => jr_cc(Condition::NC), 
+            0x38 => jr_cc(Condition::C),
+
+            // CALLS 
+            
+
+            // Call nn 
+            // push address of next instruction onto stack and then jump to address nn 
+            // nn = two byte immidate value 
+            0xCD => call(), 
+
+            // CALL cc, nn 
+            // call address n if following condition is true 
+            // cc == NZ, call if Z flag is reset 
+            // cc == Z, call if Z flag is set 
+            // cc = NC, call if C FLAG is reset 
+            // cc = C call if C flag is set 
+            // nn == two byte immeditate value (LS byte first )
+
             _ => panic!("non covered pattern found!")
         }
     }
@@ -527,9 +588,77 @@ impl Cpu {
             0x0D => self.rrc_8(L), 
             0x0E => self.rrc_8(Address::HL), 
 
-            //TODO: 
             // RR n, 
             // Rotate n right through Carry flag 
+            // z set if zero, n reset, h reset, c contains old 0 bit data 
+            0x1F => self.rr_8(A),
+            0x18 => self.rr_8(B),
+            0x19 => self.rr_8(C),
+            0x1A => self.rr_8(D),
+            0x1B => self.rr_8(E),
+            0x1C => self.rr_8(H),
+            0x1D => self.rr_8(L),
+            0x0E => self.rr_8(Address::HL),
+
+            // sla n 
+            // shift n left into carry.  LSB of n set to 0 
+            // n = A B C D E H L (HL)
+            // z set if result is zero, n reset, h reset, contains old bit 7 data 
+            0x27 => self.sla_8(A),
+            0x20 => self.sla_8(B),
+            0x21 => self.sla_8(C),
+            0x22 => self.sla_8(D),
+            0x23 => self.sla_8(E),
+            0x24 => self.sla_8(H),
+            0x25 => self.sla_8(L),
+            0x26 => self.sla_8(Address::HL),
+
+            // SRA n, 
+            // shift n right inot carry.  MSB doesn't change 
+            // n = A B C D E H L (HL)
+            // z set if result is zero, n reset, h reset, c contains old bit 0 data 
+            0x2F => self.sra_8(A),
+            0x28 => self.sra_8(B),
+            0x29 => self.sra_8(C),
+            0x2A => self.sra_8(D),
+            0x2B => self.sra_8(E),
+            0x2C => self.sra_8(H),
+            0x2D => self.sra_8(L),
+            0x2E => self.sra_8(Address::HL),
+
+            // SRL n 
+            // shift n right into carry.  MSB Set to 0 
+            // use with n = A B C D E H L (HL)
+            // z set if result is zero, n reset, h reset, c contains old bit 0 data 
+            0x3F => self.srl_8(A),
+            0x38 => self.srl_8(B),
+            0x39 => self.srl_8(C),
+            0x3A => self.srl_8(D),
+            0x3B => self.srl_8(E),
+            0x3C => self.srl_8(H),
+            0x3D => self.srl_8(L),
+            0x3E => self.srl_8(Address::HL),
+            
+            
+            // BIT OPCODES 
+            
+            // TODO 
+            // test bit b in register r 
+            // use with b = 0 - 7, r = A B C D E H L (HL)
+            // z set if bit b of register r is 0, reset n, set h, c not affected 
+            
+            // TODO 
+            // SET b r 
+            // set bit b in register r 
+            // b = 0 - 7, r = A B C D E H L (HL)
+            // no flags affected 
+
+            // TODO 
+            // RES b,r 
+            // b = 0 - 7, r = A B C D E H L (HL) 
+            // no flags affected 
+            
+
 
             _ => panic!("cb opcode not found ")
             
