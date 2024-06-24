@@ -1,4 +1,5 @@
-use crate::cpu::register; 
+use crate::cpu::Register16;
+use crate::cpu::Register8;
 use crate::cpu::decode::Condition;
 use crate::cpu::Cpu;
 
@@ -75,7 +76,7 @@ impl Cpu {
 
     }
     
-    pub fn add_SP_16<I: Copy>(&mut self) {
+    pub fn add_sp_16(&mut self) {
         
     }
 
@@ -92,6 +93,10 @@ impl Cpu {
     }
 
     pub fn daa(&mut self) {
+
+    }
+
+    pub fn srl_8<I: Copy>(&mut self, in8: I) {
 
     }
 
@@ -174,11 +179,15 @@ impl Cpu {
     pub fn jp(&mut self) {
     }
 
-    pub fn jp_cc <I: Copy>(&mut self, con: Condition) {
+    pub fn jp_cc (&mut self, con: Condition) {
 
     }
 
     pub fn jp_hl (&mut self) {
+
+    }
+
+    pub fn jr (&mut self) {
 
     }
 
@@ -187,6 +196,14 @@ impl Cpu {
     }
 
     pub fn call(&mut self) {
+
+    }
+
+    pub fn call_cc(&mut self, con: Condition) {
+
+    }
+
+    pub fn rst(&mut self, addr: u8) {
 
     }
 

@@ -202,7 +202,7 @@ impl Cpu {
             0xF5 => self.push_16(AF),
             0xC5 => self.push_16(BC),
             0xD5 => self.push_16(DE),
-            0xE5 => self.push_16(Address::HL),
+            0xE5 => self.push_16(HL),
             
             // POP non
             // pop two bytes off stack into register pair nn Increment stack pointer twice
@@ -210,7 +210,7 @@ impl Cpu {
             0xF1 => self.pop_16(AF),
             0xC1 => self.pop_16(BC),
             0xD1 => self.pop_16(DE),
-            0xE1 => self.pop_16(Address::HL),
+            0xE1 => self.pop_16(HL),
 
 
 
@@ -373,7 +373,7 @@ impl Cpu {
             // add n to stack pointer
             // n = one byte signed immediate value (#)
             // z reset, n reset, h set or reset, c set or reset 
-            0xE8 => self.add_SP_16(),
+            0xE8 => self.add_sp_16(),
 
             // INC nn 
             // increment register nn 
@@ -477,7 +477,7 @@ impl Cpu {
             // JUMPS 
             // Jump to address nn 
             // use with nn = two bte immeditate value (LS byte first)
-            0xC3 => self.jp(Immediate8),  // TODO 
+            0xC3 => self.jp(), 
 
             // JP cc, nn 
             // Jump to address n if the following condition is true 
@@ -507,10 +507,10 @@ impl Cpu {
             // cc = Z, jump if Z flag is set 
             // cc = NC, Jump if C flag is reset 
             // cc = C, Jump if C flag is set 
-            0x20 => jr_cc(Condition::NZ),
-            0x28 => jr_cc(Condition::Z), 
-            0x30 => jr_cc(Condition::NC), 
-            0x38 => jr_cc(Condition::C),
+            0x20 => self.jr_cc(Condition::NZ),
+            0x28 => self.jr_cc(Condition::Z), 
+            0x30 => self.jr_cc(Condition::NC), 
+            0x38 => self.jr_cc(Condition::C),
 
             // CALLS 
             
@@ -518,7 +518,7 @@ impl Cpu {
             // Call nn 
             // push address of next instruction onto stack and then jump to address nn 
             // nn = two byte immidate value 
-            0xCD => call(), 
+            0xCD => self.call(), 
 
             // CALL cc, nn 
             // call address n if following condition is true 
@@ -527,7 +527,33 @@ impl Cpu {
             // cc = NC, call if C FLAG is reset 
             // cc = C call if C flag is set 
             // nn == two byte immeditate value (LS byte first )
+            0xC4 => self.call_cc(Condition::NZ),
+            0xCC => self.call_cc(Condition::Z),
+            0xD4 => self.call_cc(Condition::NC),
+            0xDC => self.call_cc(Condition::C),
 
+            
+
+            // RESTARTS 
+
+            // RST n 
+            // Push present address onto the stack 
+            // jump to address $0000 + n 
+            // use with n = $00 $08 $18 $20 $20 $28 $30 $38 
+            0xC7 => self.rst(0x00),
+            0xCF => self.rst(0x08),
+            0xD7 => self.rst(0x10),
+            0xDF => self.rst(0x18),
+            0xE7 => self.rst(0x20),
+            0xEF => self.rst(0x28),
+            0xF7 => self.rst(0x30),
+            0xFF => self.rst(0x38),
+
+            // RETURNS 
+            
+            // RET 
+            // pop two bytes from stack & jump to that adresss 
+            //
             _ => panic!("non covered pattern found!")
         }
     }
