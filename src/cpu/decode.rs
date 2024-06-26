@@ -106,7 +106,6 @@ impl Cpu {
             // nn = two byte immeditate value LS byte first
             0x0A => self.load_8(A, Address::BC),
             0x1A => self.load_8(A, Address::DE),
-            0x7E => self.load_8(A, Address::HL),
             0xFA => self.load_8(A, Address::Direct), // nn is second parm
             0x3E => self.load_8(A, Immediate8), // # is the second value
             
@@ -188,7 +187,7 @@ impl Cpu {
             // Put SP + n effective address into HL
             // n = one byte signed immediate value
             // Flags affected: Z and N reset.  H and C set or reset according to operation 
-            0xF8 => self.load_16_sp_nn(), //TODO: double check if corredt
+            0xF8 => self.load_16_sp_nn(), 
 
             // LD (nn) SP
             // Put stack pointer SP at addresss n
@@ -392,19 +391,6 @@ impl Cpu {
             0x2B => self.dec_16(HL),
             0x3B => self.dec_16(SP),
 
-            // SWAP n
-            // Swap uper and lower nibles of n
-            // n = A B C D E H L (HL)
-            // Z set if zero, n h c all reset
-            0x37 => self.swap_8(A),
-            0x30 => self.swap_8(B),
-            0x31 => self.swap_8(C),
-            0x32 => self.swap_8(D),
-            0x33 => self.swap_8(E),
-            0x34 => self.swap_8(H),
-            0x35 => self.swap_8(L),
-            0x36 => self.swap_8(Address::HL),
-
             // DAA 
             // Decimal adjust register A.  This instruction adjusts register A so that the correct
             // representation of Binary coded decimal (BCD) is obtained 
@@ -487,7 +473,7 @@ impl Cpu {
             // cc = C, Jump if C flag is set, 
             // use with nn == two byte immediate value (LS Byte First )
             0xC2 => self.jp_cc(Condition::NZ),
-            0xC2 => self.jp_cc(Condition::Z),
+            0xCA => self.jp_cc(Condition::Z),
             0xD2 => self.jp_cc(Condition::NC), 
             0xDA => self.jp_cc(Condition::C), 
             
@@ -553,8 +539,26 @@ impl Cpu {
             
             // RET 
             // pop two bytes from stack & jump to that adresss 
-            //
-            _ => panic!("non covered pattern found!")
+            0xC9 => self.ret(),
+
+            // RET cc 
+            // Return if the following condition is true: 
+            // cc = NZ, return if z flag is reset 
+            // cc = z return if z flag is set 
+            // nc return if c flag is reset 
+            // cc = c return if c flag is set 
+            0xC0 => self.ret_cc(Condition::NZ),
+            0xC8 => self.ret_cc(Condition::Z),
+            0xD0 => self.ret_cc(Condition::NC),
+            0xD8 => self.ret_cc(Condition::C),
+
+            // RETI 
+            // Pop two bytes from stack & jump to that address then enable interrupts
+            0xD9 => self.reti(),
+
+            
+
+            _ => panic!("op code not found")
         }
     }
 
@@ -668,22 +672,42 @@ impl Cpu {
             
             // BIT OPCODES 
             
-            // TODO 
             // test bit b in register r 
             // use with b = 0 - 7, r = A B C D E H L (HL)
             // z set if bit b of register r is 0, reset n, set h, c not affected 
+            0x47 => self.bit(A),
+            0x40 => self.bit(B),
+            0x41 => self.bit(C),
+            0x42 => self.bit(D),
+            0x43 => self.bit(E),
+            0x44 => self.bit(H),
+            0x45 => self.bit(L),
+            0x46 => self.bit(Address::HL),
             
-            // TODO 
             // SET b r 
             // set bit b in register r 
             // b = 0 - 7, r = A B C D E H L (HL)
             // no flags affected 
+            0xC7 => self.set(A),
+            0xC0 => self.set(B),
+            0xC1 => self.set(C),
+            0xC2 => self.set(D),
+            0xC3 => self.set(E),
+            0xC4 => self.set(H),
+            0xC5 => self.set(L),
+            0xC6 => self.set(Address::HL),
 
-            // TODO 
             // RES b,r 
             // b = 0 - 7, r = A B C D E H L (HL) 
             // no flags affected 
-            
+            0x87 => self.res(A), 
+            0x80 => self.res(B), 
+            0x81 => self.res(C), 
+            0x82 => self.res(D), 
+            0x83 => self.res(E), 
+            0x84 => self.res(H), 
+            0x85 => self.res(L), 
+            0x86 => self.res(Address::HL), 
 
 
             _ => panic!("cb opcode not found ")

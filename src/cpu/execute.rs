@@ -207,5 +207,28 @@ impl Cpu {
 
     }
 
+    pub fn ret(&mut self) {
+
+    }
+
+    pub fn ret_cc(&mut self, con: Condition) {
+
+    }
+
+    pub fn reti(&mut self) {
+
+    }
+
+    pub fn bit<I: Copy>(&mut self, b: I) {
+
+    }
+
+    pub fn set<I: Copy>(&mut self, b: I) {
+
+    }
+
+    pub fn res<I: Copy>(&mut self, b: I) {
+
+    }
 
 } 
