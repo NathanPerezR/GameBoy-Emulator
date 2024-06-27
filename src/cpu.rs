@@ -9,6 +9,12 @@ pub struct Cpu {
     pub opcode: u8,
 }
 
+pub enum Step {
+    Running,
+    Halt,
+    InterruptDispatch,
+}
+
 impl Cpu {
     pub fn new() -> Cpu {
         Cpu {

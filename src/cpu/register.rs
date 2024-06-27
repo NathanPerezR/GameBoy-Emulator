@@ -68,7 +68,7 @@ impl RegisterData {
             L => self.l,
         }
     }
-    
+
     // reads as u16 register info
     pub fn read_u16(&self, reg: Register16) -> u16 {
         use self::Register16::*;
@@ -125,14 +125,33 @@ impl RegisterData {
             PC => self.pc = value,
         }
     }
+
+    pub fn set_zero_flag(&mut self, value: bool) {
+        self.f.zero = value;
+    }
+    pub fn set_subtract_flag(&mut self, value: bool) {
+        self.f.subtract = value;
+    }
+    pub fn set_half_carry_flag(&mut self, value: bool) {
+        self.f.half_carry = value;
+    }
+    pub fn set_carry_flag(&mut self, value: bool) {
+        self.f.carry = value;
+    }
+
 }
 
 #[derive(Debug)]
 struct FlagsRegister {
-    zero: bool,
-    subtract: bool,
-    half_carry: bool,
-    carry: bool,
+    zero: bool,         // Set when the result of a math operation is zero or tuo values match wehn
+                        // using the CP instruction 
+
+    subtract: bool,     // Set if subtraction was preformed in the last math instruction 
+
+    half_carry: bool,   // This bit is set if a carry occurred from the lower nibble in the last
+                        // math opperation
+                        
+    carry: bool,    
 }
 
 // const for the bits locations in the byte, lower 4 are always 0
