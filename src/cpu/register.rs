@@ -25,16 +25,16 @@ pub enum Register16 {
 // all registars are 8 bit unsigned ints
 #[derive(Debug)]
 pub struct RegisterData {
-    a: u8,            // accumulator registar
-    b: u8,            // 8 bit registar
-    c: u8,            // 8 bit registar
-    d: u8,            // 8 bit registar 
-    e: u8,            // 8 bit registar
-    f: FlagsRegister, // flag registar
-    h: u8,            // 8 bit registar
-    l: u8,            // 8 bit registar
-    sp: u16,          // stack pointer
-    pc: u16,          // program counter
+    pub a: u8,            // accumulator registar
+    pub b: u8,            // 8 bit registar
+    pub c: u8,            // 8 bit registar
+    pub d: u8,            // 8 bit registar 
+    pub e: u8,            // 8 bit registar
+    pub f: FlagsRegister, // flag registar
+    pub h: u8,            // 8 bit registar
+    pub l: u8,            // 8 bit registar
+    pub sp: u16,          // stack pointer
+    pub pc: u16,          // program counter
 }
 
 // 16 bit instructions use af, bc, de, and hl combonied to store 16 bits
