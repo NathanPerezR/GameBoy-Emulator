@@ -22,4 +22,11 @@ impl Cpu {
             opcode: 0x00,
         }
     }
+
+    pub fn prefetch_next(&mut self, addr: u16) -> Step {
+
+    }
+
+    pub fn execute_step(&mut self, step: Step) -> Step{
+    }
 }
