@@ -628,7 +628,6 @@ impl Cpu {
             0x1B => self.rr_8(E),
             0x1C => self.rr_8(H),
             0x1D => self.rr_8(L),
-            0x0E => self.rr_8(Address::HL),
 
             // sla n 
             // shift n left into carry.  LSB of n set to 0 
