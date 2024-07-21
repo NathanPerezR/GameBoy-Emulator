@@ -2,6 +2,7 @@ mod codes;
 use std::fs::File;
 use std::io::{self, Read};
 
+
 #[derive(Default,Debug)]
 struct CartHeader {
     entry: [u8; 4],
@@ -44,6 +45,23 @@ impl Cart {
 
         self.print_cart_info();
 
+        // checksum
+        let mut x: u8 = 0;
+        for i in 0x0134..=0x14C {
+            x = self.cart_ctx.rom_data[i] - 1;
+        }
+        
+        // TODO
+        let mut passed_check_sum: &str = "";
+        if x & 0xFF {
+            passed_check_sum = "PASSED";
+        } 
+        else {
+            passed_check_sum = "FAILED";
+        }
+
+        println!("\t CheckSum: {:02X}: {}", self.header.checksum, passed_check_sum);
+    
         true
     }
 
