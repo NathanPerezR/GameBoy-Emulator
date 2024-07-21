@@ -2,7 +2,7 @@ mod register;
 mod decode;
 mod execute;
 
-use crate::cpu::register::{Register8, Register16, RegisterData};
+use crate::cpu::register::{Register5, Register16, RegisterData};
 
 pub struct Cpu {
     pub registers: register::RegisterData,
@@ -23,10 +23,10 @@ impl Cpu {
         }
     }
 
-    pub fn prefetch_next(&mut self, addr: u16) -> Step {
-
+    pub fn step(&mut self) -> bool {
     }
 
-    pub fn execute_step(&mut self, step: Step) -> Step{
+    pub fn init(&mut self) {
+
     }
 }
