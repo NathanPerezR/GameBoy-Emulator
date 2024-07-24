@@ -46,21 +46,18 @@ impl Cart {
         self.print_cart_info();
 
         // checksum
-        let mut x: u8 = 0;
-        for i in 0x0134..=0x14C {
-            x = self.cart_ctx.rom_data[i] - 1;
+        let mut checksum: u16 = 0;
+        for address in 0x0134..=0x14C {
+            checksum = checksum.wrapping_sub(self.cart_ctx.rom_data[address].into()).wrapping_sub(1);
         }
         
         // TODO
-        let mut passed_check_sum: &str = "";
-        if x & 0xFF {
+        let mut passed_check_sum: &str = "FAILED";
+        if (checksum & 0xFF) == (self.header.checksum).into() {
             passed_check_sum = "PASSED";
         } 
-        else {
-            passed_check_sum = "FAILED";
-        }
 
-        println!("\t CheckSum: {:02X}: {}", self.header.checksum, passed_check_sum);
+        println!("\t Check Sum: {}", passed_check_sum);
     
         true
     }
