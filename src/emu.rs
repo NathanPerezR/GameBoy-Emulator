@@ -1,4 +1,5 @@
 use crate::cpu::Cpu;
+use crate::cart::Cart;
 
 struct EmuContext {
     pub running: bool,
@@ -6,8 +7,8 @@ struct EmuContext {
     pub ticks: u64,
 }
 
-impl EmuContext {
-   pub fn new() -> EmuContext {
+impl Default for EmuContext {
+   fn default() -> EmuContext {
         EmuContext {
             running: false,
             paused: true,
@@ -25,36 +26,43 @@ impl EmuContext {
  * Timer- time stuff
  */
 
-pub fn emu_get_context() {
-
+#[derive(Default)]
+pub struct Emu {
+    emu_ctx: EmuContext,
 }
 
-pub fn delay(ms_int: u64) {
-    let ms_time = std::time::Duration::from_millis(ms_int);
-    std::thread::sleep(ms_time);
-}
+impl Emu {
 
-pub fn emu_run() -> i16 {
-    let mut ctx: EmuContext = EmuContext::new();
-    
-    let mut cpu: Cpu = Cpu::new();
-    cpu.init();
-   
-    while ctx.running {
-       
-        if ctx.paused {
-            delay(10);
-            continue;
-        }
-
-        if !cpu.step() {
-            print!("CPU STOPPED");
-            return -1;
-        };
-
-        ctx.ticks += 1;
-
+    pub fn delay(&self, ms_int: u64) {
+        let ms_time = std::time::Duration::from_millis(ms_int);
+        std::thread::sleep(ms_time);
     }
-    0
-}
 
+    pub fn emu_run(&self, rom_path: &str) -> i16 {
+
+        let mut ctx: EmuContext = EmuContext::default();
+        
+        let mut cpu: Cpu = Cpu::new();
+        cpu.init();
+
+        let mut cart: Cart = Cart::default();
+        cart.cart_load(rom_path);
+       
+        while ctx.running {
+           
+            if ctx.paused {
+                self.delay(10);
+                continue;
+            }
+
+            if !cpu.step(cart) {
+                print!("CPU STOPPED");
+                return -1;
+            };
+
+            ctx.ticks += 1;
+
+        }
+        0
+    }
+}

@@ -43,7 +43,7 @@ enum RegisterType {
     Register16(Register16),
 }
 
-struct Cpu {
+pub struct Cpu {
     pub registers: register::RegisterData,
     pub cpu_ctx: CpuContext,
 }
@@ -58,6 +58,7 @@ struct CpuContext {
     stepping: bool,
     int_master_enabled: bool,
 }
+
 
 struct Instruction {
     in_type: u8,
