@@ -8,7 +8,7 @@ struct EmuContext {
 }
 
 impl Default for EmuContext {
-   fn default() -> EmuContext {
+   fn default() -> Self {
         EmuContext {
             running: false,
             paused: true,
@@ -25,10 +25,16 @@ impl Default for EmuContext {
  * PPU- Pixel processing unit
  * Timer- time stuff
  */
-
-#[derive(Default)]
 pub struct Emu {
     emu_ctx: EmuContext,
+}
+
+impl Default for Emu {
+    fn default() -> Self {
+        Emu {
+            emu_ctx: EmuContext::default(),
+        }
+    }
 }
 
 impl Emu {
@@ -42,7 +48,7 @@ impl Emu {
 
         let mut ctx: EmuContext = EmuContext::default();
         
-        let mut cpu: Cpu = Cpu::new();
+        let mut cpu: Cpu = Cpu::default();
         cpu.init();
 
         let mut cart: Cart = Cart::default();

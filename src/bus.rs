@@ -16,7 +16,7 @@ use crate::cart::Cart;
 // FF80	FFFE	High RAM (HRAM)	
 // FFFF	FFFF	Interrupt Enable register (IE)
 
-pub fn bus_read(mut cart: Cart, address: u16) -> u8 {
+pub fn bus_read(cart: &Cart, address: u16) -> u8 {
     if address < 0x8000 {
         return cart.cart_read(address);
     }
