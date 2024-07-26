@@ -1,3 +1,5 @@
+use crate::cart::Cart;
+
 // the following memory map info is from the gbdev.io pandocs
 //
 // START END  DESCRIPTION                     NOTES 
@@ -14,8 +16,22 @@
 // FF80	FFFE	High RAM (HRAM)	
 // FFFF	FFFF	Interrupt Enable register (IE)
 
-fn bus_read(address: u16 ) -> u8 {
+pub fn bus_read(mut cart: Cart, address: u16) -> u8 {
+    if address < 0x8000 {
+        return cart.cart_read(address);
+    }
+
+    //TODO
+    // remove false
+    1
 }
 
-fn bus_write(address: u16, value: u8) {
+fn bus_write(mut cart: Cart, address: u16, value: u8) {
+    if address < 0x8000 {
+        // ROM DATA 
+        cart.cart_write(address, value);
+        return;
+    }
+
+    //TODO
 }
