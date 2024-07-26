@@ -35,7 +35,8 @@ pub struct Cart {
 }
 
 impl Cart {
-    pub fn cart_read(&mut self, path: &str) -> bool { 
+
+    pub fn cart_load(&mut self, path: &str) -> bool { 
         self.cart_ctx.filename = path.to_string();
         self.cart_ctx.rom_data = read_file_to_vec(path).expect("Failed to load file");
 
@@ -60,6 +61,15 @@ impl Cart {
         println!("\t Check Sum: {}", passed_check_sum);
     
         true
+    }
+
+    pub fn cart_read(&self, address: u16) -> u8 {
+        self.cart_ctx.rom_data[address as usize]
+    }
+
+    //TODO: remove bool and return statement, make write to arrays of memory
+    pub fn cart_write(&mut self, address: u16, value: u8) -> bool {
+        false
     }
 
     fn save_cart_data(&mut self) {
