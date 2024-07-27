@@ -49,10 +49,12 @@ impl Emu {
         let mut ctx: EmuContext = EmuContext::default();
         
         let mut cpu: Cpu = Cpu::default();
-        cpu.init();
 
         let mut cart: Cart = Cart::default();
         cart.cart_load(rom_path);
+
+        ctx.running = true;
+        ctx.paused = false;
        
         while ctx.running {
            
@@ -61,7 +63,7 @@ impl Emu {
                 continue;
             }
 
-            if !cpu.step(cart) {
+            if !cpu.step(&cart) {
                 print!("CPU STOPPED");
                 return -1;
             };

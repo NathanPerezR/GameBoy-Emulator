@@ -1,5 +1,4 @@
-use crate::cpu::register::Register7::{A,B,C,D,E,H,L,F};
-use crate::cpu::register::Register16::{AF,BC,DE,HL,SP};
+use crate::cpu::register::RegisterType::*;
 use crate::cpu::Cpu;
 
 // addressses used throughout the program
@@ -31,7 +30,7 @@ impl Cpu {
 
     pub fn decode_exe_fetch(&mut self) {
     
-        match self.opcode {
+        match self.cpu_ctx.current_opcode {
             // put value nn into n, use with B C D E H L BC DE HL SP
             0x06 => self.load_8(B, Immediate8),
             0x0E => self.load_8(C, Immediate8), 
@@ -363,10 +362,10 @@ impl Cpu {
             // add n to HL 
             // n = BC DE HL SP 
             // Z Not affected, N reset, H Set if carry from bit 11
-            0x09 => self.add_HL_16(BC),
-            0x19 => self.add_HL_16(DE),
-            0x29 => self.add_HL_16(HL),
-            0x39 => self.add_HL_16(SP),
+            0x09 => self.add_hl_16(BC),
+            0x19 => self.add_hl_16(DE),
+            0x29 => self.add_hl_16(HL),
+            0x39 => self.add_hl_16(SP),
 
             // ADD SP, n
             // add n to stack pointer
@@ -564,7 +563,7 @@ impl Cpu {
 
     pub fn cb_decode_exe_fetch(&mut self) {
 
-        match self.opcode {
+        match self.cpu_ctx.current_opcode {
             // MISCELLANEOUS
            
             // SWAP n

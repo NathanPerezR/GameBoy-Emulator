@@ -1,5 +1,5 @@
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub struct RegisterData {
     pub a: u8,
     pub b: u8,
@@ -13,6 +13,25 @@ pub struct RegisterData {
     pub sp: u16,
 }
 
+impl Default for RegisterData {
+    fn default() -> Self {
+        RegisterData {
+            a: 0, 
+            b: 0, 
+            c: 0, 
+            d: 0, 
+            e: 0, 
+            f: 0, 
+            h: 0, 
+            l: 0, 
+            pc: 0x100,
+            sp: 0x01,
+        }
+    }
+}
+
+
+#[derive(Clone,Copy,Debug)]
 pub enum RegisterType {
     A,
     B,
@@ -20,12 +39,20 @@ pub enum RegisterType {
     D,
     E,
     F,
+    H,
+    L,
     AF,
     BC,
     DE,
     HL,
     PC,
     SP,
+}
+
+impl Default for RegisterType {
+    fn default() -> Self {
+        RegisterType::A
+    }
 }
 
 

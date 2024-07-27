@@ -83,25 +83,25 @@ impl Default for Instruction {
 
 impl Cpu {
     
-    fn fetch_instruction(&mut self, cart: &Cart) {
+    fn fetch_opcode(&mut self, cart: &Cart) {
         self.cpu_ctx.current_opcode = bus_read(cart , self.registers.pc);
         self.registers.pc = self.registers.pc + 1;
-        self.cpu_ctx.current_instruction = instruction_by_opcode(self.cpu_ctx.current_opcode);
     }
 
     // fetching data depends on the current mode of the CPU
     fn fetch_data(&mut self, cart: &Cart) {
         self.cpu_ctx.mem_dest = 0;
         self.cpu_ctx.dest_is_mem = 0;
-
+        
+        use AddressMode::*;
         match &self.cpu_ctx.current_instruction.mode {
             AmImp => return,                                
             AmR => {                                                
-                self.cpu_ctx.fetched_data = self.cpu_read_reg(self.cpu_ctx.current_instruction.register_1);
+                self.cpu_ctx.fetched_data = self.read_reg(self.cpu_ctx.current_instruction.register_1);
                 return
             },
             AmRD8 => {
-                self.cpu_ctx.fetched_data = bus_read(cart, self.registers.pc);
+                self.cpu_ctx.fetched_data = bus_read(cart, self.registers.pc) as u16;
                 self.emu_cycles(1);
                 self.registers.pc += 1;
                 return
@@ -124,50 +124,33 @@ impl Cpu {
     
 
     fn execute(&self) {
-        println!("need to do: executing")
+        println!("Executing instruction {:02X}    PC: {:04X}", self.cpu_ctx.current_opcode, self.registers.pc);
     }
 
     fn emu_cycles(&self, cycle: u8) {
         println!("need to do: emu emu_cycles")
     }
 
-    fn cpu_read_reg() {
-
-    }
-
     pub fn step(&mut self, cart: &Cart) -> bool {
-        
         if !self.cpu_ctx.halted {
-            let pc: u16 = self.registers.pc;
-
-            self.fetch_instruction(&cart);
+            self.fetch_opcode(cart);
             self.fetch_data(cart);
-
-            println!("{:04X}: {:<7} ({:02X} {:02X} {:02X}) A: {:02X} B: {:02X} C: {:02X}", 
-                     self.registers.pc,
-                     5,
-                     self.cpu_ctx.current_opcode,
-                     bus_read(&cart, self.registers.pc + 1),
-                     bus_read(&cart, self.registers.pc + 2),
-                     self.registers.a,
-                     self.registers.b,
-                     self.registers.c,
-                    );
-            
             self.execute();
         }
-
         true
     }
 
-    pub fn cpu_read_reg(&self, register_type: RegisterType) {
-        return match register_type {
-            A => self.registers.a,
-            B => self.registers.b,
-            C => self.registers.c,
-            D => self.registers.d,
-            E => self.registers.e,
-            F => self.registers.f,
+    pub fn read_reg(&self, register_type: RegisterType) -> u16 {
+        use RegisterType::*;
+        match register_type {
+            A => self.registers.a.into(),
+            B => self.registers.b.into(),
+            C => self.registers.c.into(),
+            D => self.registers.d.into(),
+            E => self.registers.e.into(),
+            F => self.registers.f.into(),
+            H => self.registers.h.into(),
+            L => self.registers.l.into(),
             AF => (self.registers.a as u16) << 8 | (self.registers.f as u16),
             BC => (self.registers.b as u16) << 8 | (self.registers.c as u16),
             DE => (self.registers.d as u16) << 8 | (self.registers.e as u16),
