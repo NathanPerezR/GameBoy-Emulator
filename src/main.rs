@@ -5,5 +5,6 @@ mod cpu;
 mod emu;
 
 fn main() {
-    let emu: Emu = emu::Emu::Default(); 
+    let emu: emu::Emu = emu::Emu::default();
+    emu.emu_run("/Users/nathanperez/repo/GameBoy-Emulator/Roms/dmg-acid2.gb");
 }
