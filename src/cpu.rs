@@ -5,8 +5,9 @@ use crate::cpu::register::RegisterType;
 use crate::bus::bus_read;
 use crate::cart::Cart;
 
-#[derive(Debug)]
+#[derive(Clone,Copy,Debug,Default)]
 enum AddressMode{
+    #[default]
     AmImp,
     AmRD16,
     AmRR,
@@ -30,8 +31,9 @@ enum AddressMode{
     AmRA16,
 }
 
-
+#[derive(Clone,Copy,Debug,Default)]
 enum ConditionType {
+    #[default]
     CtNone,
     CtNz,
     CtZ,
@@ -40,13 +42,13 @@ enum ConditionType {
 }
 
 
-#[derive(Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct Cpu {
     pub registers: register::RegisterData,
     pub cpu_ctx: CpuContext,
 }
 
-#[derive(Default)]
+#[derive(Clone, Copy, Debug, Default)]
 struct CpuContext {
     fetched_data: u16,
     mem_dest: u16,
@@ -58,6 +60,7 @@ struct CpuContext {
     int_master_enabled: bool,
 }
 
+#[derive(Clone,Copy,Debug)]
 struct Instruction {
     in_type: u8,
     mode: AddressMode, 
@@ -95,16 +98,14 @@ impl Cpu {
         
         use AddressMode::*;
         match &self.cpu_ctx.current_instruction.mode {
-            AmImp => return,                                
+            AmImp => (),                                
             AmR => {                                                
                 self.cpu_ctx.fetched_data = self.read_reg(self.cpu_ctx.current_instruction.register_1);
-                return
             },
             AmRD8 => {
                 self.cpu_ctx.fetched_data = bus_read(cart, self.registers.pc) as u16;
                 self.emu_cycles(1);
                 self.registers.pc += 1;
-                return
             },
             AmD16 => {
                 let lo: u8 = bus_read(cart, self.registers.pc);
@@ -112,19 +113,30 @@ impl Cpu {
 
                 let hi: u8 = bus_read(cart, self.registers.pc + 1);
                 self.registers.pc += 2;
-
-                return
             },
             _ => { 
                 println!("Unknown Addressing mode hit");
-                return
             }
         }
     }
     
 
     fn execute(&self) {
-        println!("Executing instruction {:02X}    PC: {:04X}", self.cpu_ctx.current_opcode, self.registers.pc);
+        println!("Executing instruction {:02X} PC: {:04X} A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} | fetched-data: {} ", 
+                 self.cpu_ctx.current_opcode,
+                 self.registers.pc,
+                 self.registers.a,
+                 self.registers.b,
+                 self.registers.c,
+                 self.registers.d,
+                 self.registers.e,
+                 self.registers.f,
+                 self.registers.h,
+                 self.registers.l,
+                 self.cpu_ctx.fetched_data,
+                 );
+        
+        self.decode_exe_fetch();
     }
 
     fn emu_cycles(&self, cycle: u8) {
