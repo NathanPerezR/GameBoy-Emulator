@@ -52,7 +52,6 @@ impl Cart {
             checksum = checksum.wrapping_sub(self.cart_ctx.rom_data[address].into()).wrapping_sub(1);
         }
         
-        // TODO
         let mut passed_check_sum: &str = "FAILED";
         if (checksum & 0xFF) == (self.header.checksum).into() {
             passed_check_sum = "PASSED";
