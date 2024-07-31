@@ -304,8 +304,12 @@ impl Cpu {
 
     pub fn jp(&mut self) {
         
-        println!("Not Done: jp");
-        self.cpu_ctx.halted = true;
+        if self.check_cond() {
+            self.registers.pc = self.cpu_ctx.fetched_data;
+            self.emu_cycles(1);
+        } 
+
+        println!("Not Done: jp: {}", self.cpu_ctx.fetched_data);
     }
 
     pub fn jp_cc (&mut self, con: Condition) {
