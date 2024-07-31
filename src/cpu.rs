@@ -4,9 +4,10 @@ mod register;
 use crate::cpu::register::RegisterType;
 use crate::bus::bus_read;
 use crate::cart::Cart;
+use crate::util::*;
 
 #[derive(Clone,Copy,Debug,Default)]
-enum AddressMode{
+enum AddressMode {
     #[default]
     AmImp,
     AmRD16,
@@ -121,7 +122,7 @@ impl Cpu {
     }
     
 
-    fn execute(&self) {
+    fn execute(&mut self) {
         println!("Executing instruction {:02X} PC: {:04X} A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} | fetched-data: {} ", 
                  self.cpu_ctx.current_opcode,
                  self.registers.pc,
@@ -171,5 +172,36 @@ impl Cpu {
             SP => self.registers.sp,
         } 
     }
+
+    pub fn set_flags(&mut self, z: bool, n: bool, h: bool, c: bool) {
+        if z {
+            self.registers.f = bit_set(self.registers.f, 7, true);
+        }
+        if n {
+            self.registers.f = bit_set(self.registers.f, 6, true);
+        }
+        if h {
+            self.registers.f = bit_set(self.registers.f, 5, true);
+        }
+        if c {
+            self.registers.f = bit_set(self.registers.f, 4, true);
+        }
+    }
+
+    pub fn check_cond(&mut self) -> bool {
+
+        let c_flag: bool = nth_bit(self.registers.f.into(), 7);
+        let z_flag: bool = nth_bit(self.registers.f.into(), 4);
+
+        use ConditionType::*;
+        match self.cpu_ctx.current_instruction.condition {
+            CtNone => true,
+            CtZ => z_flag,
+            CtNz => !z_flag,
+            CtC => c_flag,
+            CtNc => !c_flag,
+        }
+    }
+
 
 }
