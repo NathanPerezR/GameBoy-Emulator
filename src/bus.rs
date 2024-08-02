@@ -30,7 +30,6 @@ fn bus_write(mut cart: Cart, address: u16, value: u8) {
     if address < 0x8000 {
         // ROM DATA 
         cart.cart_write(address, value);
-        return;
     }
 
     //TODO

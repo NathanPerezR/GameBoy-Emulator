@@ -1,6 +1,7 @@
 mod decode;
 mod execute;
 mod register;
+mod modes;
 use crate::cpu::register::RegisterType;
 use crate::bus::bus_read;
 use crate::cart::Cart;
@@ -76,7 +77,7 @@ impl Default for Instruction {
     fn default() -> Self {
         Instruction {
             in_type: 0,
-            mode: AddressMode::AmR,
+            mode: AddressMode::AmImp,
             register_1: RegisterType::default(),
             register_2: RegisterType::default(),
             condition: ConditionType::CtNone,
@@ -88,8 +89,9 @@ impl Default for Instruction {
 impl Cpu {
     
     fn fetch_opcode(&mut self, cart: &Cart) {
-        self.cpu_ctx.current_opcode = bus_read(cart , self.registers.pc);
-        self.registers.pc = self.registers.pc + 1;
+        self.cpu_ctx.current_opcode = bus_read(cart, self.registers.pc);
+        self.registers.pc += 1;
+        self.cpu_ctx.current_instruction = self.instruction_by_opcode();
     }
 
     // fetching data depends on the current mode of the CPU
@@ -113,7 +115,10 @@ impl Cpu {
                 self.emu_cycles(1);
 
                 let hi: u8 = bus_read(cart, self.registers.pc + 1);
+                self.emu_cycles(1);
                 self.registers.pc += 2;
+
+                self.cpu_ctx.fetched_data = ((hi as u16) << 8) | (lo as u16); 
             },
             _ => { 
                 println!("Unknown Addressing mode hit");
@@ -122,21 +127,7 @@ impl Cpu {
     }
     
 
-    fn execute(&mut self) {
-        println!("Executing instruction {:02X} PC: {:04X} A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} | fetched-data: {} ", 
-                 self.cpu_ctx.current_opcode,
-                 self.registers.pc,
-                 self.registers.a,
-                 self.registers.b,
-                 self.registers.c,
-                 self.registers.d,
-                 self.registers.e,
-                 self.registers.f,
-                 self.registers.h,
-                 self.registers.l,
-                 self.cpu_ctx.fetched_data,
-                 );
-        
+    fn execute(&mut self, cart: &Cart) {
         self.decode_exe_fetch();
     }
 
@@ -146,9 +137,30 @@ impl Cpu {
 
     pub fn step(&mut self, cart: &Cart) -> bool {
         if !self.cpu_ctx.halted {
+
+            let pc: u16 = self.registers.pc;
+
             self.fetch_opcode(cart);
             self.fetch_data(cart);
-            self.execute();
+
+            println!("PC: {:04X} Executing instruction: {:02X} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} | fetched-data: {:04X} ", 
+                    pc,
+                    self.cpu_ctx.current_opcode,
+                    bus_read(cart, pc),
+                    bus_read(cart, pc + 1),
+                    bus_read(cart, pc + 2),
+                    self.registers.a,
+                    self.registers.b,
+                    self.registers.c,
+                    self.registers.d,
+                    self.registers.e,
+                    self.registers.f,
+                    self.registers.h,
+                    self.registers.l,
+                    self.cpu_ctx.fetched_data,
+                );
+
+            self.execute(cart);
         }
         true
     }
