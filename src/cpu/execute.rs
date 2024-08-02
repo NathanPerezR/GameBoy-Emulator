@@ -26,7 +26,7 @@ impl Cpu {
     }
 
     pub fn load_16_immediate(&mut self, reg: RegisterType) {
-
+        
         println!("Not Done: load_16_immediate");
         self.cpu_ctx.halted = true;
         
@@ -194,7 +194,7 @@ impl Cpu {
     }
 
     pub fn nop(&mut self) {
-
+        
     }
 
     pub fn halt(&mut self) {
@@ -213,8 +213,7 @@ impl Cpu {
     
     pub fn di(&mut self) {
 
-        println!("Not Done: di");
-        self.cpu_ctx.halted = true;
+        self.cpu_ctx.int_master_enabled = false;
 
     }
 
@@ -309,7 +308,6 @@ impl Cpu {
             self.emu_cycles(1);
         } 
 
-        println!("Not Done: jp: {}", self.cpu_ctx.fetched_data);
     }
 
     pub fn jp_cc (&mut self, con: Condition) {
