@@ -27,9 +27,23 @@ impl Cpu {
 
     pub fn load_16_immediate(&mut self, reg: RegisterType) {
         
-        println!("Not Done: load_16_immediate");
-        self.cpu_ctx.halted = true;
-        
+        use RegisterType::{BC, DE, HL, SP};
+        match reg {
+            BC => {
+                self.registers.write_reg(BC, self.cpu_ctx.fetched_data);  
+            },
+            DE => {
+                self.registers.write_reg(DE, self.cpu_ctx.fetched_data);  
+            },
+            HL => {
+                self.registers.write_reg(HL, self.cpu_ctx.fetched_data);  
+            },
+            SP => {
+                self.registers.write_reg(SP, self.cpu_ctx.fetched_data);  
+            }
+            _ => panic!("invalid RegisterType targeted!")
+        };
+
     }
 
     pub fn load_16_sp_nn(&mut self) {
@@ -54,6 +68,7 @@ impl Cpu {
     }
 
     pub fn add_8<I: Copy>(&mut self, in8: I) {
+
 
         println!("Not Done: add_8");
         self.cpu_ctx.halted = true;
