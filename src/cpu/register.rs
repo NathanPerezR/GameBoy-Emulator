@@ -33,8 +33,9 @@ impl Default for RegisterData {
 }
 
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone,Copy,Debug, Default)]
 pub enum RegisterType {
+    #[default]
     A,
     B,
     C,
@@ -49,12 +50,6 @@ pub enum RegisterType {
     HL,
     PC,
     SP,
-}
-
-impl Default for RegisterType {
-    fn default() -> Self {
-        RegisterType::A
-    }
 }
 
 impl RegisterData {
