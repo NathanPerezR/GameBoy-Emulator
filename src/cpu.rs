@@ -142,7 +142,6 @@ impl Cpu {
 
             self.fetch_opcode(cart);
             self.fetch_data(cart);
-            self.execute(cart);
             println!("PC: {:04X} Executing instruction: {:02X} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:02X} | fetched-data: {:04X} ", 
                     pc,
                     self.cpu_ctx.current_opcode,
@@ -157,9 +156,10 @@ impl Cpu {
                     self.registers.f,
                     self.registers.h,
                     self.registers.l,
-                    self.cpu_ctx.fetched_data,
                     self.registers.sp,
+                    self.cpu_ctx.fetched_data,
                 );
+            self.execute(cart);
 
         }
         true
