@@ -2,47 +2,12 @@ mod decode;
 mod execute;
 mod register;
 mod modes;
+mod structs;
 use crate::cpu::register::RegisterType;
 use crate::bus::bus_read;
 use crate::cart::Cart;
-use crate::util::*;
-
-#[derive(Clone,Copy,Debug,Default)]
-enum AddressMode {
-    #[default]
-    AmImp,
-    AmRD16,
-    AmRR,
-    AmMrR,
-    AmR,
-    AmRD8,
-    AmRMr,
-    AmRHli,
-    AmRHld,
-    AmHliR,
-    AmHldR,
-    AmRA8,
-    AmA8R,
-    AmHlSpr,
-    AmD16,
-    AmD8,
-    AmD16R,
-    AmMrD8,
-    AmMr,
-    AmA16R,
-    AmRA16,
-}
-
-#[derive(Clone,Copy,Debug,Default)]
-enum ConditionType {
-    #[default]
-    CtNone,
-    CtNz,
-    CtZ,
-    CtNc,
-    CtC,
-}
-
+use crate::util::nth_bit;
+use crate::cpu::structs::{AddressMode, ConditionType, Instruction};
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Cpu {
@@ -62,30 +27,6 @@ struct CpuContext {
     int_master_enabled: bool,
 }
 
-#[derive(Clone,Copy,Debug)]
-struct Instruction {
-    in_type: u8,
-    mode: AddressMode, 
-    register_1: RegisterType, 
-    register_2: RegisterType,
-    condition: ConditionType, 
-    parmater: u8,
-} 
-
-//TODO: find the settings in CPU
-impl Default for Instruction {
-    fn default() -> Self {
-        Instruction {
-            in_type: 0,
-            mode: AddressMode::AmImp,
-            register_1: RegisterType::default(),
-            register_2: RegisterType::default(),
-            condition: ConditionType::CtNone,
-            parmater: 0,
-        }
-    }
-}
-
 impl Cpu {
     
     fn fetch_opcode(&mut self, cart: &Cart) {
@@ -101,16 +42,16 @@ impl Cpu {
         
         use AddressMode::*;
         match &self.cpu_ctx.current_instruction.mode {
-            AmImp => (),                                
-            AmR => {                                                
+            Imp => (),                                
+            R => {                                                
                 self.cpu_ctx.fetched_data = self.registers.read_reg(self.cpu_ctx.current_instruction.register_1);
             },
-            AmRD8 => {
+            RD8 => {
                 self.cpu_ctx.fetched_data = bus_read(cart, self.registers.pc) as u16;
                 self.emu_cycles(1);
                 self.registers.pc += 1;
             },
-            AmD16 => {
+            D16 => {
                 let lo: u8 = bus_read(cart, self.registers.pc);
                 self.emu_cycles(1);
 
@@ -131,8 +72,8 @@ impl Cpu {
         self.decode_exe_fetch();
     }
 
+    // TODO: NEED TO DO EMU CYCLES
     fn emu_cycles(&self, cycle: u8) {
-        println!("need to do: emu emu_cycles")
     }
 
     pub fn step(&mut self, cart: &Cart) -> bool {
@@ -142,9 +83,10 @@ impl Cpu {
 
             self.fetch_opcode(cart);
             self.fetch_data(cart);
-            println!("PC: {:04X} Executing instruction: {:02X} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:02X} | fetched-data: {:04X} ", 
+            //TODO: FIX FOARMING OF :05?
+            println!("PC: {:04X} | Executing instruction: {:5} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:04X} | fetched-data: {:04X} ", 
                     pc,
-                    self.cpu_ctx.current_opcode,
+                    format!("{:?}", self.cpu_ctx.current_instruction.in_type).chars().take(5).collect::<String>(),
                     bus_read(cart, pc),
                     bus_read(cart, pc + 1),
                     bus_read(cart, pc + 2),
@@ -173,11 +115,11 @@ impl Cpu {
 
         use ConditionType::*;
         match self.cpu_ctx.current_instruction.condition {
-            CtNone => true,
-            CtZ => z_flag,
-            CtNz => !z_flag,
-            CtC => c_flag,
-            CtNc => !c_flag,
+            None => true,
+            Z => z_flag,
+            Nz => !z_flag,
+            C => c_flag,
+            Nc => !c_flag,
         }
     }
 }
