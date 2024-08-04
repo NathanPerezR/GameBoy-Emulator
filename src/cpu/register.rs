@@ -18,7 +18,7 @@ pub struct RegisterData {
 impl Default for RegisterData {
     fn default() -> Self {
         RegisterData {
-            a: 0, 
+            a: 0x01, 
             b: 0, 
             c: 0, 
             d: 0, 
