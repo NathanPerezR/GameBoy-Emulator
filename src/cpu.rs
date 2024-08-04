@@ -103,7 +103,7 @@ impl Cpu {
         match &self.cpu_ctx.current_instruction.mode {
             AmImp => (),                                
             AmR => {                                                
-                self.cpu_ctx.fetched_data = self.read_reg(self.cpu_ctx.current_instruction.register_1);
+                self.cpu_ctx.fetched_data = self.registers.read_reg(self.cpu_ctx.current_instruction.register_1);
             },
             AmRD8 => {
                 self.cpu_ctx.fetched_data = bus_read(cart, self.registers.pc) as u16;
@@ -142,8 +142,8 @@ impl Cpu {
 
             self.fetch_opcode(cart);
             self.fetch_data(cart);
-
-            println!("PC: {:04X} Executing instruction: {:02X} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} | fetched-data: {:04X} ", 
+            self.execute(cart);
+            println!("PC: {:04X} Executing instruction: {:02X} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:02X} | fetched-data: {:04X} ", 
                     pc,
                     self.cpu_ctx.current_opcode,
                     bus_read(cart, pc),
@@ -158,47 +158,13 @@ impl Cpu {
                     self.registers.h,
                     self.registers.l,
                     self.cpu_ctx.fetched_data,
+                    self.registers.sp,
                 );
 
-            self.execute(cart);
         }
         true
     }
 
-    pub fn read_reg(&self, register_type: RegisterType) -> u16 {
-        use RegisterType::*;
-        match register_type {
-            A => self.registers.a.into(),
-            B => self.registers.b.into(),
-            C => self.registers.c.into(),
-            D => self.registers.d.into(),
-            E => self.registers.e.into(),
-            F => self.registers.f.into(),
-            H => self.registers.h.into(),
-            L => self.registers.l.into(),
-            AF => (self.registers.a as u16) << 8 | (self.registers.f as u16),
-            BC => (self.registers.b as u16) << 8 | (self.registers.c as u16),
-            DE => (self.registers.d as u16) << 8 | (self.registers.e as u16),
-            HL => (self.registers.h as u16) << 8 | (self.registers.l as u16), 
-            PC => self.registers.pc, 
-            SP => self.registers.sp,
-        } 
-    }
-
-    pub fn set_flags(&mut self, z: bool, n: bool, h: bool, c: bool) {
-        if z {
-            self.registers.f = bit_set(self.registers.f, 7, true);
-        }
-        if n {
-            self.registers.f = bit_set(self.registers.f, 6, true);
-        }
-        if h {
-            self.registers.f = bit_set(self.registers.f, 5, true);
-        }
-        if c {
-            self.registers.f = bit_set(self.registers.f, 4, true);
-        }
-    }
 
     pub fn check_cond(&mut self) -> bool {
 
@@ -214,6 +180,4 @@ impl Cpu {
             CtNc => !c_flag,
         }
     }
-
-
 }
