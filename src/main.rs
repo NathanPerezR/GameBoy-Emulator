@@ -30,5 +30,5 @@ fn main() {
         return;
     }
 
-    emu.emu_run("../Roms/Tetris.gb");
+    emu.emu_run(rom_path.to_str().expect(""));
 }

@@ -83,7 +83,6 @@ impl Cpu {
 
             self.fetch_opcode(cart);
             self.fetch_data(cart);
-            //TODO: FIX FOARMING OF :05?
             println!("PC: {:04X} | Executing instruction: {:5} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:04X} | fetched-data: {:04X} ", 
                     pc,
                     format!("{:?}", self.cpu_ctx.current_instruction.in_type).chars().take(5).collect::<String>(),
