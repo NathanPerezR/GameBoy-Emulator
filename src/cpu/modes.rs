@@ -1,4 +1,5 @@
-use crate::cpu::{Cpu, Instruction, AddressMode};
+use crate::cpu::{Cpu, Instruction};
+use crate::cpu::structs::{InstructionName, ConditionType, AddressMode};
 
 impl Cpu {
 
@@ -94,10 +95,22 @@ impl Cpu {
             0xF0 => {}, 
             
             // 16 bit loads
-            0x01 => {to_return.mode = AddressMode::AmD16;}, 
-            0x11 => {to_return.mode = AddressMode::AmD16;}, 
-            0x21 => {to_return.mode = AddressMode::AmD16;}, 
-            0x31 => {to_return.mode = AddressMode::AmD16;},
+            0x01 => {
+                to_return.in_type = InstructionName::Ld;
+                to_return.mode = AddressMode::D16;
+            }, 
+            0x11 => {
+                to_return.in_type = InstructionName::Ld;
+                to_return.mode = AddressMode::D16;
+            }, 
+            0x21 => {
+                to_return.in_type = InstructionName::Ld;
+                to_return.mode = AddressMode::D16;
+            }, 
+            0x31 => {
+                to_return.in_type = InstructionName::Ld;
+                to_return.mode = AddressMode::D16;
+            },
 
             0xF9 => {}, 
             0xF8 => {}, 
@@ -163,15 +176,45 @@ impl Cpu {
             0xB5 => {}, 
             0xB6 => {}, 
             0xF6 => {}, 
-            0xAF => {}, 
-            0xA8 => {}, 
-            0xA9 => {}, 
-            0xAA => {}, 
-            0xAB => {}, 
-            0xAC => {}, 
-            0xAD => {}, 
-            0xAE => {}, 
-            0xEE => {}, 
+
+            // XOR n 
+            0xAF => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xA8 => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xA9 => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xAA => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xAB => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xAC => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xAD => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xAE => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+            0xEE => {
+                to_return.in_type = InstructionName::Xor;
+                to_return.mode = AddressMode::R;
+            }, 
+
             0xBF => {}, 
             0xB8 => {}, 
             0xB9 => {}, 
@@ -214,20 +257,30 @@ impl Cpu {
             0x2F => {}, 
             0x3F => {}, 
             0x37 => {}, 
+
             0x00 => {
-                to_return.mode = AddressMode::AmImp;
+                to_return.in_type = InstructionName::Nop;
+                to_return.mode = AddressMode::Imp;
             }, 
+
             0x76 => {}, 
             0x10 => {}, 
-            0xF3 => {}, 
+
+            0xF3 => {
+                to_return.in_type = InstructionName::Di;
+            },
+
             0xFB => {}, 
             0x07 => {}, 
             0x17 => {}, 
             0x0F => {}, 
-            0x1F => {}, 
+            0x1F => {},
+
             0xC3 => {
-                to_return.mode = AddressMode::AmD16;
-            }, 
+                to_return.in_type = InstructionName::Jp;
+                to_return.mode = AddressMode::D16;
+            },
+
             0xC2 => {}, 
             0xCA => {}, 
             0xD2 => {}, 
