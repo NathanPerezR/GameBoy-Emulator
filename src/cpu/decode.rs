@@ -1,4 +1,5 @@
 use crate::cpu::register::RegisterType::*;
+use crate::cpu::structs::{AddressMode, ConditionType::{None, Nz, Z, Nc, C}};
 use crate::cpu::Cpu;
 
 // addressses used throughout the program
@@ -12,14 +13,6 @@ pub enum Address {
     Direct, // nn in docs, using direct since its value at nn
     ZeroPage,
     ZeroPageC,
-}
-
-#[derive(Clone, Copy, Debug)]
-pub enum Condition { 
-    NZ, // Z flag reset 
-    Z,  // Z flag set 
-    NC, // C flag is reset 
-    C,  // C flag is set 
 }
 
 // identifys when an 8 bit number is taken as input
@@ -299,13 +292,13 @@ impl Cpu {
             // Logical exclusive or n with register A, result in A
             // n = A B C D E H L (HL) #
             // Z if result is 0, reset N H and C
-            0xAF => self.xor_8(A),
-            0xA8 => self.xor_8(B),
-            0xA9 => self.xor_8(C),
-            0xAA => self.xor_8(D),
-            0xAB => self.xor_8(E),
-            0xAC => self.xor_8(H),
-            0xAD => self.xor_8(L),
+            // 0xAF => self.xor_8(A),
+            // 0xA8 => self.xor_8(B),
+            // 0xA9 => self.xor_8(C),
+            // 0xAA => self.xor_8(D),
+            // 0xAB => self.xor_8(E),
+            // 0xAC => self.xor_8(H),
+            // 0xAD => self.xor_8(L),
             0xAE => self.xor_8(Address::HL),
             0xEE => self.xor_8(Immediate8),
 
@@ -471,10 +464,10 @@ impl Cpu {
             // cc = NC, Jump if C flag is reset, 
             // cc = C, Jump if C flag is set, 
             // use with nn == two byte immediate value (LS Byte First )
-            0xC2 => self.jp_cc(Condition::NZ),
-            0xCA => self.jp_cc(Condition::Z),
-            0xD2 => self.jp_cc(Condition::NC), 
-            0xDA => self.jp_cc(Condition::C), 
+            0xC2 => self.jp_cc(Nz),
+            0xCA => self.jp_cc(Z),
+            0xD2 => self.jp_cc(Nc), 
+            0xDA => self.jp_cc(C), 
             
             // JP (HL)
             // Jump to addres scontained in HL 
@@ -492,10 +485,10 @@ impl Cpu {
             // cc = Z, jump if Z flag is set 
             // cc = NC, Jump if C flag is reset 
             // cc = C, Jump if C flag is set 
-            0x20 => self.jr_cc(Condition::NZ),
-            0x28 => self.jr_cc(Condition::Z), 
-            0x30 => self.jr_cc(Condition::NC), 
-            0x38 => self.jr_cc(Condition::C),
+            0x20 => self.jr_cc(Nz),
+            0x28 => self.jr_cc(Z), 
+            0x30 => self.jr_cc(Nc), 
+            0x38 => self.jr_cc(C),
 
             // CALLS 
             
@@ -512,10 +505,10 @@ impl Cpu {
             // cc = NC, call if C FLAG is reset 
             // cc = C call if C flag is set 
             // nn == two byte immeditate value (LS byte first )
-            0xC4 => self.call_cc(Condition::NZ),
-            0xCC => self.call_cc(Condition::Z),
-            0xD4 => self.call_cc(Condition::NC),
-            0xDC => self.call_cc(Condition::C),
+            0xC4 => self.call_cc(Nz),
+            0xCC => self.call_cc(Z),
+            0xD4 => self.call_cc(Nc),
+            0xDC => self.call_cc(C),
 
             
 
@@ -546,10 +539,10 @@ impl Cpu {
             // cc = z return if z flag is set 
             // nc return if c flag is reset 
             // cc = c return if c flag is set 
-            0xC0 => self.ret_cc(Condition::NZ),
-            0xC8 => self.ret_cc(Condition::Z),
-            0xD0 => self.ret_cc(Condition::NC),
-            0xD8 => self.ret_cc(Condition::C),
+            0xC0 => self.ret_cc(Nz),
+            0xC8 => self.ret_cc(Z),
+            0xD0 => self.ret_cc(Nc),
+            0xD8 => self.ret_cc(C),
 
             // RETI 
             // Pop two bytes from stack & jump to that address then enable interrupts
