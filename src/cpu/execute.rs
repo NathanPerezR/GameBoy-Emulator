@@ -1,48 +1,51 @@
 use crate::cpu::RegisterType;
-use crate::cpu::decode::Condition;
 use crate::cpu::Cpu;
 
 impl Cpu {
 
-    pub fn load_8<O: Copy, I: Copy>(&mut self, out8: O, in8: I) {
+    pub fn load_8(&mut self) {
 
         println!("Not Done: load_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn push_16(&mut self, reg: RegisterType) {
+    pub fn push_16(&mut self) {
 
         println!("Not Done: push_16");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn pop_16(&mut self, reg: RegisterType) {
+    pub fn pop_16(&mut self) {
 
         println!("Not Done: pop_16");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn load_16_immediate(&mut self, reg: RegisterType) {
+    pub fn load_16_immediate(&mut self) {
+
+        println!("Not Done: load_16_immediate");
+        self.cpu_ctx.halted = true;
+        return;
         
         use RegisterType::{BC, DE, HL, SP};
-        match reg {
-            BC => {
-                self.registers.write_reg(BC, self.cpu_ctx.fetched_data);  
-            },
-            DE => {
-                self.registers.write_reg(DE, self.cpu_ctx.fetched_data);  
-            },
-            HL => {
-                self.registers.write_reg(HL, self.cpu_ctx.fetched_data);  
-            },
-            SP => {
-                self.registers.write_reg(SP, self.cpu_ctx.fetched_data);  
-            }
-            _ => panic!("invalid RegisterType targeted!")
-        };
+        // match reg {
+        //     BC => {
+        //         self.registers.write_reg(BC, self.cpu_ctx.fetched_data);  
+        //     },
+        //     DE => {
+        //         self.registers.write_reg(DE, self.cpu_ctx.fetched_data);  
+        //     },
+        //     HL => {
+        //         self.registers.write_reg(HL, self.cpu_ctx.fetched_data);  
+        //     },
+        //     SP => {
+        //         self.registers.write_reg(SP, self.cpu_ctx.fetched_data);  
+        //     }
+        //     _ => panic!("invalid RegisterType targeted!")
+        // };
 
     }
 
@@ -67,7 +70,7 @@ impl Cpu {
 
     }
 
-    pub fn add_8<I: Copy>(&mut self, in8: I) {
+    pub fn add_8(&mut self) {
 
 
         println!("Not Done: add_8");
@@ -75,68 +78,69 @@ impl Cpu {
         
     }
 
-    pub fn adc_8<I: Copy>(&mut self, in8: I) {
+    pub fn adc_8(&mut self) {
 
         println!("Not Done: adc_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn sub_8<I: Copy>(&mut self, in8: I) {
+    pub fn sub_8(&mut self) {
 
         println!("Not Done: sub_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn sbc_8<I: Copy>(&mut self, in8: I) {
+    pub fn sbc_8(&mut self) {
 
         println!("Not Done: sbc_8");
         self.cpu_ctx.halted = true;
 
     } 
 
-    pub fn and_8<I: Copy>(&mut self, in8: I) {
+    pub fn and_8(&mut self) {
 
         println!("Not Done: and_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn or_8<I: Copy>(&mut self, in8: I) {
+    pub fn or_8(&mut self) {
 
         println!("Not Done: or_8");
         self.cpu_ctx.halted = true;
 
     }
-    
-    pub fn xor_8<I: Copy>(&mut self, in8: I) {
+ 
+    pub fn xor_8(&mut self) {
         self.registers.a ^= self.cpu_ctx.fetched_data as u8;
-        self.registers.set_flags(self.registers.a == 0, false, false, false)
+        self.registers.set_flags(self.registers.a == 0, false, false, false);
+        self.cpu_ctx.halted = true;
     } 
 
-    pub fn cp_8<I: Copy>(&mut self, in8: I) {
+    pub fn cp_8(&mut self) {
 
         println!("Not Done: cp_8");
         self.cpu_ctx.halted = true;
 
     }
     
-    pub fn inc_8<I: Copy>(&mut self, in8: I) {
+    pub fn inc_8(&mut self) {
 
         println!("Not Done: inc_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn dec_8<I: Copy>(&mut self, in8: I) {
+    pub fn dec_8(&mut self) {
 
         println!("Not Done: dec_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn add_hl_16<I: Copy>(&mut self, in16: I) {
+    pub fn add_hl_16(&mut self) {
 
         println!("Not Done: add_hl_16");
         self.cpu_ctx.halted = true;
@@ -150,21 +154,21 @@ impl Cpu {
         
     }
 
-    pub fn inc_16<I: Copy>(&mut self, in16: I) {
+    pub fn inc_16(&mut self) {
 
         println!("Not Done: inc_16");
         self.cpu_ctx.halted = true;
     
     }
 
-    pub fn dec_16<I: Copy>(&mut self, in16: I) {
+    pub fn dec_16(&mut self) {
 
         println!("Not Done: dec_16");
         self.cpu_ctx.halted = true;
 
     } 
 
-    pub fn swap_8<I: Copy>(&mut self, in8: I) {
+    pub fn swap_8(&mut self) {
 
         println!("Not Done: swap_8");
         self.cpu_ctx.halted = true;
@@ -178,7 +182,7 @@ impl Cpu {
 
     }
 
-    pub fn srl_8<I: Copy>(&mut self, in8: I) {
+    pub fn srl_8(&mut self) {
 
         println!("Not Done: srl_8");
         self.cpu_ctx.halted = true;
@@ -265,49 +269,49 @@ impl Cpu {
 
     }
 
-    pub fn rlc_8<I: Copy>(&mut self, in8: I) {
+    pub fn rlc_8(&mut self) {
 
         println!("Not Done: rlc_8");
         self.cpu_ctx.halted = true;
     
     }
 
-    pub fn rl_8<I: Copy>(&mut self, in8: I) {
+    pub fn rl_8(&mut self) {
 
         println!("Not Done: rl_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn rrc_8<I: Copy>(&mut self, in8: I) {
+    pub fn rrc_8(&mut self) {
 
         println!("Not Done: rrc_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn rr_8<I: Copy>(&mut self, in8: I) {
+    pub fn rr_8(&mut self) {
 
         println!("Not Done: rr_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn sla_8 <I: Copy>(&mut self, in8: I ) {
+    pub fn sla_8 (&mut self ) {
 
         println!("Not Done: sla_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn sra_8 <I: Copy>(&mut self, in8: I ) {
+    pub fn sra_8 (&mut self ) {
 
         println!("Not Done: sra_8");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn slr_8 <I: Copy>(&mut self, in8: I ) {
+    pub fn slr_8 (&mut self ) {
 
         println!("Not Done: slr_8");
         self.cpu_ctx.halted = true;
@@ -320,10 +324,9 @@ impl Cpu {
             self.registers.pc = self.cpu_ctx.fetched_data;
             self.emu_cycles(1);
         } 
-
     }
 
-    pub fn jp_cc (&mut self, con: Condition) {
+    pub fn jp_cc (&mut self) {
 
         println!("Not Done: jp_cc");
         self.cpu_ctx.halted = true;
@@ -344,7 +347,7 @@ impl Cpu {
 
     }
 
-    pub fn jr_cc(&mut self, con: Condition) {
+    pub fn jr_cc(&mut self) {
 
         println!("Not Done: jr_cc");
         self.cpu_ctx.halted = true;
@@ -358,14 +361,14 @@ impl Cpu {
 
     }
 
-    pub fn call_cc(&mut self, con: Condition) {
+    pub fn call_cc(&mut self) {
 
         println!("Not Done: call_cc");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn rst(&mut self, addr: u8) {
+    pub fn rst(&mut self) {
 
         println!("Not Done: rst");
         self.cpu_ctx.halted = true;
@@ -379,7 +382,7 @@ impl Cpu {
 
     }
 
-    pub fn ret_cc(&mut self, con: Condition) {
+    pub fn ret_cc(&mut self) {
 
         println!("Not Done: ret_cc");
         self.cpu_ctx.halted = true;
@@ -393,21 +396,21 @@ impl Cpu {
 
     }
 
-    pub fn bit<I: Copy>(&mut self, b: I) {
+    pub fn bit(&mut self) {
 
         println!("Not Done: bit");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn set<I: Copy>(&mut self, b: I) {
+    pub fn set(&mut self) {
 
         println!("Not Done: set");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn res<I: Copy>(&mut self, b: I) {
+    pub fn res(&mut self,) {
 
         println!("Not Done: res");
         self.cpu_ctx.halted = true;
