@@ -1,4 +1,3 @@
-mod decode;
 mod execute;
 mod register;
 mod modes;
@@ -21,7 +20,7 @@ struct CpuContext {
     mem_dest: u16,
     dest_is_mem: u16,
     current_opcode: u8,
-    current_instruction: Instruction,
+    instruction: Instruction,
     halted: bool, 
     stepping: bool,
     int_master_enabled: bool,
@@ -32,7 +31,7 @@ impl Cpu {
     fn fetch_opcode(&mut self, cart: &Cart) {
         self.cpu_ctx.current_opcode = bus_read(cart, self.registers.pc);
         self.registers.pc += 1;
-        self.cpu_ctx.current_instruction = self.instruction_by_opcode();
+        self.instruction_by_opcode();
     }
 
     // fetching data depends on the current mode of the CPU
@@ -41,10 +40,10 @@ impl Cpu {
         self.cpu_ctx.dest_is_mem = 0;
         
         use AddressMode::*;
-        match &self.cpu_ctx.current_instruction.mode {
+        match &self.cpu_ctx.instruction.mode {
             Imp => (),                                
             R => {                                                
-                self.cpu_ctx.fetched_data = self.registers.read_reg(self.cpu_ctx.current_instruction.register_1);
+                self.cpu_ctx.fetched_data = self.registers.read_reg(self.cpu_ctx.instruction.register_1);
             },
             RD8 => {
                 self.cpu_ctx.fetched_data = bus_read(cart, self.registers.pc) as u16;
@@ -69,7 +68,13 @@ impl Cpu {
     
 
     fn execute(&mut self, cart: &Cart) {
-        self.decode_exe_fetch();
+
+        if let Some(func) = self.cpu_ctx.instruction.function {
+            func(self);
+        } else {
+            self.cpu_ctx.halted = true;
+            println!("NO VALID INSTRUCTION FOUND")
+        }
     }
 
     // TODO: NEED TO DO EMU CYCLES
@@ -85,7 +90,7 @@ impl Cpu {
             self.fetch_data(cart);
             println!("PC: {:04X} | Executing instruction: {:5} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:04X} | fetched-data: {:04X} ", 
                     pc,
-                    format!("{:?}", self.cpu_ctx.current_instruction.in_type).chars().take(5).collect::<String>(),
+                    format!("{:?}", self.cpu_ctx.instruction.in_type).chars().take(5).collect::<String>(),
                     bus_read(cart, pc),
                     bus_read(cart, pc + 1),
                     bus_read(cart, pc + 2),
@@ -113,7 +118,7 @@ impl Cpu {
         let z_flag: bool = nth_bit(self.registers.f.into(), 4);
 
         use ConditionType::*;
-        match self.cpu_ctx.current_instruction.condition {
+        match self.cpu_ctx.instruction.condition {
             None => true,
             Z => z_flag,
             Nz => !z_flag,
