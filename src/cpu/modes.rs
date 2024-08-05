@@ -1,11 +1,10 @@
-use crate::cpu::{Cpu, Instruction};
+use crate::cpu::Cpu;
+use crate::cpu::RegisterType;
 use crate::cpu::structs::{InstructionName, ConditionType, AddressMode};
 
 impl Cpu {
 
-    pub fn instruction_by_opcode(&mut self) -> Instruction {
-
-        let mut to_return: Instruction = Instruction::default();
+    pub fn instruction_by_opcode(&mut self) {
 
         match self.cpu_ctx.current_opcode {
             0x06 => {},  
@@ -95,21 +94,26 @@ impl Cpu {
             0xF0 => {}, 
             
             // 16 bit loads
+            // TODO: do target register 
             0x01 => {
-                to_return.in_type = InstructionName::Ld;
-                to_return.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             }, 
             0x11 => {
-                to_return.in_type = InstructionName::Ld;
-                to_return.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             }, 
             0x21 => {
-                to_return.in_type = InstructionName::Ld;
-                to_return.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             }, 
             0x31 => {
-                to_return.in_type = InstructionName::Ld;
-                to_return.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             },
 
             0xF9 => {}, 
@@ -177,43 +181,54 @@ impl Cpu {
             0xB6 => {}, 
             0xF6 => {}, 
 
-            // XOR n 
+            // XOR n,
+            // Logical exclusive or n with register A, result in A
+            // n = A B C D E H L (HL) #
+            // Z if result is 0, reset N H and C
             0xAF => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
+                self.cpu_ctx.instruction.in_type = InstructionName::Xor;
+                self.cpu_ctx.instruction.register_1 = RegisterType::A;
+                self.cpu_ctx.instruction.mode = AddressMode::R;
+                self.cpu_ctx.instruction.function = Some(Cpu::xor_8);
             }, 
             0xA8 => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
+                self.cpu_ctx.instruction.in_type = InstructionName::Xor;
+                self.cpu_ctx.instruction.register_1 = RegisterType::B;
+                self.cpu_ctx.instruction.mode = AddressMode::R;
+                self.cpu_ctx.instruction.function = Some(Cpu::xor_8);
             }, 
             0xA9 => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
+                self.cpu_ctx.instruction.in_type = InstructionName::Xor;
+                self.cpu_ctx.instruction.register_1 = RegisterType::C;
+                self.cpu_ctx.instruction.mode = AddressMode::R;
+                self.cpu_ctx.instruction.function = Some(Cpu::xor_8);
             }, 
             0xAA => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
+                self.cpu_ctx.instruction.in_type = InstructionName::Xor;
+                self.cpu_ctx.instruction.register_1 = RegisterType::D;
+                self.cpu_ctx.instruction.mode = AddressMode::R;
+                self.cpu_ctx.instruction.function = Some(Cpu::xor_8);
             }, 
             0xAB => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
+                self.cpu_ctx.instruction.in_type = InstructionName::Xor;
+                self.cpu_ctx.instruction.register_1 = RegisterType::E;
+                self.cpu_ctx.instruction.mode = AddressMode::R;
+                self.cpu_ctx.instruction.function = Some(Cpu::xor_8);
             }, 
             0xAC => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
+                self.cpu_ctx.instruction.register_1 = RegisterType::H;
+                self.cpu_ctx.instruction.in_type = InstructionName::Xor;
+                self.cpu_ctx.instruction.mode = AddressMode::R;
+                self.cpu_ctx.instruction.function = Some(Cpu::xor_8);
             }, 
             0xAD => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
+                self.cpu_ctx.instruction.in_type = InstructionName::Xor;
+                self.cpu_ctx.instruction.register_1 = RegisterType::L;
+                self.cpu_ctx.instruction.mode = AddressMode::R;
+                self.cpu_ctx.instruction.function = Some(Cpu::xor_8);
             }, 
-            0xAE => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
-            }, 
-            0xEE => {
-                to_return.in_type = InstructionName::Xor;
-                to_return.mode = AddressMode::R;
-            }, 
+            0xAE => {}, 
+            0xEE => {}, 
 
             0xBF => {}, 
             0xB8 => {}, 
@@ -259,15 +274,15 @@ impl Cpu {
             0x37 => {}, 
 
             0x00 => {
-                to_return.in_type = InstructionName::Nop;
-                to_return.mode = AddressMode::Imp;
+                self.cpu_ctx.instruction.in_type = InstructionName::Nop;
+                self.cpu_ctx.instruction.mode = AddressMode::Imp;
             }, 
 
             0x76 => {}, 
             0x10 => {}, 
 
             0xF3 => {
-                to_return.in_type = InstructionName::Di;
+                self.cpu_ctx.instruction.in_type = InstructionName::Di;
             },
 
             0xFB => {}, 
@@ -277,8 +292,9 @@ impl Cpu {
             0x1F => {},
 
             0xC3 => {
-                to_return.in_type = InstructionName::Jp;
-                to_return.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.in_type = InstructionName::Jp;
+                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.function = Some(Cpu::jp);
             },
 
             0xC2 => {}, 
@@ -312,8 +328,6 @@ impl Cpu {
             0xD9 => {}, 
             _ => {}
         }
-
-        to_return
     }
 }
 // CB OPCODES
