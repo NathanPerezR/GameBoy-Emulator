@@ -108,6 +108,8 @@ impl RegisterData {
     }
 
 
+    /// Sets CPU flags 
+    /// PARAM: Z: bool, n: bool, h: bool, c: bool
     pub fn set_flags(&mut self, z: bool, n: bool, h: bool, c: bool) {
         if z {
             self.f = bit_set(self.f, 7, true);
