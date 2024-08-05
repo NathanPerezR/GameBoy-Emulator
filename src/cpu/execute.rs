@@ -111,10 +111,8 @@ impl Cpu {
     }
     
     pub fn xor_8<I: Copy>(&mut self, in8: I) {
-
-        println!("Not Done: xor_8");
-        self.cpu_ctx.halted = true;
-
+        self.registers.a ^= self.cpu_ctx.fetched_data as u8;
+        self.registers.set_flags(self.registers.a == 0, false, false, false)
     } 
 
     pub fn cp_8<I: Copy>(&mut self, in8: I) {
