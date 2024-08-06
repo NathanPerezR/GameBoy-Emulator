@@ -97,22 +97,23 @@ impl Cpu {
             // TODO: do target register 
             0x01 => {
                 self.cpu_ctx.instruction.in_type = InstructionName::Ld;
-                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.register_1 = RegisterType::BC; 
+                self.cpu_ctx.instruction.mode = AddressMode::RD16;
                 self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             }, 
             0x11 => {
                 self.cpu_ctx.instruction.in_type = InstructionName::Ld;
-                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.mode = AddressMode::RD16;
                 self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             }, 
             0x21 => {
                 self.cpu_ctx.instruction.in_type = InstructionName::Ld;
-                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.mode = AddressMode::RD16;
                 self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             }, 
             0x31 => {
                 self.cpu_ctx.instruction.in_type = InstructionName::Ld;
-                self.cpu_ctx.instruction.mode = AddressMode::D16;
+                self.cpu_ctx.instruction.mode = AddressMode::RD16;
                 self.cpu_ctx.instruction.function = Some(Cpu::load_16_immediate)
             },
 
