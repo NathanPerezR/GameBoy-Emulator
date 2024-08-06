@@ -98,7 +98,6 @@ impl Cpu {
     pub fn xor_8(&mut self) {
         self.registers.a ^= self.cpu_ctx.fetched_data as u8;
         self.registers.set_flags(self.registers.a == 0, false, false, false);
-        self.cpu_ctx.halted = true;
     } 
 
     pub fn cp_8(&mut self) {
