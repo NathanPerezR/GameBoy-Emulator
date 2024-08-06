@@ -107,6 +107,42 @@ impl RegisterData {
         }
     }
 
+    pub fn reverse(n: u16) -> u16 {
+        ((n & 0xFF00) >> 8) | ((n & 0x00FF) << 8)
+    }
+
+    pub fn set_reg(&mut self, rt: RegisterType, val: u16) {
+        match rt {
+            RegisterType::A => self.a = (val & 0xFF) as u8,
+            RegisterType::F => self.f = (val & 0xFF) as u8,
+            RegisterType::B => self.b = (val & 0xFF) as u8,
+            RegisterType::C => self.c = (val & 0xFF) as u8,
+            RegisterType::D => self.d = (val & 0xFF) as u8,
+            RegisterType::E => self.e = (val & 0xFF) as u8,
+            RegisterType::H => self.h = (val & 0xFF) as u8,
+            RegisterType::L => self.l = (val & 0xFF) as u8,
+
+            RegisterType::AF => {
+                self.a = (val >> 8) as u8; 
+                self.f = (val & 0xFF) as u8; 
+            }
+            RegisterType::BC => {
+                self.b = (val >> 8) as u8; 
+                self.c = (val & 0xFF) as u8; 
+            }
+            RegisterType::DE => {
+                self.d = (val >> 8) as u8; 
+                self.e = (val & 0xFF) as u8;
+            }
+            RegisterType::HL => {
+                self.h = (val >> 8) as u8;
+                self.l = (val & 0xFF) as u8;
+            }
+
+            RegisterType::PC => self.pc = val,
+            RegisterType::SP => self.sp = val,
+        }
+    }
 
     /// Sets CPU flags 
     /// PARAM: Z: bool, n: bool, h: bool, c: bool
