@@ -2,6 +2,7 @@ mod execute;
 mod register;
 mod modes;
 mod structs;
+mod cpu_fetch;
 use crate::cpu::register::RegisterType;
 use crate::bus::bus_read;
 use crate::cart::Cart;
@@ -18,7 +19,7 @@ pub struct Cpu {
 struct CpuContext {
     fetched_data: u16,
     mem_dest: u16,
-    dest_is_mem: u16,
+    dest_is_mem: bool,
     current_opcode: u8,
     instruction: Instruction,
     halted: bool, 
@@ -33,39 +34,6 @@ impl Cpu {
         self.registers.pc += 1;
         self.instruction_by_opcode();
     }
-
-    // fetching data depends on the current mode of the CPU
-    fn fetch_data(&mut self, cart: &Cart) {
-        self.cpu_ctx.mem_dest = 0;
-        self.cpu_ctx.dest_is_mem = 0;
-        
-        use AddressMode::*;
-        match &self.cpu_ctx.instruction.mode {
-            Imp => (),                                
-            R => {                                                
-                self.cpu_ctx.fetched_data = self.registers.read_reg(self.cpu_ctx.instruction.register_1);
-            },
-            RD8 => {
-                self.cpu_ctx.fetched_data = bus_read(cart, self.registers.pc) as u16;
-                self.emu_cycles(1);
-                self.registers.pc += 1;
-            },
-            D16 => {
-                let lo: u8 = bus_read(cart, self.registers.pc);
-                self.emu_cycles(1);
-
-                let hi: u8 = bus_read(cart, self.registers.pc + 1);
-                self.emu_cycles(1);
-                self.registers.pc += 2;
-
-                self.cpu_ctx.fetched_data = ((hi as u16) << 8) | (lo as u16); 
-            },
-            _ => { 
-                println!("Unknown Addressing mode hit");
-            }
-        }
-    }
-    
 
     fn execute(&mut self, cart: &Cart) {
 
