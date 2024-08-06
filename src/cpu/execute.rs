@@ -1,4 +1,5 @@
 use crate::cpu::RegisterType;
+use crate::cpu::structs::AddressMode;
 use crate::cpu::Cpu;
 
 impl Cpu {
@@ -28,25 +29,6 @@ impl Cpu {
 
         println!("Not Done: load_16_immediate");
         self.cpu_ctx.halted = true;
-        return;
-        
-        use RegisterType::{BC, DE, HL, SP};
-        // match reg {
-        //     BC => {
-        //         self.registers.write_reg(BC, self.cpu_ctx.fetched_data);  
-        //     },
-        //     DE => {
-        //         self.registers.write_reg(DE, self.cpu_ctx.fetched_data);  
-        //     },
-        //     HL => {
-        //         self.registers.write_reg(HL, self.cpu_ctx.fetched_data);  
-        //     },
-        //     SP => {
-        //         self.registers.write_reg(SP, self.cpu_ctx.fetched_data);  
-        //     }
-        //     _ => panic!("invalid RegisterType targeted!")
-        // };
-
     }
 
     pub fn load_16_sp_nn(&mut self) {
