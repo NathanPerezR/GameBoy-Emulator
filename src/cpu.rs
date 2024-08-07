@@ -29,16 +29,16 @@ struct CpuContext {
 
 impl Cpu {
     
-    fn fetch_opcode(&mut self, cart: &Cart) {
+    fn fetch_opcode(&mut self, cart: &mut Cart) {
         self.cpu_ctx.current_opcode = bus_read(cart, self.registers.pc);
         self.registers.pc += 1;
-        self.instruction_by_opcode();
+        self.instruction_by_opcode(cart);
     }
 
-    fn execute(&mut self, cart: &Cart) {
+    fn execute(&mut self, cart: &mut Cart) {
 
         if let Some(func) = self.cpu_ctx.instruction.function {
-            func(self);
+            func(self, cart);
         } else {
             self.cpu_ctx.halted = true;
             println!("NO VALID INSTRUCTION FOUND")
@@ -49,7 +49,7 @@ impl Cpu {
     fn emu_cycles(&self, cycle: u8) {
     }
 
-    pub fn step(&mut self, cart: &Cart) -> bool {
+    pub fn step(&mut self, cart: &mut Cart) -> bool {
         if !self.cpu_ctx.halted {
 
             let pc: u16 = self.registers.pc;
