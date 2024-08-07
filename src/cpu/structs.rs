@@ -1,5 +1,6 @@
 use crate::cpu::register::RegisterType;
 use crate::cpu::Cpu;
+use crate::cpu::Cart;
 
 #[derive(Clone,Copy,Debug,Default)]
 pub enum AddressMode {
@@ -98,7 +99,7 @@ pub struct Instruction {
     pub register_2: RegisterType,
     pub condition: ConditionType, 
     pub parmater: u8,
-    pub function: Option<fn(&mut Cpu)>, 
+    pub function: Option<fn(&mut Cpu, &mut Cart)>, 
 } 
 
 impl Default for Instruction {
