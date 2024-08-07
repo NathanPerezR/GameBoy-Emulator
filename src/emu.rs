@@ -63,7 +63,7 @@ impl Emu {
                 continue;
             }
 
-            if !cpu.step(&cart) {
+            if !cpu.step(&mut cart) {
                 print!("CPU STOPPED");
                 return -1;
             };
