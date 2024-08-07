@@ -148,22 +148,30 @@ impl RegisterData {
         }
     }
 
-    /// Sets CPU flags 
-    /// PARAM: Z: bool, n: bool, h: bool, c: bool
-    pub fn set_flags(&mut self, z: bool, n: bool, h: bool, c: bool) {
-        if z {
-            self.f = bit_set(self.f, 7, true);
-        }
-        if n {
-            self.f = bit_set(self.f, 6, true);
-        }
-        if h {
-            self.f = bit_set(self.f, 5, true);
-        }
-        if c {
-            self.f = bit_set(self.f, 4, true);
-        }
+    pub fn set_z(&mut self, z: bool ) {
+        self.f = bit_set(self.f, 7, z);
     }
+    pub fn set_n(&mut self, n: bool ) {
+        self.f = bit_set(self.f, 6, n);         
+    }
+    pub fn set_h(&mut self, h: bool ) {
+        self.f = bit_set(self.f, 5, h);         
+    }
+    pub fn set_c(&mut self, c: bool ) {
+        self.f = bit_set(self.f, 4, c); 
+    }                   
 
+    pub fn get_c(&mut self) -> bool {
+        nth_bit(self.f.into(), 4)
+    }
+}
+
+
+pub fn is_16_bit(register_type: RegisterType) -> bool {
+    use RegisterType::*;
+    match register_type {
+        A | B | C | D | E | F | L | H | None => {false},
+        AF | BC | DE | HL | PC | SP => {true},
+    }
 }
 

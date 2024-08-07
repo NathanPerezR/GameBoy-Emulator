@@ -14,183 +14,183 @@ impl Cpu {
         match self.cpu_ctx.current_opcode {
 
             0x06 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
-                self.cpu_ctx.instruction.mode = AddressMode::RD8;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RD8;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             },  
             0x0E => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
-                self.cpu_ctx.instruction.mode = AddressMode::RD8;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RD8;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x16 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::D;
-                self.cpu_ctx.instruction.mode = AddressMode::RD8;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RD8;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x1E => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::E;
-                self.cpu_ctx.instruction.mode = AddressMode::RD8;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RD8;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
 
 
             }, 
             0x26 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::H;
-                self.cpu_ctx.instruction.mode = AddressMode::RD8;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RD8;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x2E => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::L;
-                self.cpu_ctx.instruction.mode = AddressMode::RD8;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RD8;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
     
             0x7F => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x78 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::B;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x79 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::C;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x7A => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::D;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             },
             0x7B => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::E;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }
             0x7C => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::H;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x7D => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::L;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x7E => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::HL;
-                self.cpu_ctx.instruction.mode = AddressMode::RMr;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RMr;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x40 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::B;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x41 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::C;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x42 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::D;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x43 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::E;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x44 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::H;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x45 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::L;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x46 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::HL;
-                self.cpu_ctx.instruction.mode = AddressMode::RMr;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RMr;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x48 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
                 self.cpu_ctx.instruction.register_2 = RegisterType::B;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x49 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
                 self.cpu_ctx.instruction.register_2 = RegisterType::C;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x4A => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
                 self.cpu_ctx.instruction.register_2 = RegisterType::D;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x4B => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
                 self.cpu_ctx.instruction.register_2 = RegisterType::E;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x4C => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
                 self.cpu_ctx.instruction.register_2 = RegisterType::H;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load);
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x4D => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
@@ -478,145 +478,145 @@ impl Cpu {
             },
 
             0x47 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x4F => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x57 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::D;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+              self.cpu_ctx.instruction.function     = Some(Cpu::load)
             }, 
             0x5F => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::E;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x67 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::H;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x6F => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::L;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::RR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x02 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::BC;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::MrR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::MrR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x12 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::DE;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::MrR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::MrR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x77 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::HL;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::MrR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::MrR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0xEA => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::None;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::A16R;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::A16R;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
 
             0xF2 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::C;
-                self.cpu_ctx.instruction.mode = AddressMode::RMr;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RMr;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0xE2 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::C;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::MrR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::MrR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x3A => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::HL;
-                self.cpu_ctx.instruction.mode = AddressMode::RHld;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RHld;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x32 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::HL;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::HldR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::HldR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x2A => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
                 self.cpu_ctx.instruction.register_2 = RegisterType::HL;
-                self.cpu_ctx.instruction.mode = AddressMode::RHli;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RHli;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x22 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::HL;
                 self.cpu_ctx.instruction.register_2 = RegisterType::A;
-                self.cpu_ctx.instruction.mode = AddressMode::HliR;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::HliR;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0xE0 => {}, 
             0xF0 => {}, 
             
             // 16 bit loads
             0x01 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::BC; 
-                self.cpu_ctx.instruction.mode = AddressMode::RD16;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RD16;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x11 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::DE;
-                self.cpu_ctx.instruction.mode = AddressMode::RD16;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RD16;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x21 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::HL;
-                self.cpu_ctx.instruction.mode = AddressMode::RD16;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RD16;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             }, 
             0x31 => {
-                self.cpu_ctx.instruction.in_type = InstructionName::Ld;
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::SP;
-                self.cpu_ctx.instruction.mode = AddressMode::RD16;
-                self.cpu_ctx.instruction.function = Some(Cpu::load)
+                self.cpu_ctx.instruction.mode       = AddressMode::RD16;
+                self.cpu_ctx.instruction.function   = Some(Cpu::load)
             },
 
             0xF9 => {}, 
@@ -815,7 +815,13 @@ impl Cpu {
             0x3B => {}, 
             0x27 => {}, 
             0x2F => {}, 
-            0x3F => {}, 
+
+            0x3F => {
+                self.cpu_ctx.instruction.in_type    = InstructionName::Ccf;
+                self.cpu_ctx.instruction.mode       = AddressMode::Imp;
+                self.cpu_ctx.instruction.function   = Some(Cpu::ccf);
+            }, 
+
             0x37 => {}, 
 
             0x00 => {
@@ -860,11 +866,14 @@ impl Cpu {
             0x28 => {}, 
             0x30 => {}, 
             0x38 => {}, 
+
             0xCD => {}, 
+
             0xC4 => {}, 
             0xCC => {}, 
             0xD4 => {}, 
             0xDC => {}, 
+            
             0xC7 => {}, 
             0xCF => {}, 
             0xD7 => {}, 
@@ -873,11 +882,14 @@ impl Cpu {
             0xEF => {}, 
             0xF7 => {}, 
             0xFF => {}, 
-            0xC9 => {}, 
+            
+            0xC9 => {},
+
             0xC0 => {}, 
             0xC8 => {}, 
             0xD0 => {}, 
             0xD8 => {}, 
+
             0xD9 => {}, 
             _ => {}
         }

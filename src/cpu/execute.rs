@@ -1,8 +1,9 @@
 use crate::cpu::RegisterType;
+use crate::cpu::register::is_16_bit;
 use crate::cpu::structs::AddressMode;
 use crate::cpu::Cpu;
 use crate::cart::Cart;
-use crate::bus::{bus_write, bus_write16};
+use crate::bus::{bus_write, bus_read, bus_write16};
 
 impl Cpu {
 
@@ -29,7 +30,11 @@ impl Cpu {
             let c_flag: bool = (self.registers.read_reg(self.cpu_ctx.instruction.register_2) & 0xFF) +
                 (self.cpu_ctx.fetched_data & 0xFF) >= 0x100;
             
-            self.registers.set_flags(false,false, h_flag, c_flag);
+            self.registers.set_z(false);
+            self.registers.set_n(false);
+            self.registers.set_h(h_flag);
+            self.registers.set_c(c_flag);
+
             let value_reg_2 = self.registers.read_reg(self.cpu_ctx.instruction.register_2);
             let new_value = value_reg_2.wrapping_add(self.cpu_ctx.fetched_data);
             self.registers.set_reg(self.cpu_ctx.instruction.register_1, new_value);
@@ -98,7 +103,10 @@ impl Cpu {
  
     pub fn xor_8(&mut self, _cart: &mut Cart) {
         self.registers.a ^= self.cpu_ctx.fetched_data as u8;
-        self.registers.set_flags(self.registers.a == 0, false, false, false);
+        self.registers.set_z(self.registers.read_reg(RegisterType::A) == 0);
+        self.registers.set_n(false);
+        self.registers.set_h(false);
+        self.registers.set_c(false);
     } 
 
     pub fn cp_8(&mut self) {
@@ -136,11 +144,35 @@ impl Cpu {
     
     }
 
-    pub fn dec(&mut self, _cart: &mut Cart) {
+    pub fn dec(&mut self, cart: &mut Cart) {
+        
+        let reg_value = self.registers.read_reg(self.cpu_ctx.instruction.register_1);
+        let mut val = reg_value.wrapping_sub(1);
+    
+        if is_16_bit(self.cpu_ctx.instruction.register_1) {
+            self.emu_cycles(1);
+        }
 
-        println!("Not Done: dec");
-        self.cpu_ctx.halted = true;
+        if let RegisterType::HL = self.cpu_ctx.instruction.register_1 {
+            if let AddressMode::Mr = self.cpu_ctx.instruction.mode {
+                let address = self.registers.read_reg(RegisterType::HL);
+                let current_value = bus_read(cart, address);
+                let new_value = current_value.wrapping_sub(1); 
+                bus_write(cart, address, new_value);
+            }
+        }
+        else {
+            self.registers.set_reg(self.cpu_ctx.instruction.register_1, val);
+            val = self.registers.read_reg(self.cpu_ctx.instruction.register_1);
+        }
 
+        if self.cpu_ctx.current_opcode & 0x0B == 0x0B {
+            return;
+        }
+
+        self.registers.set_z(val == 0);
+        self.registers.set_n(true);
+        self.registers.set_h((val & 0x0F) == 0x0F);
     } 
 
     pub fn swap_8(&mut self) {
@@ -171,11 +203,11 @@ impl Cpu {
 
     }
 
-    pub fn ccf(&mut self) {
-
-        println!("Not Done: ccf");
-        self.cpu_ctx.halted = true;
-
+    pub fn ccf(&mut self, _cart: &mut Cart) {
+        let c_flag = self.registers.get_c();
+        self.registers.set_n(false); 
+        self.registers.set_h(false); 
+        self.registers.set_c(c_flag ^ true); 
     }
 
     pub fn scf(&mut self) {
@@ -190,10 +222,7 @@ impl Cpu {
     }
 
     pub fn halt(&mut self, _cart: &mut Cart) {
-
-        println!("Not Done: halt");
         self.cpu_ctx.halted = true;
-
     }
 
     pub fn stop(&mut self) {
