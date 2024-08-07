@@ -44,45 +44,44 @@ impl Cpu {
         self.registers.set_reg(self.cpu_ctx.instruction.register_1, self.cpu_ctx.fetched_data)
     }
 
-    pub fn push_16(&mut self) {
+    pub fn push(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: push_16");
+        println!("Not Done: push");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn pop_16(&mut self) {
+    pub fn pop(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: pop_16");
+        println!("Not Done: pop");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn add_8(&mut self) {
+    pub fn add(&mut self, _cart: &mut Cart) {
 
-
-        println!("Not Done: add_8");
+        println!("Not Done: add");
         self.cpu_ctx.halted = true;
         
     }
 
-    pub fn adc_8(&mut self) {
+    pub fn adc(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: adc_8");
+        println!("Not Done: adc");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn sub_8(&mut self) {
+    pub fn sub(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: sub_8");
+        println!("Not Done: sub");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn sbc_8(&mut self) {
+    pub fn sbc(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: sbc_8");
+        println!("Not Done: sbc");
         self.cpu_ctx.halted = true;
 
     } 
@@ -123,20 +122,6 @@ impl Cpu {
 
     }
 
-    pub fn add_hl_16(&mut self) {
-
-        println!("Not Done: add_hl_16");
-        self.cpu_ctx.halted = true;
-
-    }
-    
-    pub fn add_sp_16(&mut self) {
-
-        println!("Not Done: add_sp_16");
-        self.cpu_ctx.halted = true;
-        
-    }
-
     pub fn inc_16(&mut self) {
 
         println!("Not Done: inc_16");
@@ -144,6 +129,12 @@ impl Cpu {
     
     }
 
+    pub fn ldh(&mut self, _cart: &mut Cart) {
+        
+        println!("Not Done: LDH");
+        self.cpu_ctx.halted = true;
+    }
+ 
     pub fn dec(&mut self, cart: &mut Cart) {
         
         let reg_value = self.registers.read_reg(self.cpu_ctx.instruction.register_1);
