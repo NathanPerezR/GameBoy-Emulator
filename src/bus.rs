@@ -26,11 +26,27 @@ pub fn bus_read(cart: &Cart, address: u16) -> u8 {
     1
 }
 
-fn bus_write(mut cart: Cart, address: u16, value: u8) {
+pub fn bus_write(cart: &mut Cart, address: u16, value: u8) {
     if address < 0x8000 {
         // ROM DATA 
         cart.cart_write(address, value);
     }
 
     //TODO
+}
+
+pub fn bus_read16(cart: &Cart, address: u16) -> u16 {
+    let lo: u16 = bus_read(cart, address) as u16;
+    let hi: u16 = bus_read(cart, address) as u16;
+
+    lo | (hi << 8)
+}
+
+pub fn bus_write16(cart: &mut Cart, address: u16, value: u16) {
+    
+    let lo = (value & 0xFF) as u8;
+    let hi = (value >> 8) as u8;
+
+    bus_write(cart, address + 1, lo);
+    bus_write(cart, address, hi);
 }
