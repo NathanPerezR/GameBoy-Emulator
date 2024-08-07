@@ -846,9 +846,24 @@ impl Cpu {
 
             0xFB => {}, 
             0x07 => {}, 
-            0x17 => {}, 
-            0x0F => {}, 
-            0x1F => {},
+
+            0x17 => {
+                self.cpu_ctx.instruction.in_type    = InstructionName::Rla;
+                self.cpu_ctx.instruction.mode       = AddressMode::Imp;
+                self.cpu_ctx.instruction.function   = Some(Cpu::rla);
+            },
+
+            0x0F => {
+                self.cpu_ctx.instruction.in_type    = InstructionName::Rrca;
+                self.cpu_ctx.instruction.mode       = AddressMode::Imp;
+                self.cpu_ctx.instruction.function   = Some(Cpu::rrca);
+            }, 
+
+            0x1F => {
+                self.cpu_ctx.instruction.in_type    = InstructionName::Rra;
+                self.cpu_ctx.instruction.mode       = AddressMode::Imp;
+                self.cpu_ctx.instruction.function   = Some(Cpu::rra);
+            },
 
             0xC3 => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Jp;

@@ -251,21 +251,56 @@ impl Cpu {
 
     }
 
-    pub fn rla(&mut self) {
-
+    // TODO: TEST THIS
+    pub fn rla(&mut self, _cart: &mut Cart) {
+        
+        let copy_of_a = self.registers.a;
+        let c_flag = self.registers.get_c();
+        let new_c_flag = (copy_of_a >> 7) & 1 != 0; 
+        
+        self.registers.a = (copy_of_a << 1) | if c_flag {1} else {0};
+        
+        self.registers.set_z(false); 
+        self.registers.set_n(false); 
+        self.registers.set_h(false); 
+        self.registers.set_c(new_c_flag); 
         println!("Not Done: rla");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn rrca(&mut self) {
-
-        println!("Not Done: rrca");
-        self.cpu_ctx.halted = true;
+    // TODO: TEST THIS
+    pub fn rrca(&mut self, _cart: &mut Cart) {
         
+        let lo_a = self.registers.a & 1;
+        
+        self.registers.a >>= 1;
+        self.registers.a |= lo_a << 7;
+
+        self.registers.set_z(false); 
+        self.registers.set_n(false); 
+        self.registers.set_h(false); 
+        self.registers.set_c(lo_a != 0); 
     }
 
-    pub fn rra(&mut self) {
+    // TODO: TEST THIS
+    pub fn rra(&mut self, _cart: &mut Cart) {
+        
+        let c_flag = self.registers.get_c();
+        let new_c_flag = (self.registers.a & 1) == 1;
+
+        self.registers.a >>= 1;
+        if c_flag {
+            self.registers.a |= 0b1000_0000;
+        }
+        else {
+            self.registers.a &= 0b0111_1111;
+        }
+
+        self.registers.set_z(false); 
+        self.registers.set_n(false); 
+        self.registers.set_h(false); 
+        self.registers.set_c(new_c_flag); 
 
         println!("Not Done: rra");
         self.cpu_ctx.halted = true;
@@ -278,6 +313,7 @@ impl Cpu {
         self.cpu_ctx.halted = true;
     
     }
+
 
     pub fn rl_8(&mut self) {
 
