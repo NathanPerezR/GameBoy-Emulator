@@ -1,14 +1,42 @@
 use crate::cpu::RegisterType;
 use crate::cpu::structs::AddressMode;
 use crate::cpu::Cpu;
+use crate::cart::Cart;
+use crate::bus::{bus_write, bus_write16};
 
 impl Cpu {
 
-    pub fn load_8(&mut self) {
+    pub fn load(&mut self, cart: &mut Cart) {
+        if self.cpu_ctx.dest_is_mem {
 
-        println!("Not Done: load_8");
-        self.cpu_ctx.halted = true;
+            use RegisterType::*;
+            match self.cpu_ctx.instruction.register_2 {
+                A | B | C | D | E | L | F | H => {
+                    bus_write(cart, self.cpu_ctx.mem_dest, self.cpu_ctx.fetched_data as u8);   
+                },
+                AF | BC | DE | HL | PC | SP => {
+                    self.emu_cycles(1);
+                    bus_write16(cart, self.cpu_ctx.mem_dest, self.cpu_ctx.fetched_data);
+                },
+                _ => println!("Error, none selected")
+            }
+            return;
+        }
 
+        if let AddressMode::HlSpr = self.cpu_ctx.instruction.mode {
+            let h_flag: bool = (self.registers.read_reg(self.cpu_ctx.instruction.register_2) & 0xF) + 
+                (self.cpu_ctx.fetched_data & 0xF) >= 0x10;
+            let c_flag: bool = (self.registers.read_reg(self.cpu_ctx.instruction.register_2) & 0xFF) +
+                (self.cpu_ctx.fetched_data & 0xFF) >= 0x100;
+            
+            self.registers.set_flags(false,false, h_flag, c_flag);
+            let value_reg_2 = self.registers.read_reg(self.cpu_ctx.instruction.register_2);
+            let new_value = value_reg_2.wrapping_add(self.cpu_ctx.fetched_data);
+            self.registers.set_reg(self.cpu_ctx.instruction.register_1, new_value);
+            return;
+        }
+
+        self.registers.set_reg(self.cpu_ctx.instruction.register_1, self.cpu_ctx.fetched_data)
     }
 
     pub fn push_16(&mut self) {
@@ -21,33 +49,6 @@ impl Cpu {
     pub fn pop_16(&mut self) {
 
         println!("Not Done: pop_16");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn load_16_immediate(&mut self) {
-
-        println!("Not Done: load_16_immediate");
-        self.cpu_ctx.halted = true;
-    }
-
-    pub fn load_16_sp_nn(&mut self) {
-
-        println!("Not Done: load_16_sp_nn");
-        self.cpu_ctx.halted = true;
-    
-    }
-
-    pub fn load_16_nn_sp(&mut self) {
-
-        println!("Not Done: load_16_nn_sp");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn load_sp_hl(&mut self) {
-
-        println!("Not Done: load_sp_hl");
         self.cpu_ctx.halted = true;
 
     }
@@ -95,7 +96,7 @@ impl Cpu {
 
     }
  
-    pub fn xor_8(&mut self) {
+    pub fn xor_8(&mut self, _cart: &mut Cart) {
         self.registers.a ^= self.cpu_ctx.fetched_data as u8;
         self.registers.set_flags(self.registers.a == 0, false, false, false);
     } 
@@ -191,7 +192,7 @@ impl Cpu {
 
     }
 
-    pub fn nop(&mut self) {
+    pub fn nop(&mut self, _cart: &mut Cart) {
         
     }
 
@@ -209,8 +210,7 @@ impl Cpu {
 
     }
     
-    pub fn di(&mut self) {
-
+    pub fn di(&mut self, _cart: &mut Cart) {
         self.cpu_ctx.int_master_enabled = false;
 
     }
@@ -299,7 +299,7 @@ impl Cpu {
 
     }
 
-    pub fn jp(&mut self) {
+    pub fn jp(&mut self, _cart: &mut Cart) {
         
         if self.check_cond() {
             self.registers.pc = self.cpu_ctx.fetched_data;
