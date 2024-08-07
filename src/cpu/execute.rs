@@ -115,13 +115,6 @@ impl Cpu {
 
     }
 
-    pub fn dec_8(&mut self) {
-
-        println!("Not Done: dec_8");
-        self.cpu_ctx.halted = true;
-
-    }
-
     pub fn add_hl_16(&mut self) {
 
         println!("Not Done: add_hl_16");
@@ -143,9 +136,9 @@ impl Cpu {
     
     }
 
-    pub fn dec_16(&mut self) {
+    pub fn dec(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: dec_16");
+        println!("Not Done: dec");
         self.cpu_ctx.halted = true;
 
     } 
@@ -196,7 +189,7 @@ impl Cpu {
         
     }
 
-    pub fn halt(&mut self) {
+    pub fn halt(&mut self, _cart: &mut Cart) {
 
         println!("Not Done: halt");
         self.cpu_ctx.halted = true;
