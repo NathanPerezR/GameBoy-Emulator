@@ -36,6 +36,7 @@ impl Default for RegisterData {
 #[derive(Clone,Copy,Debug, Default)]
 pub enum RegisterType {
     #[default]
+    None,
     A,
     B,
     C,
@@ -71,6 +72,7 @@ impl RegisterData {
             HL => (self.h as u16) << 8 | (self.l as u16), 
             PC => self.pc, 
             SP => self.sp,
+            None => {0}
         } 
     }
 
@@ -104,6 +106,7 @@ impl RegisterData {
             },
             PC => self.pc = value,
             SP => self.sp = value,
+            None => {}
         }
     }
 
@@ -141,6 +144,7 @@ impl RegisterData {
 
             RegisterType::PC => self.pc = val,
             RegisterType::SP => self.sp = val,
+            RegisterType::None => {}
         }
     }
 
