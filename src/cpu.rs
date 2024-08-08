@@ -94,4 +94,29 @@ impl Cpu {
             Nc => !c_flag,
         }
     }
+
+    pub fn stack_push(&mut self, bus: &mut Bus, data: u8) {
+        
+        self.registers.sp -= 1;
+        bus.write(self.registers.sp, data); 
+
+    }
+
+    pub fn stack_push16(&mut self, bus: &mut Bus, data: u16) {
+        self.stack_push(bus, (data >> 8) as u8);
+        self.stack_push(bus, data as u8);
+    }
+
+    pub fn stack_pop(&mut self, bus: &mut Bus) -> u8 {
+        let popped_value = bus.read(self.registers.sp);
+        self.registers.sp += 1;
+        popped_value
+    }
+
+    pub fn stack_pop16(&mut self, bus: &mut Bus) -> u16 {
+        let lo: u16 = self.stack_pop(bus).into();
+        let hi: u16 = self.stack_pop(bus).into();
+
+        (hi << 8) | lo
+    }
 }
