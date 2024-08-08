@@ -86,16 +86,16 @@ impl Cpu {
 
     } 
 
-    pub fn and_8(&mut self) {
+    pub fn and(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: and_8");
+        println!("Not Done: and");
         self.cpu_ctx.halted = true;
 
     }
 
-    pub fn or_8(&mut self) {
-
-        println!("Not Done: or_8");
+    pub fn or(&mut self, _cart: &mut Cart) {
+ 
+        println!("Not Done: or");
         self.cpu_ctx.halted = true;
 
     }
@@ -108,16 +108,16 @@ impl Cpu {
         self.registers.set_c(false);
     } 
 
-    pub fn cp_8(&mut self) {
+    pub fn cp(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: cp_8");
+        println!("Not Done: cp");
         self.cpu_ctx.halted = true;
 
     }
     
-    pub fn inc_8(&mut self) {
+    pub fn inc(&mut self, _cart: &mut Cart) {
 
-        println!("Not Done: inc_8");
+        println!("Not Done: inc");
         self.cpu_ctx.halted = true;
 
     }
