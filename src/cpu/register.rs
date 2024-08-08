@@ -55,7 +55,7 @@ pub enum RegisterType {
 
 impl RegisterData {
     
-    pub fn read_reg(&self, register_type: RegisterType) -> u16 {
+    pub fn read(&self, register_type: RegisterType) -> u16 {
         use RegisterType::*;
         match register_type {
             A => self.a.into(),
@@ -77,7 +77,7 @@ impl RegisterData {
     }
 
 
-    pub fn write_reg(&mut self, register_type: RegisterType, value: u16) {
+    pub fn write(&mut self, register_type: RegisterType, value: u16) {
         use RegisterType::*;
         match register_type {
             A => self.a = value as u8,

@@ -1,74 +1,50 @@
 use crate::cpu::Cpu;
-use crate::cart::Cart;
+use crate::bus::Bus;
 
-struct EmuContext {
+pub struct EmuContext {
     pub running: bool,
     pub paused: bool,
     pub ticks: u64,
+
+    pub cpu: Cpu,
+    pub bus: Bus, 
 }
 
 impl Default for EmuContext {
    fn default() -> Self {
         EmuContext {
-            running: false,
-            paused: true,
-            ticks: 0
+            running: true,
+            paused: false,
+            ticks: 0,
+            cpu: Cpu::default(),
+            bus: Bus::default(),
         } 
    } 
 }
 
-/*
- * Emu consists of:
- * Cart- load cart, read data, also write data
- * CPU- instructions, registers 
- * Address Bus- reading and writting to addresses (mem mapped)
- * PPU- Pixel processing unit
- * Timer- time stuff
- */
-pub struct Emu {
-    emu_ctx: EmuContext,
-}
-
-impl Default for Emu {
-    fn default() -> Self {
-        Emu {
-            emu_ctx: EmuContext::default(),
-        }
-    }
-}
-
-impl Emu {
+impl EmuContext {
 
     pub fn delay(&self, ms_int: u64) {
         let ms_time = std::time::Duration::from_millis(ms_int);
         std::thread::sleep(ms_time);
     }
 
-    pub fn emu_run(&self, rom_path: &str) -> i16 {
+    pub fn emu_run(&mut self, rom_path: &str) -> i16 {
 
-        let mut ctx: EmuContext = EmuContext::default();
-        
-        let mut cpu: Cpu = Cpu::default();
-
-        let mut cart: Cart = Cart::default();
-        cart.cart_load(rom_path);
-
-        ctx.running = true;
-        ctx.paused = false;
-       
-        while ctx.running {
+        self.bus.cart.cart_load(rom_path);
+        while self.running {
            
-            if ctx.paused {
+            if self.paused {
                 self.delay(10);
                 continue;
             }
 
-            if !cpu.step(&mut cart) {
+            if !self.cpu.step(&mut self.bus) {
                 print!("CPU STOPPED");
                 return -1;
             };
 
-            ctx.ticks += 1;
+            self.ticks += 1;
 
         }
         0

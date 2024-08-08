@@ -7,9 +7,10 @@ mod ppu;
 mod ram;
 use std::env;
 use std::path::Path;
+use emu::EmuContext;
 
 fn main() {
-    let emu: emu::Emu = emu::Emu::default();
+    let mut emu: EmuContext = EmuContext::default();
 
     // Get the command-line arguments
     let args: Vec<String> = env::args().collect();

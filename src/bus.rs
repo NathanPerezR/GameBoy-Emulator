@@ -1,4 +1,7 @@
+use std::default;
+
 use crate::cart::Cart;
+use crate::ram::Ram;
 
 // the following memory map info is from the gbdev.io pandocs
 //
@@ -16,92 +19,205 @@ use crate::cart::Cart;
 // FF80	FFFE	High RAM (HRAM)	
 // FFFF	FFFF	Interrupt Enable register (IE)
 
-pub fn bus_read(cart: &Cart, address: u16) -> u8 {
-    if address < 0x8000 {
-        return cart.cart_read(address);
-    }
-    else if address < 0xA000 {
-        // char / map data
-    }
-    else if address < 0xC00 {
-        // Cart Ram
-        cart.cart_read(address)
-    }
-    else if address < 0xE000 {
-        // WRAM (Working Ram) 
-        wram_read(address)
-    }
-    else if address < 0xFE00 {
-        //reserved echo RAM
-        return 0;
-    }
-    else if address < 0xFEA0 {
-        // OAM 
-    }
-    else if address < 0xFF00 {
-        // reserved 
-    }
-    else if address < 0xFF80 {
-        // IO Registers 
-    }
-    else if address == 0xFFFF {
-        cpu_get_ie_register();
-    }
-    else {
-        return hram_read(address);
+pub struct Bus {
+    pub cart: Cart,
+    pub ram: Ram,
+    // pub ppu: Ppu, 
+
+}
+
+impl Default for Bus {
+    fn default() -> Self {
+        Bus {
+            cart: Cart::default(),
+            ram: Ram::new(),
+        }
     }
 }
 
-pub fn bus_write(cart: &mut Cart, address: u16, value: u8) {
+impl Bus {
 
-    if address < 0x8000 {
-        cart.cart_write(address, value);
-    }
-    else if address < 0xA000 {
-        // char / map data
-    }
-    else if address < 0xC00 {
-        // Cart Ram
-        cart.cart_write(address, value);
-    }
-    else if address < 0xE000 {
-        // WRAM (Working Ram) 
-        wram_write(address, value)
-    }
-    else if address < 0xFE00 {
-        //reserved echo RAM
-    }
-    else if address < 0xFEA0 {
-        // OAM 
-    }
-    else if address < 0xFF00 {
-        // reserved 
-    }
-    else if address < 0xFF80 {
-        // IO Registers 
-    }
-    else if address == 0xFFFF {
-        cpu_get_ie_register();
-    }
-    else {
-        return hram_read(address);
+    pub fn read(&mut self, address: u16) -> u8 {
+        if address < 0x8000 {
+            return self.cart.cart_read(address);
+        }
+        else if address < 0xA000 {
+            // char / map data
+        }
+        else if address < 0xC00 {
+            // Cart Ram
+    //        cart.cart_read(address)
+        }
+        else if address < 0xE000 {
+            // WRAM (Working Ram) 
+    //        wram_read(address)
+        }
+        else if address < 0xFE00 {
+            //reserved echo RAM
+            return 0;
+        }
+        else if address < 0xFEA0 {
+            // OAM 
+        }
+        else if address < 0xFF00 {
+            // reserved 
+        }
+        else if address < 0xFF80 {
+            // IO Registers 
+        }
+        else if address == 0xFFFF {
+    //        cpu_get_ie_register();
+        }
+        else {
+    //        return hram_read(address);
+        }
+
+        0
     }
 
-    //TODO
+    pub fn write(&mut self, address: u16, value: u8) {
+
+        if address < 0x8000 {
+            // cart.cart_write(address, value);
+        }
+        else if address < 0xA000 {
+            // char / map data
+        }
+        else if address < 0xC00 {
+            // Cart Ram
+            // cart.cart_write(address, value);
+        }
+        else if address < 0xE000 {
+            // WRAM (Working Ram) 
+            // wram_write(address, value)
+        }
+        else if address < 0xFE00 {
+            //reserved echo RAM
+        }
+        else if address < 0xFEA0 {
+            // OAM 
+        }
+        else if address < 0xFF00 {
+            // reserved 
+        }
+        else if address < 0xFF80 {
+            // IO Registers 
+        }
+        else if address == 0xFFFF {
+            // cpu_get_ie_register();
+        }
+        else {
+            // return hram_read(address);
+        }
+
+        //TODO
+    }
+
+    pub fn read16(&mut self, address: u16) -> u16 {
+        let lo: u16 = self.read(address) as u16;
+        let hi: u16 = self.read(address) as u16;
+
+        lo | (hi << 8)
+    }
+
+    pub fn write16(&mut self, address: u16, value: u16) {
+        
+        let lo = (value & 0xFF) as u8;
+        let hi = (value >> 8) as u8;
+
+        self.write(address + 1, lo);
+        self.write(address, hi);
+    }
+
 }
 
-pub fn bus_read16(cart: &Cart, address: u16) -> u16 {
-    let lo: u16 = bus_read(cart, address) as u16;
-    let hi: u16 = bus_read(cart, address) as u16;
 
-    lo | (hi << 8)
-}
 
-pub fn bus_write16(cart: &mut Cart, address: u16, value: u16) {
-    
-    let lo = (value & 0xFF) as u8;
-    let hi = (value >> 8) as u8;
 
-    bus_write(cart, address + 1, lo);
-    bus_write(cart, address, hi);
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

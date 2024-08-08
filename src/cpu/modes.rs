@@ -1,11 +1,10 @@
 use crate::cpu::Cpu;
-use crate::cart::Cart;
 use crate::cpu::RegisterType;
 use crate::cpu::structs::{InstructionName, ConditionType, AddressMode, Instruction};
 
 impl Cpu {
 
-    pub fn instruction_by_opcode(&mut self, cart: &mut Cart) {
+    pub fn instruction_by_opcode(&mut self) {
         
         // TODO: REMOVE THIS 
         self.cpu_ctx.fetched_data = 0x0000;

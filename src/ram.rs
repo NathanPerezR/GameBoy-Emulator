@@ -1,12 +1,12 @@
 #[derive(Debug)]
-struct RamContext {
+pub struct Ram {
     wram: [u8; 0x2000],
     hram: [u8; 0x80],
 }
 
-impl RamContext {
+impl Ram {
     pub const fn new() -> Self {
-        RamContext {
+        Ram {
             wram: [0; 0x2000],
             hram: [0; 0x80],
         }

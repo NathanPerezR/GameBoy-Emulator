@@ -4,7 +4,7 @@ mod modes;
 mod structs;
 mod cpu_fetch;
 use crate::cpu::register::RegisterType;
-use crate::bus::bus_read;
+use crate::bus::Bus;
 use crate::cart::Cart;
 use crate::util::nth_bit;
 use crate::cpu::structs::{AddressMode, ConditionType, Instruction};
@@ -29,16 +29,16 @@ struct CpuContext {
 
 impl Cpu {
     
-    fn fetch_opcode(&mut self, cart: &mut Cart) {
-        self.cpu_ctx.current_opcode = bus_read(cart, self.registers.pc);
+    fn fetch_opcode(&mut self, bus: &mut Bus) {
+        self.cpu_ctx.current_opcode = bus.read(self.registers.pc);
         self.registers.pc += 1;
-        self.instruction_by_opcode(cart);
+        self.instruction_by_opcode();
     }
 
-    fn execute(&mut self, cart: &mut Cart) {
+    fn execute(&mut self, bus: &mut Bus) {
 
         if let Some(func) = self.cpu_ctx.instruction.function {
-            func(self, cart);
+            func(self, bus);
         } else {
             self.cpu_ctx.halted = true;
             println!("NO VALID INSTRUCTION FOUND")
@@ -49,19 +49,19 @@ impl Cpu {
     fn emu_cycles(&self, cycle: u8) {
     }
 
-    pub fn step(&mut self, cart: &mut Cart) -> bool {
+    pub fn step(&mut self, bus: &mut Bus) -> bool {
         if !self.cpu_ctx.halted {
 
             let pc: u16 = self.registers.pc;
 
-            self.fetch_opcode(cart);
-            self.fetch_data(cart);
+            self.fetch_opcode(bus);
+            self.fetch_data(bus);
             println!("PC: {:04X} | Executing instruction: {:5} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:04X} | fetched-data: {:04X} ", 
                     pc,
                     format!("{:?}", self.cpu_ctx.instruction.in_type).chars().take(5).collect::<String>(),
-                    bus_read(cart, pc),
-                    bus_read(cart, pc + 1),
-                    bus_read(cart, pc + 2),
+                    bus.read(pc),
+                    bus.read(pc + 1),
+                    bus.read(pc + 2),
                     self.registers.a,
                     self.registers.b,
                     self.registers.c,
@@ -73,7 +73,7 @@ impl Cpu {
                     self.registers.sp,
                     self.cpu_ctx.fetched_data,
                 );
-            self.execute(cart);
+            self.execute(bus);
 
         }
         true

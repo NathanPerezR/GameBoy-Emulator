@@ -1,7 +1,14 @@
-fn ppu_init() {
+struct Ppu {
 
 }
 
-fn ppu_tick() {
 
+impl Ppu {
+
+    fn ppu_init() {
+
+    }
+
+    fn ppu_tick() {
+    }
 }
