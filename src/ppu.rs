@@ -1,4 +1,5 @@
-struct Ppu {
+#[derive(Default)]
+pub struct Ppu {
 
 }
 
