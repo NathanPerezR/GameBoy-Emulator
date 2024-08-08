@@ -1,5 +1,4 @@
-use std::default;
-
+use crate::ppu::Ppu;
 use crate::cart::Cart;
 use crate::ram::Ram;
 
@@ -22,7 +21,7 @@ use crate::ram::Ram;
 pub struct Bus {
     pub cart: Cart,
     pub ram: Ram,
-    // pub ppu: Ppu, 
+    pub ppu: Ppu, 
 
 }
 
@@ -31,6 +30,7 @@ impl Default for Bus {
         Bus {
             cart: Cart::default(),
             ram: Ram::new(),
+            ppu: Ppu::default(),
         }
     }
 }
@@ -46,11 +46,11 @@ impl Bus {
         }
         else if address < 0xC00 {
             // Cart Ram
-    //        cart.cart_read(address)
+            return self.cart.cart_read(address);
         }
         else if address < 0xE000 {
             // WRAM (Working Ram) 
-    //        wram_read(address)
+            return self.ram.wram_read(address)
         }
         else if address < 0xFE00 {
             //reserved echo RAM
@@ -128,7 +128,6 @@ impl Bus {
         self.write(address + 1, lo);
         self.write(address, hi);
     }
-
 }
 
 
