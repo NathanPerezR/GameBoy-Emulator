@@ -1,5 +1,5 @@
 use crate::bus::Bus;
-use crate::cpu::RegisterType;
+use crate::cpu::{RegisterType, ConditionType};
 use crate::cpu::register::is_16_bit;
 use crate::cpu::structs::AddressMode;
 use crate::cpu::Cpu;
@@ -24,9 +24,9 @@ impl Cpu {
         }
 
         if let AddressMode::HlSpr = self.cpu_ctx.instruction.mode {
-            let h_flag: bool = (self.registers.read(self.cpu_ctx.instruction.register_2) & 0xF) + 
+            let h_flag: bool = (self.registers.read(self.cpu_ctx.instruction.register_2) & 0xF).wrapping_add 
                 (self.cpu_ctx.fetched_data & 0xF) >= 0x10;
-            let c_flag: bool = (self.registers.read(self.cpu_ctx.instruction.register_2) & 0xFF) +
+            let c_flag: bool = (self.registers.read(self.cpu_ctx.instruction.register_2) & 0xFF).wrapping_add
                 (self.cpu_ctx.fetched_data & 0xFF) >= 0x100;
             
             self.registers.set_z(false);
@@ -331,39 +331,41 @@ impl Cpu {
     }
 
 
-    pub fn jp(&mut self, _bus: &mut Bus) {
-        
+    pub fn jp(&mut self, bus: &mut Bus) {
+        self.goto_address(bus, self.cpu_ctx.fetched_data, false)
+    }
+
+    pub fn jr(&mut self, bus: &mut Bus) {
+        let relitive_jump_amount = self.cpu_ctx.fetched_data  as i8;
+        let address = self.registers.pc.wrapping_add(relitive_jump_amount as u16);
+        self.goto_address(bus, address, false)
+    }
+
+    pub fn call(&mut self, bus: &mut Bus) {
+        self.goto_address(bus, self.cpu_ctx.fetched_data, true)
+    }
+
+    pub fn rst(&mut self, bus: &mut Bus) {
+        self.goto_address(bus, self.cpu_ctx.instruction.parmater.into() , true)
+    }
+
+    pub fn ret(&mut self, bus: &mut Bus) {
+    
+        if let ConditionType::None = self.cpu_ctx.instruction.condition {
+            self.emu_cycles(1)
+        }
+
         if self.check_cond() {
-            self.registers.pc = self.cpu_ctx.fetched_data;
+            let lo: u16 = self.stack_pop(bus).into();
             self.emu_cycles(1);
-        } 
-    }
 
-    pub fn jr(&mut self, _bus: &mut Bus) {
+            let hi: u16 = self.stack_pop(bus).into();
+            self.emu_cycles(1);
 
-        println!("Not Done: jr");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn call(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: call");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn rst(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: rst");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn ret(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: ret");
-        self.cpu_ctx.halted = true;
+            let n: u16 = (hi << 8 ) | lo;
+            self.registers.pc = n;
+            self.emu_cycles(1);
+        }
 
     }
 
@@ -376,11 +378,10 @@ impl Cpu {
     
     // misc helper functions
     
-    fn goto_address(&mut self, _bus: &mut Bus, address: u16, pushpc: bool) {
+    fn goto_address(&mut self, bus: &mut Bus, address: u16, pushpc: bool) {
         if self.check_cond() && pushpc {
             self.emu_cycles(2);
-            // TODO: impliment stack
-            // self.stack_push16(self.registers.pc);
+            self.stack_push16(bus, self.registers.pc);
         }
 
         self.registers.pc = address;
