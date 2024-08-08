@@ -3,6 +3,8 @@ mod bus;
 mod util;
 mod cpu;
 mod emu;
+mod ppu;
+mod ram;
 use std::env;
 use std::path::Path;
 

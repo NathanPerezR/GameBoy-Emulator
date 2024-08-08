@@ -74,6 +74,7 @@ impl Cpu {
 
     pub fn sub(&mut self, _cart: &mut Cart) {
 
+
         println!("Not Done: sub");
         self.cpu_ctx.halted = true;
 
@@ -122,10 +123,16 @@ impl Cpu {
 
     }
 
-    pub fn ldh(&mut self, _cart: &mut Cart) {
+    pub fn ldh(&mut self, cart: &mut Cart) {
         
-        println!("Not Done: LDH");
-        self.cpu_ctx.halted = true;
+        if let RegisterType::A = self.cpu_ctx.instruction.register_1{
+            self.registers.set_reg(self.cpu_ctx.instruction.register_1, bus_read(cart, 0xFF00 self.cpu_ctx.fetched_data) as u16);
+        }
+        else {
+            bus_write(cart, self.cpu_ctx.mem_dest, self.registers.a)
+        }
+
+        self.emu_cycles(1);
     }
  
     pub fn dec(&mut self, cart: &mut Cart) {
@@ -215,13 +222,12 @@ impl Cpu {
     }
 
     pub fn rlca(&mut self, _cart: &mut Cart) {
-
+        
         println!("Not Done: rlca");
         self.cpu_ctx.halted = true;
 
     }
 
-    // TODO: TEST THIS
     pub fn rla(&mut self, _cart: &mut Cart) {
         
         let copy_of_a = self.registers.a;
@@ -239,7 +245,6 @@ impl Cpu {
 
     }
 
-    // TODO: TEST THIS
     pub fn rrca(&mut self, _cart: &mut Cart) {
         
         let lo_a = self.registers.a & 1;
@@ -253,7 +258,6 @@ impl Cpu {
         self.registers.set_c(lo_a != 0); 
     }
 
-    // TODO: TEST THIS
     pub fn rra(&mut self, _cart: &mut Cart) {
         
         let c_flag = self.registers.get_c();
@@ -327,6 +331,7 @@ impl Cpu {
 
     }
 
+
     pub fn jp(&mut self, _cart: &mut Cart) {
         
         if self.check_cond() {
@@ -336,7 +341,7 @@ impl Cpu {
     }
 
     pub fn jr(&mut self, _cart: &mut Cart) {
-        
+
         println!("Not Done: jr");
         self.cpu_ctx.halted = true;
 
@@ -363,10 +368,23 @@ impl Cpu {
 
     }
 
-    pub fn reti(&mut self, _cart: &mut Cart) {
+    pub fn reti(&mut self, cart: &mut Cart) {
 
-        println!("Not Done: reti");
-        self.cpu_ctx.halted = true;
+        self.cpu_ctx.int_master_enabled = true;
+        self.ret(cart);
 
+    }
+    
+    // misc helper functions
+    
+    fn goto_address(&mut self, _cart: &mut Cart, address: u16, pushpc: bool) {
+        if self.check_cond() && pushpc {
+            self.emu_cycles(2);
+            // TODO: impliment stack
+            // self.stack_push16(self.registers.pc);
+        }
+
+        self.registers.pc = address;
+        self.emu_cycles(1);
     }
 } 

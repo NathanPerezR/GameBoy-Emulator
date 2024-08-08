@@ -20,16 +20,71 @@ pub fn bus_read(cart: &Cart, address: u16) -> u8 {
     if address < 0x8000 {
         return cart.cart_read(address);
     }
-
-    //TODO
-    // remove false
-    1
+    else if address < 0xA000 {
+        // char / map data
+    }
+    else if address < 0xC00 {
+        // Cart Ram
+        cart.cart_read(address)
+    }
+    else if address < 0xE000 {
+        // WRAM (Working Ram) 
+        wram_read(address)
+    }
+    else if address < 0xFE00 {
+        //reserved echo RAM
+        return 0;
+    }
+    else if address < 0xFEA0 {
+        // OAM 
+    }
+    else if address < 0xFF00 {
+        // reserved 
+    }
+    else if address < 0xFF80 {
+        // IO Registers 
+    }
+    else if address == 0xFFFF {
+        cpu_get_ie_register();
+    }
+    else {
+        return hram_read(address);
+    }
 }
 
 pub fn bus_write(cart: &mut Cart, address: u16, value: u8) {
+
     if address < 0x8000 {
-        // ROM DATA 
         cart.cart_write(address, value);
+    }
+    else if address < 0xA000 {
+        // char / map data
+    }
+    else if address < 0xC00 {
+        // Cart Ram
+        cart.cart_write(address, value);
+    }
+    else if address < 0xE000 {
+        // WRAM (Working Ram) 
+        wram_write(address, value)
+    }
+    else if address < 0xFE00 {
+        //reserved echo RAM
+    }
+    else if address < 0xFEA0 {
+        // OAM 
+    }
+    else if address < 0xFF00 {
+        // reserved 
+    }
+    else if address < 0xFF80 {
+        // IO Registers 
+    }
+    else if address == 0xFFFF {
+        cpu_get_ie_register();
+    }
+    else {
+        return hram_read(address);
     }
 
     //TODO
