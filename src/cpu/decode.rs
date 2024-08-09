@@ -248,7 +248,7 @@ impl Cpu {
             0xD6 => self.sub_8(Immediate8),
 
             // SUB A, n
-            // Subcrate n + carry flag from A
+            // Subtract n + carry flag from A
             // n = A B C D E H L (HL) #
             // set Z if result 0, set N, Set h if no borrow from bit 4, set C if no borrow
             0x9F => self.sbc_8(A),

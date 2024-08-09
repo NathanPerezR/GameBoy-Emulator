@@ -14,7 +14,7 @@ pub fn bit_set(mut input: u8, nth_bit: u8, on: bool) -> u8 {
     else {
         input &= !(1<<nth_bit);
     }
-    return input;
+    input
 }
 
 
