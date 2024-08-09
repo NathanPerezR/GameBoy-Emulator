@@ -75,26 +75,57 @@ impl Cpu {
         
     }
 
-    pub fn adc(&mut self, bus: &mut Bus) {
+    pub fn adc(&mut self, _bus: &mut Bus) {
+        
+        let u = self.cpu_ctx.fetched_data;
+        let a = self.registers.a;
+        let c_flag = self.registers.get_c();
 
-        println!("Not Done: adc");
-        self.cpu_ctx.halted = true;
+        let sum = a as u16 + u + (if c_flag {1} else {0});
+        self.registers.a = sum as u8;
+        
+        self.registers.set_z(self.registers.a == 0);
+        self.registers.set_n(false);
+        self.registers.set_h((a & 0xF) + (u & 0xF) as u8 + (if c_flag {1} else {0}) > 0xF);
+        self.registers.set_c(sum > 0xFF);
 
     }
 
     pub fn sub(&mut self, _bus: &mut Bus) {
+        let reg_value = self.registers.read(self.cpu_ctx.instruction.register_1);
+        let fetched_value = self.cpu_ctx.fetched_data;
 
+        let val = reg_value.wrapping_sub(fetched_value);
 
-        println!("Not Done: sub");
-        self.cpu_ctx.halted = true;
+        let z = val == 0;
+        let h = ((reg_value & 0xF) as i16) - ((fetched_value & 0xF) as i16) < 0;
+        let c = (reg_value as i16) - (fetched_value as i16) < 0;
 
+        self.registers.set_z(z);
+        self.registers.set_n(true);
+        self.registers.set_h(h);
+        self.registers.set_c(c);
     }
 
+    // TODO: FIX THIS 
     pub fn sbc(&mut self, _bus: &mut Bus) {
 
-        println!("Not Done: sbc");
-        self.cpu_ctx.halted = true;
+        let old_carry_flag = if self.registers.get_c() {1} else {0};
+        let val: u8 = (self.cpu_ctx.fetched_data as u8).wrapping_add(old_carry_flag);
 
+        let z = (self.registers.read(self.cpu_ctx.instruction.register_1) as u8).wrapping_sub(val) == 0;
+        let h = ((self.registers.read(self.cpu_ctx.instruction.register_1) & 0xF) as i16)
+            .wrapping_sub((self.cpu_ctx.fetched_data & 0xF) as i16)
+            .wrapping_sub(old_carry_flag as i16) < 0;
+
+        let c = (self.registers.read(self.cpu_ctx.instruction.register_1) as i16)
+            .wrapping_sub(self.cpu_ctx.fetched_data as i16)
+            .wrapping_sub(old_carry_flag as i16) < 0;
+
+        self.registers.set_z(z);
+        self.registers.set_n(true);
+        self.registers.set_h(h);
+        self.registers.set_c(c);
     } 
 
     pub fn and(&mut self, _bus: &mut Bus) {
