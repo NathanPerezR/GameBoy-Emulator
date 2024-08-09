@@ -25,6 +25,7 @@ struct CpuContext {
     halted: bool, 
     stepping: bool,
     int_master_enabled: bool,
+    enable_ime: bool
 }
 
 impl Cpu {
