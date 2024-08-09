@@ -161,6 +161,15 @@ impl RegisterData {
         self.f = bit_set(self.f, 4, c); 
     }                   
 
+    pub fn get_z(&mut self) -> bool {
+        nth_bit(self.f.into(), 7)
+    }
+    pub fn get_n(&mut self) -> bool {
+        nth_bit(self.f.into(), 6)
+    }
+    pub fn get_h(&mut self) -> bool {
+        nth_bit(self.f.into(), 5)
+    }
     pub fn get_c(&mut self) -> bool {
         nth_bit(self.f.into(), 4)
     }
