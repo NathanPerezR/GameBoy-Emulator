@@ -43,18 +43,29 @@ impl Cpu {
         self.registers.set_reg(self.cpu_ctx.instruction.register_1, self.cpu_ctx.fetched_data)
     }
 
-    pub fn push(&mut self, _bus: &mut Bus) {
+    pub fn push(&mut self, bus: &mut Bus) {
 
-        println!("Not Done: push");
-        self.cpu_ctx.halted = true;
+        let hi = ((self.registers.read(self.cpu_ctx.instruction.register_1) >> 8) & 0xFF) as u8;
+        self.emu_cycles(1);
+        self.stack_push(bus, hi);
+
+        let lo = (self.registers.read(self.cpu_ctx.instruction.register_1) & 0xFF) as u8;
+        self.emu_cycles(1);
+        self.stack_push(bus, lo);
+
+        self.emu_cycles(1);
 
     }
 
-    pub fn pop(&mut self, _bus: &mut Bus) {
+    pub fn pop(&mut self, bus: &mut Bus) {
 
-        println!("Not Done: pop");
-        self.cpu_ctx.halted = true;
+        let hi = self.stack_pop(bus);
+        self.emu_cycles(1);
+        self.stack_push(bus, hi);
 
+        let lo = self.stack_pop(bus);
+        self.emu_cycles(1);
+        self.stack_push(bus, lo);
     }
 
     pub fn add(&mut self, _bus: &mut Bus) {
@@ -64,7 +75,7 @@ impl Cpu {
         
     }
 
-    pub fn adc(&mut self, _bus: &mut Bus) {
+    pub fn adc(&mut self, bus: &mut Bus) {
 
         println!("Not Done: adc");
         self.cpu_ctx.halted = true;
@@ -88,21 +99,26 @@ impl Cpu {
 
     pub fn and(&mut self, _bus: &mut Bus) {
 
-        println!("Not Done: and");
-        self.cpu_ctx.halted = true;
-
+        self.registers.a &= self.cpu_ctx.fetched_data as u8;
+        self.registers.set_z(self.registers.a == 0);
+        self.registers.set_n(false);
+        self.registers.set_h(false);
+        self.registers.set_c(false);
     }
 
     pub fn or(&mut self, _bus: &mut Bus) {
- 
-        println!("Not Done: or");
-        self.cpu_ctx.halted = true;
+    
+        self.registers.a |= (self.cpu_ctx.fetched_data & 0xFF) as u8;
+        self.registers.set_z(self.registers.a == 0);
+        self.registers.set_n(false);
+        self.registers.set_h(false);
+        self.registers.set_c(false);
 
     }
  
     pub fn xor_8(&mut self, _bus: &mut Bus) {
         self.registers.a ^= self.cpu_ctx.fetched_data as u8;
-        self.registers.set_z(self.registers.read(RegisterType::A) == 0);
+        self.registers.set_z(self.registers.a == 0);
         self.registers.set_n(false);
         self.registers.set_h(false);
         self.registers.set_c(false);
@@ -110,8 +126,12 @@ impl Cpu {
 
     pub fn cp(&mut self, _bus: &mut Bus) {
 
-        println!("Not Done: cp");
-        self.cpu_ctx.halted = true;
+        let n = (self.registers.a as i16).wrapping_sub(self.cpu_ctx.fetched_data as i16);
+        
+        self.registers.set_z(n == 0);
+        self.registers.set_n(true);
+        self.registers.set_h( (self.registers.a as i16 & 0x0F).wrapping_sub(self.cpu_ctx.fetched_data as i16 & 0x0F) < 0 );
+        self.registers.set_c(n < 0);
 
     }
     
@@ -239,9 +259,6 @@ impl Cpu {
         self.registers.set_n(false); 
         self.registers.set_h(false); 
         self.registers.set_c(new_c_flag); 
-        println!("Not Done: rla");
-        self.cpu_ctx.halted = true;
-
     }
 
     pub fn rrca(&mut self, _bus: &mut Bus) {
@@ -274,62 +291,7 @@ impl Cpu {
         self.registers.set_n(false); 
         self.registers.set_h(false); 
         self.registers.set_c(new_c_flag); 
-
-        println!("Not Done: rra");
-        self.cpu_ctx.halted = true;
-
     }
-
-    pub fn rlc(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: rlc_8");
-        self.cpu_ctx.halted = true;
-    
-    }
-
-
-    pub fn rl(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: rl_8");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn rrc(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: rrc_8");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn rr(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: rr_8");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn sla(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: sla_8");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn sra(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: sra_8");
-        self.cpu_ctx.halted = true;
-
-    }
-
-    pub fn slr(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: slr_8");
-        self.cpu_ctx.halted = true;
-
-    }
-
 
     pub fn jp(&mut self, bus: &mut Bus) {
         self.goto_address(bus, self.cpu_ctx.fetched_data, false)
