@@ -135,10 +135,34 @@ impl Cpu {
 
     }
     
-    pub fn inc(&mut self, _bus: &mut Bus) {
+    pub fn inc(&mut self, bus: &mut Bus) {
+        
+        let mut val = self.registers.read(self.cpu_ctx.instruction.register_1) + 1;
 
-        println!("Not Done: inc");
-        self.cpu_ctx.halted = true;
+        if is_16_bit(self.cpu_ctx.instruction.register_1) {
+            self.emu_cycles(1);
+        }
+
+        if let RegisterType::HL = self.cpu_ctx.instruction.register_1 {
+            if let AddressMode::Mr = self.cpu_ctx.instruction.mode {
+                let address = self.registers.read(RegisterType::HL);
+                val = bus.read(address) as u16 + 1;
+                val &= 0xFF;
+                bus.write(self.registers.read(RegisterType::HL), val as u8);
+            } 
+        }
+        else {
+            self.registers.set_reg(self.cpu_ctx.instruction.register_1, val);
+            val = self.registers.read(self.cpu_ctx.instruction.register_1);
+        }
+
+        if self.cpu_ctx.current_opcode & 0x03 == 0x03 {
+            return;
+        }
+
+        self.registers.set_z(val == 0);
+        self.registers.set_n(false);
+        self.registers.set_h((val & 0x0F) == 0);
 
     }
 
@@ -187,16 +211,35 @@ impl Cpu {
 
     pub fn daa(&mut self, _bus: &mut Bus) {
 
-        println!("Not Done: daa");
-        self.cpu_ctx.halted = true;
+        let a = self.registers.a;
 
+        if !self.registers.get_n() {
+            if self.registers.get_c() || a > 0x99 {
+                self.registers.a = a.wrapping_add(0x60);
+                self.registers.set_c(true);
+            }
+            if self.registers.get_h() || (a & 0xF) > 0x09 {
+                self.registers.a = self.registers.a.wrapping_sub(0x06);
+            }
+        }
+        else {
+            if self.registers.get_c() {
+                self.registers.a = self.registers.a.wrapping_sub(0x60)
+            }
+            if self.registers.get_h() {
+                self.registers.a = self.registers.a.wrapping_sub(0x06);  
+            }
+        }
+
+        self.registers.set_z(self.registers.a == 0);
+        self.registers.set_h(false);
     }
 
     pub fn cpl(&mut self, _bus: &mut Bus) {
+        self.registers.a = !self.registers.a;
 
-        println!("Not Done: cpl");
-        self.cpu_ctx.halted = true;
-
+        self.registers.set_n(true); 
+        self.registers.set_h(true);
     }
 
     pub fn ccf(&mut self, _bus: &mut Bus) {
@@ -207,10 +250,9 @@ impl Cpu {
     }
 
     pub fn scf(&mut self, _bus: &mut Bus) {
-
-        println!("Not Done: scf");
-        self.cpu_ctx.halted = true;
-
+        self.registers.set_n(false); 
+        self.registers.set_h(false); 
+        self.registers.set_c(true); 
     }
 
     pub fn nop(&mut self, _bus: &mut Bus) {
@@ -230,20 +272,25 @@ impl Cpu {
     
     pub fn di(&mut self, _bus: &mut Bus) {
         self.cpu_ctx.int_master_enabled = false;
-
     }
 
     pub fn ei(&mut self, _bus: &mut Bus) {
 
-        println!("Not Done: ei");
-        self.cpu_ctx.halted = true;
+        self.cpu_ctx.enable_ime = true;
 
     }
 
     pub fn rlca(&mut self, _bus: &mut Bus) {
         
-        println!("Not Done: rlca");
-        self.cpu_ctx.halted = true;
+        let a = self.registers.a;   
+        let c = ((a >> 7) & 1) != 0;
+        let a = (a << 1) | if c {1} else {0};
+        self.registers.a = a;
+
+        self.registers.set_z(false); 
+        self.registers.set_n(false); 
+        self.registers.set_h(false); 
+        self.registers.set_c(c); 
 
     }
 
