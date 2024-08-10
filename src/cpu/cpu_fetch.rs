@@ -14,6 +14,7 @@ impl Cpu {
                 self.cpu_ctx.fetched_data = self.registers.read(self.cpu_ctx.instruction.register_1);
             },
             RR => {
+                self.cpu_ctx.fetched_data = self.registers.read(self.cpu_ctx.instruction.register_1);
             }
             RD8 => {
                 self.cpu_ctx.fetched_data = bus.read(self.registers.pc) as u16;
