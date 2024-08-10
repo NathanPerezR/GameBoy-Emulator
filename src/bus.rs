@@ -85,11 +85,11 @@ impl Bus {
         }
         else if address < 0xC00 {
             // Cart Ram
-            // cart.cart_write(address, value);
+            self.cart.cart_write(address, value);
         }
         else if address < 0xE000 {
             // WRAM (Working Ram) 
-            // wram_write(address, value)
+            self.ram.wram_write(address, value)
         }
         else if address < 0xFE00 {
             //reserved echo RAM
@@ -107,7 +107,7 @@ impl Bus {
             // cpu_get_ie_register();
         }
         else {
-            // return hram_read(address);
+            return self.ram.hram_read(address);
         }
 
         //TODO

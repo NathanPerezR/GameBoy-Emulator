@@ -23,17 +23,17 @@ impl Ram {
     }
 
 
-    fn wram_write(&mut self, address: u16, value: u8) {
+    pub fn wram_write(&mut self, address: u16, value: u8) {
         let address = address.wrapping_sub(0xC000);
         self.wram[address as usize] = value;
     }
 
-    fn hram_read(&self, address: u16) -> u8 {
+    pub fn hram_read(&self, address: u16) -> u8 {
         let address = address.wrapping_sub(0xFF80);
         self.hram[address as usize]
     }
 
-    fn hram_write(&mut self, address: u16, value: u8) {
+    pub fn hram_write(&mut self, address: u16, value: u8) {
         let address = address.wrapping_sub(0xFF80);
         self.hram[address as usize] = value;
     }
