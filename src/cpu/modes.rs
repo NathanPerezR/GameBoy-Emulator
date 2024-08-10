@@ -6,7 +6,6 @@ impl Cpu {
 
     pub fn instruction_by_opcode(&mut self) {
         
-        // TODO: REMOVE THIS 
         self.cpu_ctx.fetched_data = 0x0000;
         self.cpu_ctx.instruction = Instruction::default();
 
