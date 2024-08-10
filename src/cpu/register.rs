@@ -1,4 +1,5 @@
 use crate::util::*;
+use crate::bus::Bus;
 
 
 #[derive(Clone, Copy, Debug)]
@@ -145,6 +146,42 @@ impl RegisterData {
             RegisterType::PC => self.pc = val,
             RegisterType::SP => self.sp = val,
             RegisterType::None => {}
+        }
+    }
+
+    pub fn set_reg_8(&mut self, bus: &mut Bus, register_type: RegisterType, value: u8) {
+        
+        use RegisterType::{A,B,C,D,E,F,H,L,HL};
+        match register_type {
+
+            A => self.a = value,
+            B => self.b = value,
+            C => self.c = value,
+            D => self.d = value,
+            E => self.e = value,
+            F => self.f = value,
+            H => self.h = value,
+            L => self.l = value,
+            HL => bus.write(self.read(HL), value), 
+            _ => unreachable!(),
+        }
+    }
+
+    pub fn read_8(&mut self, bus: &mut Bus, register_type: RegisterType) -> u8 {
+        
+        use RegisterType::{A,B,C,D,E,F,H,L,HL};
+        match register_type {
+
+            A => return self.a,
+            B => return self.b,
+            C => return self.c,
+            D => return self.d,
+            E => return self.e,
+            F => return self.f,
+            H => return self.h,
+            L => return self.l,
+            HL => bus.read(self.read(HL)), 
+            _ => unreachable!(),
         }
     }
 
