@@ -10,7 +10,11 @@ impl Cpu {
         self.cpu_ctx.instruction = Instruction::default();
 
         match self.cpu_ctx.current_opcode {
-
+            0xCB => {
+                self.cpu_ctx.instruction.in_type    = InstructionName::CB;
+                self.cpu_ctx.instruction.mode       = AddressMode::D8;
+                self.cpu_ctx.instruction.function   = Some(Cpu::cb);
+            }
             0x06 => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::B;
