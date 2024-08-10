@@ -3,6 +3,7 @@ use crate::cpu::{RegisterType, ConditionType};
 use crate::cpu::register::is_16_bit;
 use crate::cpu::structs::AddressMode;
 use crate::cpu::Cpu;
+use crate::emu;
 
 impl Cpu {
 
@@ -41,6 +42,142 @@ impl Cpu {
         }
 
         self.registers.set_reg(self.cpu_ctx.instruction.register_1, self.cpu_ctx.fetched_data)
+    }
+
+    const RT_LOOKUP: [RegisterType; 8] = [
+        RegisterType::B,
+        RegisterType::C,
+        RegisterType::D,
+        RegisterType::E,
+        RegisterType::H,
+        RegisterType::L,
+        RegisterType::HL,
+        RegisterType::A
+    ];
+
+    fn decode_reg(reg: u8) -> RegisterType {
+        if reg > 0b111 {
+            RegisterType::None
+        } else {
+            Self::RT_LOOKUP[reg as usize]
+        }
+    }
+
+    pub fn cb(&mut self, bus: &mut Bus) {
+        let op: u8 = self.cpu_ctx.fetched_data.try_into().unwrap();
+        let reg: RegisterType = Self::decode_reg(op & 0b111);
+        let bit: u8 = (op >> 3) & 0b111;
+        let bit_op: u8 = (op >> 6) & 0b11;
+        let mut reg_val: u8 = self.registers.read_8(bus, reg);
+
+        self.emu_cycles(1);
+
+        if let RegisterType::HL = reg {
+            self.emu_cycles(2);
+        }
+
+        match bit_op {
+            1 => {
+                self.registers.set_z((reg_val & (1 << bit)) == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(true);
+                return;
+            },
+            2 => {
+                reg_val &= !(1 << bit);
+                self.registers.set_reg_8(bus, reg, reg_val);
+                return;
+            }
+            3 => {
+                reg_val |= 1 << bit;
+                self.registers.set_reg_8(bus, reg, reg_val);
+                return;
+            }
+            _ => {}
+        }
+
+
+
+        let c_flag: bool = self.registers.get_c();
+
+        match bit {
+            0 => {
+                let set_c = (reg_val & (1 << 7)) != 0;
+                let result = (reg_val << 1) & 0xFF;
+                let result = if set_c { result | 1 } else { result };
+                self.registers.set_reg_8(bus, reg, result);
+
+                self.registers.set_z(result == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c(set_c);
+            },
+            1 => {
+
+                let old = reg_val;
+                reg_val = (reg_val >> 1) | (old << 7);
+                self.registers.set_reg_8(bus, reg, reg_val);
+                self.registers.set_z(reg_val == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c(old & 1 != 0);
+            },
+            2 => {
+                let old = reg_val;
+                reg_val = (reg_val << 1) | (if c_flag { 1 } else { 0 });
+                self.registers.set_reg_8(bus, reg, reg_val);
+                self.registers.set_z(reg_val == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c((old & 0x80) != 0);
+            },
+            3 => {
+                let old = reg_val;
+                reg_val = (reg_val >> 1) | (if c_flag { 0x80 } else { 0 });
+                self.registers.set_reg_8(bus, reg, reg_val);
+                self.registers.set_z(reg_val == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c(old & 1 != 0);
+            },
+            4 => {
+                let old = reg_val;
+                reg_val <<= 1;
+                self.registers.set_reg_8(bus, reg, reg_val);
+                self.registers.set_z(reg_val == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c((old & 0x80) != 0);
+            },
+            5 => {
+
+                let u = ((reg_val as i8) >> 1) as u8;
+                self.registers.set_reg_8(bus, reg, u);
+                self.registers.set_z(u == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c(reg_val & 1 != 0);
+
+            },
+            6 => {
+                reg_val = ((reg_val & 0xF0) >> 4) | ((reg_val & 0xF) << 4);
+                self.registers.set_reg_8(bus, reg, reg_val);
+                self.registers.set_z(reg_val == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c(false);
+            },
+            7 => {
+                let u = reg_val >> 1;
+                self.registers.set_reg_8(bus, reg, u);
+                self.registers.set_z(u == 0);
+                self.registers.set_n(false);
+                self.registers.set_h(false);
+                self.registers.set_c(reg_val & 1 != 0);
+            },
+            _ => unreachable!(),
+        }
+
     }
 
     pub fn push(&mut self, bus: &mut Bus) {
