@@ -69,7 +69,6 @@ pub enum InstructionName {
     Jp,
     Push,
     Ret,
-    Cb,
     Call,
     Reti,
     Ldh,
@@ -88,7 +87,8 @@ pub enum InstructionName {
     Srl,
     Bit, 
     Res, 
-    Set
+    Set,
+    CB,
 }
 
 #[derive(Clone,Copy,Debug)]
