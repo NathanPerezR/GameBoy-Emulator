@@ -78,7 +78,7 @@ impl Bus {
     pub fn write(&mut self, address: u16, value: u8) {
 
         if address < 0x8000 {
-            // cart.cart_write(address, value);
+            self.cart.cart_write(address, value);
         }
         else if address < 0xA000 {
             // char / map data
@@ -107,7 +107,7 @@ impl Bus {
             // cpu_get_ie_register();
         }
         else {
-            return self.ram.hram_read(address);
+            self.ram.hram_write(address, value);
         }
 
         //TODO
