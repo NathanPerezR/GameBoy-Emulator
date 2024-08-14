@@ -6,11 +6,14 @@ mod emu;
 mod ppu;
 mod ram;
 use std::env;
+mod ui;
 use std::path::Path;
 use emu::EmuContext;
+use std::sync::{Arc, Mutex,atomic::AtomicBool};
 
 fn main() {
-    let mut emu: EmuContext = EmuContext::default();
+    let emu = Arc::new(Mutex::new(EmuContext::default())); 
+    let stop_flag = Arc::new(AtomicBool::new(false));
 
     // Get the command-line arguments
     let args: Vec<String> = env::args().collect();
@@ -33,5 +36,5 @@ fn main() {
         return;
     }
 
-    emu.emu_run(rom_path.to_str().expect(""));
+    emu::EmuContext::emu_run(Arc::clone(&emu), rom_path.to_str().expect(""), Arc::clone(&stop_flag));
 }
