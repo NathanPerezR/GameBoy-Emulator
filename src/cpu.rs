@@ -5,7 +5,6 @@ mod structs;
 mod cpu_fetch;
 use crate::cpu::register::RegisterType;
 use crate::bus::Bus;
-use crate::cart::Cart;
 use crate::util::nth_bit;
 use crate::cpu::structs::{AddressMode, ConditionType, Instruction};
 
