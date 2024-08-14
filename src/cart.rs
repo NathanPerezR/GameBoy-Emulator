@@ -66,7 +66,6 @@ impl Cart {
         self.cart_ctx.rom_data[address as usize]
     }
 
-    //TODO: remove bool and return statement, make write to arrays of memory
     pub fn cart_write(&mut self, address: u16, value: u8) -> bool {
         false
     }
