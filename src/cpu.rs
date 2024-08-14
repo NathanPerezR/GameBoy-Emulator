@@ -3,6 +3,7 @@ mod register;
 mod modes;
 mod structs;
 mod cpu_fetch;
+mod interrupts;
 use crate::cpu::register::RegisterType;
 use crate::bus::Bus;
 use crate::util::nth_bit;
@@ -24,7 +25,9 @@ struct CpuContext {
     halted: bool, 
     stepping: bool,
     int_master_enabled: bool,
-    enable_ime: bool
+    enable_ime: bool,
+    interrupt_flag: u8,
+    ie_register: u8,
 }
 
 impl Cpu {
@@ -75,6 +78,23 @@ impl Cpu {
                 );
             self.execute(bus);
 
+        }
+        else {
+            self.emu_cycles(1);
+
+            if self.cpu_ctx.interrupt_flag != 0 {
+                self.cpu_ctx.enable_ime = false;
+            }
+
+        }
+
+        if self.cpu_ctx.int_master_enabled {
+            self.handle_interrupt(bus);
+            self.cpu_ctx.enable_ime = false;
+        }
+
+        if self.cpu_ctx.enable_ime {
+            self.cpu_ctx.int_master_enabled = true;
         }
         true
     }
