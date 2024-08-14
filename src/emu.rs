@@ -8,7 +8,6 @@ pub struct EmuContext {
     pub running: bool,
     pub paused: bool,
     pub ticks: u64,
-    pub die: bool,
 
     pub cpu: Cpu,
     pub bus: Bus,
@@ -20,7 +19,6 @@ impl Default for EmuContext {
             running: true,
             paused: false,
             ticks: 0,
-            die: false,
             cpu: Cpu::default(),
             bus: Bus::default(),
         } 

@@ -43,6 +43,7 @@ impl Bus {
         }
         else if address < 0xA000 {
             // char / map data
+            todo!()
         }
         else if address < 0xC00 {
             // Cart Ram
@@ -58,14 +59,17 @@ impl Bus {
         }
         else if address < 0xFEA0 {
             // OAM 
+            todo!()
         }
         else if address < 0xFF00 {
             // reserved 
         }
         else if address < 0xFF80 {
             // IO Registers 
+            todo!()
         }
         else if address == 0xFFFF {
+            //        TOOD: NEED TO FIGURE THIS OUT
     //        cpu_get_ie_register();
         }
         else {
