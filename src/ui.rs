@@ -6,6 +6,7 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use std::time::Duration;
+use crate::EmuContext;
 
 pub struct Ui {
     sdl_context: sdl2::Sdl,
@@ -38,7 +39,7 @@ impl Ui {
         ::std::thread::sleep(Duration::from_millis(ms.into()));
     }
 
-    pub fn handle_events(&self) {
+    pub fn handle_events(&mut self) {
         let mut event_pump = self.sdl_context.event_pump().expect("Failed to get event pump");
         for event in event_pump.poll_iter() {
             match event {
@@ -63,18 +64,5 @@ impl Ui {
         self.canvas.clear();
         // Drawing code goes here
         self.canvas.present();
-    }
-}
-
-fn main() {
-    const SCREEN_WIDTH: u32 = 800;
-    const SCREEN_HEIGHT: u32 = 600;
-
-    let mut ui = Ui::new(SCREEN_WIDTH, SCREEN_HEIGHT).expect("Failed to initialize UI");
-
-    'running: loop {
-        ui.handle_events();
-        ui.render();
-        ui.delay(16); // Roughly 60 FPS
     }
 }

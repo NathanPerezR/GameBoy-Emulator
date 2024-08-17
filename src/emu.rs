@@ -1,5 +1,6 @@
 use crate::cpu::Cpu;
 use crate::bus::Bus;
+use crate::ui::Ui;
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::time::Duration;
 use std::thread;
@@ -62,6 +63,8 @@ impl EmuContext {
         let stop_flag_clone = Arc::clone(&stop_flag);
         let emu_context_clone = Arc::clone(&emu_context);
 
+        let mut ui = Ui::new(800, 800).expect("Failed to initialize UI");
+
         let cpu_thread = thread::spawn(move || {
             let mut emu = emu_context_clone.lock().unwrap();
             while !stop_flag_clone.load(Ordering::Relaxed) {
@@ -69,11 +72,12 @@ impl EmuContext {
             }
         });
 
-        drop(emu); // Release the lock on emu_context before the main thread continues
+        drop(emu); 
 
         while !stop_flag.load(Ordering::Relaxed) {
             thread::sleep(Duration::from_millis(1000));
-            // UI HERE
+            ui.handle_events();
+            ui.render();
         }
 
         stop_flag.store(true, Ordering::Relaxed);
