@@ -1,6 +1,6 @@
 use crate::util::*;
 use crate::bus::Bus;
-
+use crate::cpu::Cpu;
 
 #[derive(Clone, Copy, Debug)]
 pub struct RegisterData {
@@ -54,7 +54,7 @@ pub enum RegisterType {
     SP,
 }
 
-impl RegisterData {
+impl Cpu {
     
     pub fn read(&self, register_type: RegisterType) -> u16 {
         use RegisterType::*;
@@ -162,7 +162,7 @@ impl RegisterData {
             F => self.f = value,
             H => self.h = value,
             L => self.l = value,
-            HL => bus.write(self.read(HL), value), 
+            HL => bus.write(self.read(HL), value, self), 
             _ => unreachable!(),
         }
     }
@@ -180,7 +180,7 @@ impl RegisterData {
             F => return self.f,
             H => return self.h,
             L => return self.l,
-            HL => bus.read(self.read(HL)), 
+            HL => bus.read(self.read(HL), *self), 
             _ => unreachable!(),
         }
     }

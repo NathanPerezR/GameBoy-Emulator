@@ -13,11 +13,11 @@ impl Cpu {
             use RegisterType::*;
             match self.cpu_ctx.instruction.register_2 {
                 A | B | C | D | E | L | F | H => {
-                    bus.write(self.cpu_ctx.mem_dest, self.cpu_ctx.fetched_data as u8);   
+                    bus.write(self.cpu_ctx.mem_dest, self.cpu_ctx.fetched_data as u8, self);   
                 },
                 AF | BC | DE | HL | PC | SP => {
                     self.emu_cycles(1);
-                    bus.write16(self.cpu_ctx.mem_dest, self.cpu_ctx.fetched_data);
+                    bus.write16(self.cpu_ctx.mem_dest, self.cpu_ctx.fetched_data, self);
                 },
                 _ => println!("Error, none selected")
             }
@@ -25,23 +25,23 @@ impl Cpu {
         }
 
         if let AddressMode::HlSpr = self.cpu_ctx.instruction.mode {
-            let h_flag: bool = (self.registers.read(self.cpu_ctx.instruction.register_2) & 0xF).wrapping_add 
+            let h_flag: bool = (self.read(self.cpu_ctx.instruction.register_2) & 0xF).wrapping_add 
                 (self.cpu_ctx.fetched_data & 0xF) >= 0x10;
-            let c_flag: bool = (self.registers.read(self.cpu_ctx.instruction.register_2) & 0xFF).wrapping_add
+            let c_flag: bool = (self.read(self.cpu_ctx.instruction.register_2) & 0xFF).wrapping_add
                 (self.cpu_ctx.fetched_data & 0xFF) >= 0x100;
             
-            self.registers.set_z(false);
-            self.registers.set_n(false);
-            self.registers.set_h(h_flag);
-            self.registers.set_c(c_flag);
+            self.set_z(false);
+            self.set_n(false);
+            self.set_h(h_flag);
+            self.set_c(c_flag);
 
-            let value_reg_2 = self.registers.read(self.cpu_ctx.instruction.register_2);
+            let value_reg_2 = self.read(self.cpu_ctx.instruction.register_2);
             let new_value = value_reg_2.wrapping_add(self.cpu_ctx.fetched_data);
-            self.registers.set_reg(self.cpu_ctx.instruction.register_1, new_value);
+            self.set_reg(self.cpu_ctx.instruction.register_1, new_value);
             return;
         }
 
-        self.registers.set_reg(self.cpu_ctx.instruction.register_1, self.cpu_ctx.fetched_data)
+        self.set_reg(self.cpu_ctx.instruction.register_1, self.cpu_ctx.fetched_data)
     }
 
     const RT_LOOKUP: [RegisterType; 8] = [
@@ -68,7 +68,7 @@ impl Cpu {
         let reg: RegisterType = Self::decode_reg(op & 0b111);
         let bit: u8 = (op >> 3) & 0b111;
         let bit_op: u8 = (op >> 6) & 0b11;
-        let mut reg_val: u8 = self.registers.read_8(bus, reg);
+        let mut reg_val: u8 = self.read_8(bus, reg);
 
         self.emu_cycles(1);
 
@@ -78,19 +78,19 @@ impl Cpu {
 
         match bit_op {
             1 => {
-                self.registers.set_z((reg_val & (1 << bit)) == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(true);
+                self.set_z((reg_val & (1 << bit)) == 0);
+                self.set_n(false);
+                self.set_h(true);
                 return;
             },
             2 => {
                 reg_val &= !(1 << bit);
-                self.registers.set_reg_8(bus, reg, reg_val);
+                self.set_reg_8(bus, reg, reg_val);
                 return;
             }
             3 => {
                 reg_val |= 1 << bit;
-                self.registers.set_reg_8(bus, reg, reg_val);
+                self.set_reg_8(bus, reg, reg_val);
                 return;
             }
             _ => {}
@@ -98,82 +98,82 @@ impl Cpu {
 
 
 
-        let c_flag: bool = self.registers.get_c();
+        let c_flag: bool = self.get_c();
 
         match bit {
             0 => {
                 let set_c = (reg_val & (1 << 7)) != 0;
                 let result = (reg_val << 1) & 0xFF;
                 let result = if set_c { result | 1 } else { result };
-                self.registers.set_reg_8(bus, reg, result);
+                self.set_reg_8(bus, reg, result);
 
-                self.registers.set_z(result == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c(set_c);
+                self.set_z(result == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c(set_c);
             },
             1 => {
 
                 let old = reg_val;
                 reg_val = (reg_val >> 1) | (old << 7);
-                self.registers.set_reg_8(bus, reg, reg_val);
-                self.registers.set_z(reg_val == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c(old & 1 != 0);
+                self.set_reg_8(bus, reg, reg_val);
+                self.set_z(reg_val == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c(old & 1 != 0);
             },
             2 => {
                 let old = reg_val;
                 reg_val = (reg_val << 1) | (if c_flag { 1 } else { 0 });
-                self.registers.set_reg_8(bus, reg, reg_val);
-                self.registers.set_z(reg_val == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c((old & 0x80) != 0);
+                self.set_reg_8(bus, reg, reg_val);
+                self.set_z(reg_val == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c((old & 0x80) != 0);
             },
             3 => {
                 let old = reg_val;
                 reg_val = (reg_val >> 1) | (if c_flag { 0x80 } else { 0 });
-                self.registers.set_reg_8(bus, reg, reg_val);
-                self.registers.set_z(reg_val == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c(old & 1 != 0);
+                self.set_reg_8(bus, reg, reg_val);
+                self.set_z(reg_val == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c(old & 1 != 0);
             },
             4 => {
                 let old = reg_val;
                 reg_val <<= 1;
-                self.registers.set_reg_8(bus, reg, reg_val);
-                self.registers.set_z(reg_val == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c((old & 0x80) != 0);
+                self.set_reg_8(bus, reg, reg_val);
+                self.set_z(reg_val == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c((old & 0x80) != 0);
             },
             5 => {
 
                 let u = ((reg_val as i8) >> 1) as u8;
-                self.registers.set_reg_8(bus, reg, u);
-                self.registers.set_z(u == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c(reg_val & 1 != 0);
+                self.set_reg_8(bus, reg, u);
+                self.set_z(u == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c(reg_val & 1 != 0);
 
             },
             6 => {
                 reg_val = ((reg_val & 0xF0) >> 4) | ((reg_val & 0xF) << 4);
-                self.registers.set_reg_8(bus, reg, reg_val);
-                self.registers.set_z(reg_val == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c(false);
+                self.set_reg_8(bus, reg, reg_val);
+                self.set_z(reg_val == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c(false);
             },
             7 => {
                 let u = reg_val >> 1;
-                self.registers.set_reg_8(bus, reg, u);
-                self.registers.set_z(u == 0);
-                self.registers.set_n(false);
-                self.registers.set_h(false);
-                self.registers.set_c(reg_val & 1 != 0);
+                self.set_reg_8(bus, reg, u);
+                self.set_z(u == 0);
+                self.set_n(false);
+                self.set_h(false);
+                self.set_c(reg_val & 1 != 0);
             },
             _ => unreachable!(),
         }
@@ -182,11 +182,11 @@ impl Cpu {
 
     pub fn push(&mut self, bus: &mut Bus) {
 
-        let hi = ((self.registers.read(self.cpu_ctx.instruction.register_1) >> 8) & 0xFF) as u8;
+        let hi = ((self.read(self.cpu_ctx.instruction.register_1) >> 8) & 0xFF) as u8;
         self.emu_cycles(1);
         self.stack_push(bus, hi);
 
-        let lo = (self.registers.read(self.cpu_ctx.instruction.register_1) & 0xFF) as u8;
+        let lo = (self.read(self.cpu_ctx.instruction.register_1) & 0xFF) as u8;
         self.emu_cycles(1);
         self.stack_push(bus, lo);
 
@@ -215,21 +215,21 @@ impl Cpu {
     pub fn adc(&mut self, _bus: &mut Bus) {
         
         let u = self.cpu_ctx.fetched_data;
-        let a = self.registers.a;
-        let c_flag = self.registers.get_c();
+        let a = self.a;
+        let c_flag = self.get_c();
 
         let sum = a as u16 + u + (if c_flag {1} else {0});
-        self.registers.a = sum as u8;
+        self.a = sum as u8;
         
-        self.registers.set_z(self.registers.a == 0);
-        self.registers.set_n(false);
-        self.registers.set_h((a & 0xF) + (u & 0xF) as u8 + (if c_flag {1} else {0}) > 0xF);
-        self.registers.set_c(sum > 0xFF);
+        self.set_z(self.a == 0);
+        self.set_n(false);
+        self.set_h((a & 0xF) + (u & 0xF) as u8 + (if c_flag {1} else {0}) > 0xF);
+        self.set_c(sum > 0xFF);
 
     }
 
     pub fn sub(&mut self, _bus: &mut Bus) {
-        let reg_value = self.registers.read(self.cpu_ctx.instruction.register_1);
+        let reg_value = self.read(self.cpu_ctx.instruction.register_1);
         let fetched_value = self.cpu_ctx.fetched_data;
 
         let val = reg_value.wrapping_sub(fetched_value);
@@ -238,74 +238,74 @@ impl Cpu {
         let h = ((reg_value & 0xF) as i16) - ((fetched_value & 0xF) as i16) < 0;
         let c = (reg_value as i16) - (fetched_value as i16) < 0;
 
-        self.registers.set_z(z);
-        self.registers.set_n(true);
-        self.registers.set_h(h);
-        self.registers.set_c(c);
+        self.set_z(z);
+        self.set_n(true);
+        self.set_h(h);
+        self.set_c(c);
     }
 
     // TODO: FIX THIS 
     pub fn sbc(&mut self, _bus: &mut Bus) {
 
-        let old_carry_flag = if self.registers.get_c() {1} else {0};
+        let old_carry_flag = if self.get_c() {1} else {0};
         let val: u8 = (self.cpu_ctx.fetched_data as u8).wrapping_add(old_carry_flag);
 
-        let z = (self.registers.read(self.cpu_ctx.instruction.register_1) as u8).wrapping_sub(val) == 0;
-        let h = ((self.registers.read(self.cpu_ctx.instruction.register_1) & 0xF) as i16)
+        let z = (self.read(self.cpu_ctx.instruction.register_1) as u8).wrapping_sub(val) == 0;
+        let h = ((self.read(self.cpu_ctx.instruction.register_1) & 0xF) as i16)
             .wrapping_sub((self.cpu_ctx.fetched_data & 0xF) as i16)
             .wrapping_sub(old_carry_flag as i16) < 0;
 
-        let c = (self.registers.read(self.cpu_ctx.instruction.register_1) as i16)
+        let c = (self.read(self.cpu_ctx.instruction.register_1) as i16)
             .wrapping_sub(self.cpu_ctx.fetched_data as i16)
             .wrapping_sub(old_carry_flag as i16) < 0;
 
-        self.registers.set_z(z);
-        self.registers.set_n(true);
-        self.registers.set_h(h);
-        self.registers.set_c(c);
+        self.set_z(z);
+        self.set_n(true);
+        self.set_h(h);
+        self.set_c(c);
     } 
 
     pub fn and(&mut self, _bus: &mut Bus) {
 
-        self.registers.a &= self.cpu_ctx.fetched_data as u8;
-        self.registers.set_z(self.registers.a == 0);
-        self.registers.set_n(false);
-        self.registers.set_h(false);
-        self.registers.set_c(false);
+        self.a &= self.cpu_ctx.fetched_data as u8;
+        self.set_z(self.a == 0);
+        self.set_n(false);
+        self.set_h(false);
+        self.set_c(false);
     }
 
     pub fn or(&mut self, _bus: &mut Bus) {
     
-        self.registers.a |= (self.cpu_ctx.fetched_data & 0xFF) as u8;
-        self.registers.set_z(self.registers.a == 0);
-        self.registers.set_n(false);
-        self.registers.set_h(false);
-        self.registers.set_c(false);
+        self.a |= (self.cpu_ctx.fetched_data & 0xFF) as u8;
+        self.set_z(self.a == 0);
+        self.set_n(false);
+        self.set_h(false);
+        self.set_c(false);
 
     }
  
     pub fn xor_8(&mut self, _bus: &mut Bus) {
-        self.registers.a ^= self.cpu_ctx.fetched_data as u8;
-        self.registers.set_z(self.registers.a == 0);
-        self.registers.set_n(false);
-        self.registers.set_h(false);
-        self.registers.set_c(false);
+        self.a ^= self.cpu_ctx.fetched_data as u8;
+        self.set_z(self.a == 0);
+        self.set_n(false);
+        self.set_h(false);
+        self.set_c(false);
     } 
 
     pub fn cp(&mut self, _bus: &mut Bus) {
 
-        let n = (self.registers.a as i16).wrapping_sub(self.cpu_ctx.fetched_data as i16);
+        let n = (self.a as i16).wrapping_sub(self.cpu_ctx.fetched_data as i16);
         
-        self.registers.set_z(n == 0);
-        self.registers.set_n(true);
-        self.registers.set_h( (self.registers.a as i16 & 0x0F).wrapping_sub(self.cpu_ctx.fetched_data as i16 & 0x0F) < 0 );
-        self.registers.set_c(n < 0);
+        self.set_z(n == 0);
+        self.set_n(true);
+        self.set_h( (self.a as i16 & 0x0F).wrapping_sub(self.cpu_ctx.fetched_data as i16 & 0x0F) < 0 );
+        self.set_c(n < 0);
 
     }
     
     pub fn inc(&mut self, bus: &mut Bus) {
         
-        let mut val = self.registers.read(self.cpu_ctx.instruction.register_1) + 1;
+        let mut val = self.read(self.cpu_ctx.instruction.register_1) + 1;
 
         if is_16_bit(self.cpu_ctx.instruction.register_1) {
             self.emu_cycles(1);
@@ -313,34 +313,34 @@ impl Cpu {
 
         if let RegisterType::HL = self.cpu_ctx.instruction.register_1 {
             if let AddressMode::Mr = self.cpu_ctx.instruction.mode {
-                let address = self.registers.read(RegisterType::HL);
-                val = bus.read(address) as u16 + 1;
+                let address = self.read(RegisterType::HL);
+                val = bus.read(address, *self) as u16 + 1;
                 val &= 0xFF;
-                bus.write(self.registers.read(RegisterType::HL), val as u8);
+                bus.write(self.read(RegisterType::HL), val as u8, self);
             } 
         }
         else {
-            self.registers.set_reg(self.cpu_ctx.instruction.register_1, val);
-            val = self.registers.read(self.cpu_ctx.instruction.register_1);
+            self.set_reg(self.cpu_ctx.instruction.register_1, val);
+            val = self.read(self.cpu_ctx.instruction.register_1);
         }
 
         if self.cpu_ctx.current_opcode & 0x03 == 0x03 {
             return;
         }
 
-        self.registers.set_z(val == 0);
-        self.registers.set_n(false);
-        self.registers.set_h((val & 0x0F) == 0);
+        self.set_z(val == 0);
+        self.set_n(false);
+        self.set_h((val & 0x0F) == 0);
 
     }
 
     pub fn ldh(&mut self, bus: &mut Bus) {
         
         if let RegisterType::A = self.cpu_ctx.instruction.register_1{
-            self.registers.set_reg(self.cpu_ctx.instruction.register_1, bus.read(0xFF00 & self.cpu_ctx.fetched_data) as u16);
+            self.set_reg(self.cpu_ctx.instruction.register_1, bus.read(0xFF00 & self.cpu_ctx.fetched_data, *self) as u16);
         }
         else {
-            bus.write(self.cpu_ctx.mem_dest, self.registers.a)
+            bus.write(self.cpu_ctx.mem_dest, self.a, self);
         }
 
         self.emu_cycles(1);
@@ -348,7 +348,7 @@ impl Cpu {
  
     pub fn dec(&mut self, bus: &mut Bus) {
         
-        let reg_value = self.registers.read(self.cpu_ctx.instruction.register_1);
+        let reg_value = self.read(self.cpu_ctx.instruction.register_1);
         let mut val = reg_value.wrapping_sub(1);
     
         if is_16_bit(self.cpu_ctx.instruction.register_1) {
@@ -357,70 +357,70 @@ impl Cpu {
 
         if let RegisterType::HL = self.cpu_ctx.instruction.register_1 {
             if let AddressMode::Mr = self.cpu_ctx.instruction.mode {
-                let address = self.registers.read(RegisterType::HL);
-                let current_value = bus.read(address);
+                let address = self.read(RegisterType::HL);
+                let current_value = bus.read(address, *self);
                 let new_value = current_value.wrapping_sub(1); 
-                bus.write(address, new_value);
+                bus.write(address, new_value, self);
             }
         }
         else {
-            self.registers.set_reg(self.cpu_ctx.instruction.register_1, val);
-            val = self.registers.read(self.cpu_ctx.instruction.register_1);
+            self.set_reg(self.cpu_ctx.instruction.register_1, val);
+            val = self.read(self.cpu_ctx.instruction.register_1);
         }
 
         if self.cpu_ctx.current_opcode & 0x0B == 0x0B {
             return;
         }
 
-        self.registers.set_z(val == 0);
-        self.registers.set_n(true);
-        self.registers.set_h((val & 0x0F) == 0x0F);
+        self.set_z(val == 0);
+        self.set_n(true);
+        self.set_h((val & 0x0F) == 0x0F);
     } 
 
     pub fn daa(&mut self, _bus: &mut Bus) {
 
-        let a = self.registers.a;
+        let a = self.a;
 
-        if !self.registers.get_n() {
-            if self.registers.get_c() || a > 0x99 {
-                self.registers.a = a.wrapping_add(0x60);
-                self.registers.set_c(true);
+        if !self.get_n() {
+            if self.get_c() || a > 0x99 {
+                self.a = a.wrapping_add(0x60);
+                self.set_c(true);
             }
-            if self.registers.get_h() || (a & 0xF) > 0x09 {
-                self.registers.a = self.registers.a.wrapping_sub(0x06);
+            if self.get_h() || (a & 0xF) > 0x09 {
+                self.a = self.a.wrapping_sub(0x06);
             }
         }
         else {
-            if self.registers.get_c() {
-                self.registers.a = self.registers.a.wrapping_sub(0x60)
+            if self.get_c() {
+                self.a = self.a.wrapping_sub(0x60)
             }
-            if self.registers.get_h() {
-                self.registers.a = self.registers.a.wrapping_sub(0x06);  
+            if self.get_h() {
+                self.a = self.a.wrapping_sub(0x06);  
             }
         }
 
-        self.registers.set_z(self.registers.a == 0);
-        self.registers.set_h(false);
+        self.set_z(self.a == 0);
+        self.set_h(false);
     }
 
     pub fn cpl(&mut self, _bus: &mut Bus) {
-        self.registers.a = !self.registers.a;
+        self.a = !self.a;
 
-        self.registers.set_n(true); 
-        self.registers.set_h(true);
+        self.set_n(true); 
+        self.set_h(true);
     }
 
     pub fn ccf(&mut self, _bus: &mut Bus) {
-        let c_flag = self.registers.get_c();
-        self.registers.set_n(false); 
-        self.registers.set_h(false); 
-        self.registers.set_c(c_flag ^ true); 
+        let c_flag = self.get_c();
+        self.set_n(false); 
+        self.set_h(false); 
+        self.set_c(c_flag ^ true); 
     }
 
     pub fn scf(&mut self, _bus: &mut Bus) {
-        self.registers.set_n(false); 
-        self.registers.set_h(false); 
-        self.registers.set_c(true); 
+        self.set_n(false); 
+        self.set_h(false); 
+        self.set_c(true); 
     }
 
     pub fn nop(&mut self, _bus: &mut Bus) {
@@ -450,62 +450,62 @@ impl Cpu {
 
     pub fn rlca(&mut self, _bus: &mut Bus) {
         
-        let a = self.registers.a;   
+        let a = self.a;   
         let c = ((a >> 7) & 1) != 0;
         let a = (a << 1) | if c {1} else {0};
-        self.registers.a = a;
+        self.a = a;
 
-        self.registers.set_z(false); 
-        self.registers.set_n(false); 
-        self.registers.set_h(false); 
-        self.registers.set_c(c); 
+        self.set_z(false); 
+        self.set_n(false); 
+        self.set_h(false); 
+        self.set_c(c); 
 
     }
 
     pub fn rla(&mut self, _bus: &mut Bus) {
         
-        let copy_of_a = self.registers.a;
-        let c_flag = self.registers.get_c();
+        let copy_of_a = self.a;
+        let c_flag = self.get_c();
         let new_c_flag = (copy_of_a >> 7) & 1 != 0; 
         
-        self.registers.a = (copy_of_a << 1) | if c_flag {1} else {0};
+        self.a = (copy_of_a << 1) | if c_flag {1} else {0};
         
-        self.registers.set_z(false); 
-        self.registers.set_n(false); 
-        self.registers.set_h(false); 
-        self.registers.set_c(new_c_flag); 
+        self.set_z(false); 
+        self.set_n(false); 
+        self.set_h(false); 
+        self.set_c(new_c_flag); 
     }
 
     pub fn rrca(&mut self, _bus: &mut Bus) {
         
-        let lo_a = self.registers.a & 1;
+        let lo_a = self.a & 1;
         
-        self.registers.a >>= 1;
-        self.registers.a |= lo_a << 7;
+        self.a >>= 1;
+        self.a |= lo_a << 7;
 
-        self.registers.set_z(false); 
-        self.registers.set_n(false); 
-        self.registers.set_h(false); 
-        self.registers.set_c(lo_a != 0); 
+        self.set_z(false); 
+        self.set_n(false); 
+        self.set_h(false); 
+        self.set_c(lo_a != 0); 
     }
 
     pub fn rra(&mut self, _bus: &mut Bus) {
         
-        let c_flag = self.registers.get_c();
-        let new_c_flag = (self.registers.a & 1) == 1;
+        let c_flag = self.get_c();
+        let new_c_flag = (self.a & 1) == 1;
 
-        self.registers.a >>= 1;
+        self.a >>= 1;
         if c_flag {
-            self.registers.a |= 0b1000_0000;
+            self.a |= 0b1000_0000;
         }
         else {
-            self.registers.a &= 0b0111_1111;
+            self.a &= 0b0111_1111;
         }
 
-        self.registers.set_z(false); 
-        self.registers.set_n(false); 
-        self.registers.set_h(false); 
-        self.registers.set_c(new_c_flag); 
+        self.set_z(false); 
+        self.set_n(false); 
+        self.set_h(false); 
+        self.set_c(new_c_flag); 
     }
 
     pub fn jp(&mut self, bus: &mut Bus) {
@@ -514,7 +514,7 @@ impl Cpu {
 
     pub fn jr(&mut self, bus: &mut Bus) {
         let relitive_jump_amount = self.cpu_ctx.fetched_data  as i8;
-        let address = self.registers.pc.wrapping_add(relitive_jump_amount as u16);
+        let address = self.pc.wrapping_add(relitive_jump_amount as u16);
         self.goto_address(bus, address, false)
     }
 
@@ -540,7 +540,7 @@ impl Cpu {
             self.emu_cycles(1);
 
             let n: u16 = (hi << 8 ) | lo;
-            self.registers.pc = n;
+            self.pc = n;
             self.emu_cycles(1);
         }
 
@@ -558,10 +558,10 @@ impl Cpu {
     fn goto_address(&mut self, bus: &mut Bus, address: u16, pushpc: bool) {
         if self.check_cond() && pushpc {
             self.emu_cycles(2);
-            self.stack_push16(bus, self.registers.pc);
+            self.stack_push16(bus, self.pc);
         }
 
-        self.registers.pc = address;
+        self.pc = address;
         self.emu_cycles(1);
     }
 }

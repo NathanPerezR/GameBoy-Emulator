@@ -1,6 +1,7 @@
 use crate::ppu::Ppu;
 use crate::cart::Cart;
 use crate::ram::Ram;
+use crate::cpu::Cpu;
 
 // the following memory map info is from the gbdev.io pandocs
 //
@@ -37,7 +38,7 @@ impl Default for Bus {
 
 impl Bus {
 
-    pub fn read(&mut self, address: u16) -> u8 {
+    pub fn read(&mut self, address: u16, cpu: Cpu) -> u8 {
         if address < 0x8000 {
             return self.cart.cart_read(address);
         }
@@ -69,8 +70,7 @@ impl Bus {
             todo!()
         }
         else if address == 0xFFFF {
-            //        TOOD: NEED TO FIGURE THIS OUT
-    //        cpu_get_ie_register();
+            cpu.get_ie_register();
         }
         else {
     //        return hram_read(address);
@@ -79,7 +79,7 @@ impl Bus {
         0
     }
 
-    pub fn write(&mut self, address: u16, value: u8) {
+    pub fn write(&mut self, address: u16, value: u8, cpu: &mut Cpu) {
 
         if address < 0x8000 {
             self.cart.cart_write(address, value);
@@ -108,7 +108,7 @@ impl Bus {
             // IO Registers 
         }
         else if address == 0xFFFF {
-            // cpu_get_ie_register();
+            cpu.set_ie_register(value);
         }
         else {
             self.ram.hram_write(address, value);
@@ -117,20 +117,20 @@ impl Bus {
         //TODO
     }
 
-    pub fn read16(&mut self, address: u16) -> u16 {
-        let lo: u16 = self.read(address) as u16;
-        let hi: u16 = self.read(address) as u16;
+    pub fn read16(&mut self, address: u16, cpu: &mut Cpu) -> u16 {
+        let lo: u16 = self.read(address, *cpu) as u16;
+        let hi: u16 = self.read(address, *cpu) as u16;
 
         lo | (hi << 8)
     }
 
-    pub fn write16(&mut self, address: u16, value: u16) {
+    pub fn write16(&mut self, address: u16, value: u16, cpu: &mut Cpu) {
         
         let lo = (value & 0xFF) as u8;
         let hi = (value >> 8) as u8;
 
-        self.write(address + 1, lo);
-        self.write(address, hi);
+        self.write(address + 1, lo, cpu);
+        self.write(address, hi, cpu);
     }
 }
 

@@ -14,8 +14,8 @@ enum InterruptType {
 impl Cpu {
 
     fn interrupt_handle(&mut self, bus: &mut Bus , address: u16) {
-        self.stack_push16(bus, self.registers.pc);
-        self.registers.pc = address;
+        self.stack_push16(bus, self.pc);
+        self.pc = address;
     }
 
 
