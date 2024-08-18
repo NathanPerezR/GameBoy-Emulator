@@ -126,7 +126,7 @@ impl Cpu {
 
     pub fn stack_push(&mut self, bus: &mut Bus, data: u8) {
         
-        self.sp -= 1;
+        self.sp = self.sp.wrapping_sub(1);
         bus.write(self.sp, data, self); 
 
     }
@@ -138,7 +138,7 @@ impl Cpu {
 
     pub fn stack_pop(&mut self, bus: &mut Bus) -> u8 {
         let popped_value = bus.read(self.sp, *self);
-        self.sp += 1;
+        self.sp = self.sp.wrapping_add(1);
         popped_value
     }
 
