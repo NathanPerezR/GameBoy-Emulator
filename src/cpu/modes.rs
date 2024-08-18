@@ -1392,6 +1392,7 @@ impl Cpu {
             }, 
             0x00 => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Nop;
+                self.cpu_ctx.instruction.mode       = AddressMode::Imp;
                 self.cpu_ctx.instruction.function   = Some(Cpu::nop)
             }, 
             0x76 => {
