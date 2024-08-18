@@ -46,15 +46,15 @@ impl Bus {
         }
         else if address < 0xA000 {
             // char / map data
-            todo!()
+            todo!("char and map data needs to be impl")
         }
         else if address < 0xC00 {
             // Cart Ram
-            return self.cart.cart_read(address)
+            self.cart.cart_read(address)
         }
         else if address < 0xE000 {
             // WRAM (Working Ram) 
-            return self.ram.wram_read(address)
+            self.ram.wram_read(address)
         }
         else if address < 0xFE00 {
             //reserved echo RAM
@@ -62,7 +62,7 @@ impl Bus {
         }
         else if address < 0xFEA0 {
             // OAM 
-            todo!()
+            todo!("OAM needs to be impl")
         }
         else if address < 0xFF00 {
             // reserved 
@@ -75,7 +75,7 @@ impl Bus {
             cpu.get_ie_register()
         }
         else {
-            return self.ram.hram_read(address);
+            self.ram.hram_read(address)
         }
     }
 
@@ -133,94 +133,3 @@ impl Bus {
         self.write(address, hi, cpu);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
