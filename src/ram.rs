@@ -13,13 +13,13 @@ impl Ram {
     }
 
     pub fn wram_read(&mut self, address: u16) -> u8 {
-        address.wrapping_sub(0xC000);
+        let addr = address.wrapping_sub(0xC000);
 
-        if address >= 0x2000 {
+        if addr >= 0x2000 {
             println!("INVALID RAM ADDRESS");
         }
 
-        return self.wram[address as usize];
+        self.wram[addr as usize]
     }
 
 
