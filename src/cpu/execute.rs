@@ -207,9 +207,40 @@ impl Cpu {
 
     pub fn add(&mut self, _bus: &mut Bus) {
 
-        println!("Not Done: add");
-        self.cpu_ctx.halted = true;
-        
+        let mut val: u32 = self.read(self.cpu_ctx.instruction.register_1) as u32 + self.cpu_ctx.fetched_data as u32;
+
+        let is_16bit: bool = is_16_bit(self.cpu_ctx.instruction.register_1);
+
+        if is_16bit {
+            self.emu_cycles(1);
+        }
+
+        if let RegisterType::SP = self.cpu_ctx.instruction.register_1 {
+            val = self.read(self.cpu_ctx.instruction.register_1) as u32 + self.cpu_ctx.fetched_data as i8 as u32;
+        }
+
+        let mut z = (val & 0xFF) == 0; 
+        let mut h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF) + (self.cpu_ctx.fetched_data & 0xF) >= 0x10;
+        let mut c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xF) + (self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100; 
+
+        if is_16bit {
+            z = false;
+            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xFFF) + (self.cpu_ctx.fetched_data & 0xFFF) >= 0x1000;
+            let n = (self.read(self.cpu_ctx.instruction.register_1) as u32) + self.cpu_ctx.fetched_data as u32;
+            c = n >= 0x10000
+        }
+
+        if let RegisterType::SP = self.cpu_ctx.instruction.register_1 {
+            z = false;
+            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF) + (self.cpu_ctx.fetched_data & 0xF) > 0x100;
+            c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF) + (self.cpu_ctx.fetched_data as u32 & 0xFF) > 0x100;
+        }
+
+        self.set_reg(self.cpu_ctx.instruction.register_1, (val & 0xFFFF) as u16);
+        self.set_z(z);
+        self.set_n(false);
+        self.set_h(h);
+        self.set_c(c);
     }
 
     pub fn adc(&mut self, _bus: &mut Bus) {
@@ -235,8 +266,8 @@ impl Cpu {
         let val = reg_value.wrapping_sub(fetched_value);
 
         let z = val == 0;
-        let h = ((reg_value & 0xF) as i16) - ((fetched_value & 0xF) as i16) < 0;
-        let c = (reg_value as i16) - (fetched_value as i16) < 0;
+        let h = ((reg_value & 0xF) as i16).wrapping_sub((fetched_value & 0xF) as i16) < 0;
+        let c = (reg_value as i16).wrapping_sub(fetched_value as i16) < 0;
 
         self.set_z(z);
         self.set_n(true);
