@@ -16,7 +16,7 @@ impl Ram {
         let addr = address.wrapping_sub(0xC000);
 
         if addr >= 0x2000 {
-            println!("INVALID RAM ADDRESS");
+            panic!("INVALID RAM ADDRESS");
         }
 
         self.wram[addr as usize]
