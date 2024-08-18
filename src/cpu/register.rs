@@ -172,14 +172,14 @@ impl Cpu {
         use RegisterType::{A,B,C,D,E,F,H,L,HL};
         match register_type {
 
-            A => return self.a,
-            B => return self.b,
-            C => return self.c,
-            D => return self.d,
-            E => return self.e,
-            F => return self.f,
-            H => return self.h,
-            L => return self.l,
+            A => self.a,
+            B => self.b,
+            C => self.c,
+            D => self.d,
+            E => self.e,
+            F => self.f,
+            H => self.h,
+            L => self.l,
             HL => bus.read(self.read(HL), *self), 
             _ => unreachable!(),
         }
