@@ -3,7 +3,6 @@ use crate::cpu::{RegisterType, ConditionType};
 use crate::cpu::register::is_16_bit;
 use crate::cpu::structs::AddressMode;
 use crate::cpu::Cpu;
-use crate::emu;
 
 impl Cpu {
 
