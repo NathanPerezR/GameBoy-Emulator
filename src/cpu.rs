@@ -79,7 +79,7 @@ impl Cpu {
     }
 
     // TODO: NEED TO DO EMU CYCLES
-    fn emu_cycles(&self, cycle: u8) {
+    fn emu_cycles(&self, _cycle: u8) {
     }
 
     pub fn step(&mut self, bus: &mut Bus) -> bool {
@@ -119,7 +119,7 @@ impl Cpu {
             self.emu_cycles(1);
 
             if self.cpu_ctx.interrupt_flag != 0 {
-                self.cpu_ctx.enable_ime = false;
+                self.cpu_ctx.halted = false;
             }
 
         }

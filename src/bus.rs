@@ -100,6 +100,7 @@ impl Bus {
         }
         else if address < 0xFEA0 {
             // OAM 
+            todo!("OAM write needs to be impl");
         }
         else if address < 0xFF00 {
             // reserved 

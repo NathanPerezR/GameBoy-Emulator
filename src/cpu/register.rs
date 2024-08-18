@@ -77,44 +77,6 @@ impl Cpu {
         } 
     }
 
-
-    pub fn write(&mut self, register_type: RegisterType, value: u16) {
-        use RegisterType::*;
-        match register_type {
-            A => self.a = value as u8,
-            B => self.b = value as u8,
-            C => self.c = value as u8,
-            D => self.d = value as u8,
-            E => self.e = value as u8,
-            F => self.f = value as u8,
-            H => self.h = value as u8,
-            L => self.l = value as u8,
-            AF => {
-                self.a = (value >> 8) as u8;
-                self.f = (value & 0xFF) as u8;
-            },
-            BC => {
-                self.b = (value >> 8) as u8;
-                self.c = (value & 0xFF) as u8;
-            },
-            DE => {
-                self.d = (value >> 8) as u8;
-                self.e = (value & 0xFF) as u8;
-            },
-            HL => {
-                self.h = (value >> 8) as u8;
-                self.l = (value & 0xFF) as u8;
-            },
-            PC => self.pc = value,
-            SP => self.sp = value,
-            None => {}
-        }
-    }
-
-    pub fn reverse(n: u16) -> u16 {
-        ((n & 0xFF00) >> 8) | ((n & 0x00FF) << 8)
-    }
-
     pub fn set_reg(&mut self, rt: RegisterType, val: u16) {
         match rt {
             RegisterType::A => self.a = (val & 0xFF) as u8,
@@ -198,6 +160,7 @@ impl Cpu {
         self.f = bit_set(self.f, 4, c); 
     }                   
 
+    #[allow(dead_code)]
     pub fn get_z(&mut self) -> bool {
         nth_bit(self.f.into(), 7)
     }

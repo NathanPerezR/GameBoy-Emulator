@@ -1,4 +1,4 @@
-use crate::cpu::Cpu;
+use crate::{bus, cpu::Cpu};
 use crate::bus::Bus;
 use crate::ui::Ui;
 use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
@@ -90,6 +90,19 @@ impl EmuContext {
         cpu_thread.join().unwrap();
 
         0
+    }
+
+    pub fn emu_cycles(&mut self, cpu_cycles: u16) {
+        let n: u8 = (cpu_cycles * 4).try_into().unwrap();
+
+        for _ in 0..n {
+            self.ticks += 1;
+            {
+                let mut bus = self.bus.lock().unwrap();
+                bus.io.timer.tick(self.cpu);
+            }
+        }
+
     }
 
 

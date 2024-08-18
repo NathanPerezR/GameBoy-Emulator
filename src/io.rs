@@ -4,7 +4,7 @@ use crate::cpu::Cpu;
 #[derive(Copy, Clone, Default, Debug)]
 pub struct Io {
     serial: [u8; 2],
-    timer: Timer,
+    pub timer: Timer,
 }
 
 impl Io {
