@@ -3,7 +3,7 @@ use crate::bus::Bus;
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
-enum InterruptType {
+pub enum InterruptType {
     VbBlank = 1,
     LcdStat = 2,
     Timer = 4,
