@@ -3,13 +3,14 @@ mod register;
 mod modes;
 mod structs;
 mod cpu_fetch;
-mod interrupts;
+use crate::interrupts::InterruptType;
 use crate::cpu::register::RegisterType;
 use crate::bus::Bus;
 use crate::util::nth_bit;
 use crate::cpu::structs::{AddressMode, ConditionType, Instruction};
+use crate::dbg::Debugger;
 
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug)]
 pub struct Cpu {
     pub cpu_ctx: CpuContext,
     pub a: u8,
@@ -24,19 +25,37 @@ pub struct Cpu {
     pub sp: u16,
 }
 
+impl Default for Cpu {
+    fn default() -> Self {
+        Cpu {
+            cpu_ctx: CpuContext::default(),
+            a: 0xB0,
+            f: 0x01,
+            b: 0x13,
+            c: 0x00,
+            d: 0xD8,
+            e: 0x00,
+            h: 0x4D,
+            l: 0x01,
+            pc: 0x100,
+            sp: 0xFFFE,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default)]
-struct CpuContext {
-    fetched_data: u16,
-    mem_dest: u16,
-    dest_is_mem: bool,
-    current_opcode: u8,
-    instruction: Instruction,
-    halted: bool, 
-    stepping: bool,
-    int_master_enabled: bool,
-    enable_ime: bool,
-    interrupt_flag: u8,
-    ie_register: u8,
+pub struct CpuContext {
+    pub fetched_data: u16,
+    pub mem_dest: u16,
+    pub dest_is_mem: bool,
+    pub current_opcode: u8,
+    pub instruction: Instruction,
+    pub halted: bool, 
+    pub stepping: bool,
+    pub int_master_enabled: bool,
+    pub enable_ime: bool,
+    pub interrupt_flag: u8,
+    pub ie_register: u8,
 }
 
 impl Cpu {
@@ -85,6 +104,13 @@ impl Cpu {
                     self.sp,
                     self.cpu_ctx.fetched_data,
                 );
+
+            // DEBUG INFO FOR BLARG 
+            let mut d = Debugger::new();
+            d.update(*self, bus);
+            d.print();
+
+
             self.execute(bus);
 
         }
@@ -155,5 +181,17 @@ impl Cpu {
 
     pub fn get_ie_register(self) -> u8 {
         self.cpu_ctx.ie_register 
+    }
+
+    pub fn get_interrupt_flags(self) -> u8 {
+        self.cpu_ctx.interrupt_flag
+    }
+
+    pub fn set_interrupt_flags(&mut self, value: u8) {
+        self.cpu_ctx.interrupt_flag = value;
+    }
+
+    pub fn request_interrupt(& mut self, t: InterruptType) {
+        self.cpu_ctx.interrupt_flag |= t as u8;
     }
 }
