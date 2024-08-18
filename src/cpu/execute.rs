@@ -102,7 +102,7 @@ impl Cpu {
         match bit {
             0 => {
                 let set_c = (reg_val & (1 << 7)) != 0;
-                let result = (reg_val << 1) & 0xFF;
+                let result = reg_val << 1;
                 let result = if set_c { result | 1 } else { result };
                 self.set_reg_8(bus, reg, result);
 
@@ -274,26 +274,18 @@ impl Cpu {
         self.set_c(c);
     }
 
-    // TODO: FIX THIS 
     pub fn sbc(&mut self, _bus: &mut Bus) {
-
-        let old_carry_flag = if self.get_c() {1} else {0};
-        let val: u8 = (self.cpu_ctx.fetched_data as u8).wrapping_add(old_carry_flag);
-
-        let z = (self.read(self.cpu_ctx.instruction.register_1) as u8).wrapping_sub(val) == 0;
-        let h = ((self.read(self.cpu_ctx.instruction.register_1) & 0xF) as i16)
-            .wrapping_sub((self.cpu_ctx.fetched_data & 0xF) as i16)
-            .wrapping_sub(old_carry_flag as i16) < 0;
-
-        let c = (self.read(self.cpu_ctx.instruction.register_1) as i16)
-            .wrapping_sub(self.cpu_ctx.fetched_data as i16)
-            .wrapping_sub(old_carry_flag as i16) < 0;
-
-        self.set_z(z);
+        let carry = if self.get_c() { 1 } else { 0 };
+        let reg_value = self.read(self.cpu_ctx.instruction.register_1) as i16;
+        let fetched_value = self.cpu_ctx.fetched_data as i16;
+        let result = reg_value.wrapping_sub(fetched_value).wrapping_sub(carry);
+        
+        self.set_z(result == 0);
         self.set_n(true);
-        self.set_h(h);
-        self.set_c(c);
-    } 
+        self.set_h((reg_value & 0x0F) < (fetched_value & 0x0F) + carry);
+        self.set_c(result < 0);
+        self.set_reg(self.cpu_ctx.instruction.register_1, result.try_into().unwrap());
+    }
 
     pub fn and(&mut self, _bus: &mut Bus) {
 
