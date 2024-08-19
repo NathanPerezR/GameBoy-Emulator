@@ -46,9 +46,10 @@ impl Bus {
         }
         else if address < 0xA000 {
             // char / map data
-            todo!("char and map data needs to be impl")
+            // todo!("char and map data needs to be impl")
+            0
         }
-        else if address < 0xC00 {
+        else if address < 0xC000 {
             // Cart Ram
             self.cart.cart_read(address)
         }
@@ -62,7 +63,8 @@ impl Bus {
         }
         else if address < 0xFEA0 {
             // OAM 
-            todo!("OAM needs to be impl")
+            // todo!("OAM needs to be impl")
+            0
         }
         else if address < 0xFF00 {
             // reserved 
@@ -87,7 +89,7 @@ impl Bus {
         else if address < 0xA000 {
             // char / map data
         }
-        else if address < 0xC00 {
+        else if address < 0xC000 {
             // Cart Ram
             self.cart.cart_write(address, value);
         }
@@ -100,7 +102,7 @@ impl Bus {
         }
         else if address < 0xFEA0 {
             // OAM 
-            todo!("OAM write needs to be impl");
+            // todo!("OAM write needs to be impl");
         }
         else if address < 0xFF00 {
             // reserved 
