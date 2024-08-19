@@ -80,10 +80,6 @@ impl Cpu {
         }
     }
 
-    // TODO: NEED TO DO EMU CYCLES
-    fn emu_cycles(&self, _cycle: u8) {
-    }
-
     pub fn step(&mut self, bus: &mut Bus) -> bool {
         if !self.cpu_ctx.halted {
 
@@ -103,12 +99,12 @@ impl Cpu {
                 let inst = self.inst_to_str(bus);
         
                 println!(
-                    "{:04X}: {:<12} ({:02X} {:02X} {:02X}) A:{:02X} F:{} BC:{:02X}{:02X} DE:{:02X}{:02X} HL:{:02X}{:02X}",
+                    "{:04X}: {:<12} ({:02X} {:02X} {:02X}) A:{:02X} F:{} BC:{:02X}{:02X} DE:{:02X}{:02X} HL:{:02X}{:02X} | Fetched Data: {:04X}",
                     pc,
                     inst,
+                    self.cpu_ctx.current_opcode,
                     bus.read(pc + 1, *self),
                     bus.read(pc + 2, *self),
-                    self.cpu_ctx.current_opcode,
                     self.a,
                     flags,
                     self.b,
@@ -116,7 +112,8 @@ impl Cpu {
                     self.d,
                     self.e,
                     self.h,
-                    self.l
+                    self.l,
+                    self.cpu_ctx.fetched_data,
                 );
             
 
@@ -129,7 +126,7 @@ impl Cpu {
 
         }
         else {
-            self.emu_cycles(1);
+            self.emu_cycles(1, bus);
 
             if self.cpu_ctx.interrupt_flag != 0 {
                 self.cpu_ctx.halted = false;
@@ -151,8 +148,8 @@ impl Cpu {
 
     pub fn check_cond(&mut self) -> bool {
 
-        let c_flag: bool = nth_bit(self.f.into(), 7);
-        let z_flag: bool = nth_bit(self.f.into(), 4);
+        let c_flag: bool = self.get_c();
+        let z_flag: bool = self.get_z();
 
         use ConditionType::*;
         match self.cpu_ctx.instruction.condition {
@@ -180,6 +177,16 @@ impl Cpu {
         let popped_value = bus.read(self.sp, *self);
         self.sp = self.sp.wrapping_add(1);
         popped_value
+    }
+
+    pub fn emu_cycles(&mut self, cpu_cycles: u16, bus: &mut Bus) {
+        let n: u8 = (cpu_cycles * 4) as u8;
+
+        for _ in 0..n {
+            {
+                bus.io.timer.tick(self);
+            }
+        }
     }
 
     pub fn stack_pop16(&mut self, bus: &mut Bus) -> u16 {
@@ -218,71 +225,64 @@ impl Cpu {
             AddressMode::Imp => return result.trim().to_string(),
 
             AddressMode::RD16 | AddressMode::RA16 => {
-                result = format!(
+                format!(
                     "{} {}${:04X}",
                     inst_name,
                     self.rt_lookup(inst.register_1),
                     self.cpu_ctx.fetched_data
-                );
-                return result;
+                )
             }
 
             AddressMode::R => {
-                result = format!(
+                format!(
                     "{} {}",
                     inst_name,
                     self.rt_lookup(inst.register_1)
-                );
-                return result;
+                )
             }
 
             AddressMode::RR => {
-                result = format!(
+                format!(
                     "{} {},{}",
                     inst_name,
                     self.rt_lookup(inst.register_1),
                     self.rt_lookup(inst.register_2)
-                );
-                return result;
+                )
             }
 
             AddressMode::MrR => {
-                result = format!(
+                format!(
                     "{} ({}, {})",
                     inst_name,
                     self.rt_lookup(inst.register_1),
                     self.rt_lookup(inst.register_2)
-                );
-                return result;
+                )
             }
 
             AddressMode::Mr => {
-                result = format!(
+                format!(
                     "{} ({})",
                     inst_name,
                     self.rt_lookup(inst.register_1)
-                );
-                return result;
+                )
             }
 
             AddressMode::RMr => {
-                result = format!(
+                format!(
                     "{} {}, ({})",
                     inst_name,
                     self.rt_lookup(inst.register_1),
                     self.rt_lookup(inst.register_2)
-                );
-                return result;
+                )
             }
 
             AddressMode::RD8 | AddressMode::RA8 => {
-                result = format!(
+                format!(
                     "{} {}${:02X}",
                     inst_name,
                     self.rt_lookup(inst.register_1),
                     self.cpu_ctx.fetched_data & 0xFF
-                );
-                return result;
+                )
             }
 
             AddressMode::RHli => {
