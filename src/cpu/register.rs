@@ -173,6 +173,27 @@ impl Cpu {
     pub fn get_c(&mut self) -> bool {
         nth_bit(self.f.into(), 4)
     }
+
+    pub fn rt_lookup(&self, reg: RegisterType) -> &'static str {
+        match reg {
+            RegisterType::None => "None",
+            RegisterType::A => "A",
+            RegisterType::B => "B",
+            RegisterType::C => "C",
+            RegisterType::D => "D",
+            RegisterType::E => "E",
+            RegisterType::F => "F",
+            RegisterType::H => "H",
+            RegisterType::L => "L",
+            RegisterType::AF => "AF",
+            RegisterType::BC => "BC",
+            RegisterType::DE => "DE",
+            RegisterType::HL => "HL",
+            RegisterType::PC => "PC",
+            RegisterType::SP => "SP",
+        }
+    }
+
 }
 
 
