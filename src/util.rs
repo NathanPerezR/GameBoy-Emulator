@@ -16,9 +16,3 @@ pub fn bit_set(mut input: u8, nth_bit: u8, on: bool) -> u8 {
     }
     input
 }
-
-
-
-pub fn between(a: i32, b: i32, c: i32) -> bool {
-    a >= b && a <= c
-} 
