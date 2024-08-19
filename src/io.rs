@@ -10,8 +10,8 @@ pub struct Io {
 impl Io {
     pub fn read(self, address: u16, cpu: Cpu) -> u8 {
         match address {
-            0xFF01 => self.serial[0] as u8,
-            0xFF02 => self.serial[1] as u8,
+            0xFF01 => self.serial[0],
+            0xFF02 => self.serial[1],
             0xFF04..=0xFF07 => self.timer.read(address),
             0xFF0F => cpu.get_interrupt_flags(),
             _ => {
@@ -23,8 +23,8 @@ impl Io {
 
     pub fn write(mut self, address: u16, value: u8, mut cpu: Cpu) {
         match address {
-            0xFF01 => self.serial[0] = value as u8,
-            0xFF02 => self.serial[1] = value as u8,
+            0xFF01 => self.serial[0] = value,
+            0xFF02 => self.serial[1] = value,
             0xFF04..=0xFF07 => self.timer.write(address, value),
             0xFF0F => cpu.set_interrupt_flags(value),
             _ => {
