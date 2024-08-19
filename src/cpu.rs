@@ -3,9 +3,11 @@ mod register;
 mod modes;
 mod structs;
 mod cpu_fetch;
+use structs::InstructionName;
+
 use crate::interrupts::InterruptType;
 use crate::cpu::register::RegisterType;
-use crate::bus::Bus;
+use crate::bus::{self, Bus};
 use crate::util::nth_bit;
 use crate::cpu::structs::{AddressMode, ConditionType, Instruction};
 use crate::dbg::Debugger;
@@ -89,23 +91,34 @@ impl Cpu {
 
             self.fetch_opcode(bus);
             self.fetch_data(bus);
-            println!("PC: {:04X} | Executing instruction: {:5} ({:02X} {:02X} {:02X}) A:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} F:{:02X} H:{:02X} L:{:02X} SP:{:04X} | fetched-data: {:04X} ", 
+
+                let flags = format!(
+                    "{}{}{}{}",
+                    if self.f & (1 << 7) != 0 { 'Z' } else { '-' },
+                    if self.f & (1 << 6) != 0 { 'N' } else { '-' },
+                    if self.f & (1 << 5) != 0 { 'H' } else { '-' },
+                    if self.f & (1 << 4) != 0 { 'C' } else { '-' }
+                );
+        
+                let inst = self.inst_to_str(bus);
+        
+                println!(
+                    "{:04X}: {:<12} ({:02X} {:02X} {:02X}) A:{:02X} F:{} BC:{:02X}{:02X} DE:{:02X}{:02X} HL:{:02X}{:02X}",
                     pc,
-                    format!("{:?}", self.cpu_ctx.instruction.in_type).chars().take(5).collect::<String>(),
-                    bus.read(pc, *self),
+                    inst,
                     bus.read(pc + 1, *self),
                     bus.read(pc + 2, *self),
+                    self.cpu_ctx.current_opcode,
                     self.a,
+                    flags,
                     self.b,
                     self.c,
                     self.d,
                     self.e,
-                    self.f,
                     self.h,
-                    self.l,
-                    self.sp,
-                    self.cpu_ctx.fetched_data,
+                    self.l
                 );
+            
 
             // DEBUG INFO FOR BLARG 
             self.dbg.update(*self, bus);
@@ -194,5 +207,239 @@ impl Cpu {
 
     pub fn request_interrupt(& mut self, t: InterruptType) {
         self.cpu_ctx.interrupt_flag |= t as u8;
+    }
+
+    pub fn inst_to_str(&self, bus: &mut Bus) -> String {
+        let inst = &self.cpu_ctx.instruction;
+        let inst_name = self.inst_name(inst.in_type);
+        let mut result = format!("{} ", inst_name);
+
+        match inst.mode {
+            AddressMode::Imp => return result.trim().to_string(),
+
+            AddressMode::RD16 | AddressMode::RA16 => {
+                result = format!(
+                    "{} {}${:04X}",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.cpu_ctx.fetched_data
+                );
+                return result;
+            }
+
+            AddressMode::R => {
+                result = format!(
+                    "{} {}",
+                    inst_name,
+                    self.rt_lookup(inst.register_1)
+                );
+                return result;
+            }
+
+            AddressMode::RR => {
+                result = format!(
+                    "{} {},{}",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::MrR => {
+                result = format!(
+                    "{} ({}, {})",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::Mr => {
+                result = format!(
+                    "{} ({})",
+                    inst_name,
+                    self.rt_lookup(inst.register_1)
+                );
+                return result;
+            }
+
+            AddressMode::RMr => {
+                result = format!(
+                    "{} {}, ({})",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::RD8 | AddressMode::RA8 => {
+                result = format!(
+                    "{} {}${:02X}",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.cpu_ctx.fetched_data & 0xFF
+                );
+                return result;
+            }
+
+            AddressMode::RHli => {
+                result = format!(
+                    "{} {},({}+)",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::RHld => {
+                result = format!(
+                    "{} {},({}-)",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::HliR => {
+                result = format!(
+                    "{} ({:+}, {})",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::HldR => {
+                result = format!(
+                    "{} ({:+}, {})",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::A8R => {
+                result = format!(
+                    "{} ${:02X}, {}",
+                    inst_name,
+                    bus.read(self.pc - 1, *self),
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            AddressMode::HlSpr => {
+                result = format!(
+                    "{} ({}, SP+{:})",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.cpu_ctx.fetched_data & 0xFF
+                );
+                return result;
+            }
+
+            AddressMode::D8 => {
+                result = format!(
+                    "{} ${:02X}",
+                    inst_name,
+                    self.cpu_ctx.fetched_data & 0xFF
+                );
+                return result;
+            }
+
+            AddressMode::D16 => {
+                result = format!(
+                    "{} ${:04X}",
+                    inst_name,
+                    self.cpu_ctx.fetched_data
+                );
+                return result;
+            }
+
+            AddressMode::MrD8 => {
+                result = format!(
+                    "{} ({}, ${:02X})",
+                    inst_name,
+                    self.rt_lookup(inst.register_1),
+                    self.cpu_ctx.fetched_data & 0xFF
+                );
+                return result;
+            }
+
+            AddressMode::A16R => {
+                result = format!(
+                    "{} (${:04X}, {})",
+                    inst_name,
+                    self.cpu_ctx.fetched_data,
+                    self.rt_lookup(inst.register_2)
+                );
+                return result;
+            }
+
+            _ => {
+                eprintln!("INVALID AM: {:?}", inst.mode);
+                return "INVALID".to_string();
+            }
+        }
+    }
+
+    fn inst_name(&self, inst_type: InstructionName) -> &'static str {
+        match inst_type {
+            InstructionName::None => "None",
+            InstructionName::Nop => "NOP",
+            InstructionName::Ld => "LD",
+            InstructionName::Inc => "INC",
+            InstructionName::Dec => "DEC",
+            InstructionName::Rlca => "RLCA",
+            InstructionName::Add => "ADD",
+            InstructionName::Rrca => "RRCA",
+            InstructionName::Stop => "STOP",
+            InstructionName::Rla => "RLA",
+            InstructionName::Jr => "JR",
+            InstructionName::Rra => "RRA",
+            InstructionName::Daa => "DAA",
+            InstructionName::Cpl => "CPL",
+            InstructionName::Scf => "SCF",
+            InstructionName::Ccf => "CCF",
+            InstructionName::Halt => "HALT",
+            InstructionName::Adc => "ADC",
+            InstructionName::Sub => "SUB",
+            InstructionName::Sbc => "SBC",
+            InstructionName::And => "AND",
+            InstructionName::Xor => "XOR",
+            InstructionName::Or => "OR",
+            InstructionName::Cp => "CP",
+            InstructionName::Pop => "POP",
+            InstructionName::Jp => "JP",
+            InstructionName::Push => "PUSH",
+            InstructionName::Ret => "RET",
+            InstructionName::Call => "CALL",
+            InstructionName::Reti => "RETI",
+            InstructionName::Ldh => "LDH",
+            InstructionName::Jphl => "JPHL",
+            InstructionName::Di => "DI",
+            InstructionName::Ei => "EI",
+            InstructionName::Rst => "RST",
+            InstructionName::Err => "ERR",
+            InstructionName::Rlc => "RLC",
+            InstructionName::Rrc => "RRC",
+            InstructionName::Rl => "RL",
+            InstructionName::Rr => "RR",
+            InstructionName::Sla => "SLA",
+            InstructionName::Sra => "SRA",
+            InstructionName::Swap => "SWAP",
+            InstructionName::Srl => "SRL",
+            InstructionName::Bit => "BIT",
+            InstructionName::Res => "RES",
+            InstructionName::Set => "SET",
+            InstructionName::CB => "CB",
+        }
     }
 }
