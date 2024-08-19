@@ -22,14 +22,14 @@ impl Cpu {
                 self.pc = self.pc.wrapping_add(1);
             },
             RD16 | D16 => {
-                let lo: u8 = bus.read(self.pc, *self);
+                let lo: u16 = bus.read(self.pc, *self) as u16;
                 self.emu_cycles(1);
                                                                                                           
-                let hi: u8 = bus.read(self.pc + 1, *self);
+                let hi: u16 = bus.read(self.pc.wrapping_add(1), *self) as u16;
                 self.emu_cycles(1);
                 self.pc = self.pc.wrapping_add(2);
                                                                                                           
-                self.cpu_ctx.fetched_data = ((hi as u16) << 8) | (lo as u16); 
+                self.cpu_ctx.fetched_data = (hi << 8) | lo ; 
             },
             MrR => {
                 self.cpu_ctx.fetched_data = self.read(self.cpu_ctx.instruction.register_2);
