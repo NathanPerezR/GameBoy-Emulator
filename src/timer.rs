@@ -2,7 +2,7 @@ use crate::cpu::Cpu;
 use crate::interrupts::InterruptType;
 
 
-#[derive(Copy, Clone, Default, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Timer {
     div: u16,
     tima: u8,
@@ -10,15 +10,18 @@ pub struct Timer {
     tac: u8,
 }
 
-impl Timer {
-    pub fn new() -> Self {
+impl Default for Timer {
+    fn default() -> Self {
         Timer {
-            div: 0xABCC,
+            div: 0xAC00,
             tima: 0,
             tma: 0,
-            tac: 0,
+            tac: 0
         }
     }
+}
+
+impl Timer {
 
     pub fn tick(&mut self, mut cpu: Cpu) {
         let prev_div = self.div;
