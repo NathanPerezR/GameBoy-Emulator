@@ -40,7 +40,7 @@ impl Default for Bus {
 
 impl Bus {
 
-    pub fn read(&mut self, address: u16, cpu: Cpu) -> u8 {
+    pub fn read(&mut self, address: u16, cpu: &Cpu) -> u8 {
         if address < 0x8000 {
             self.cart.cart_read(address)
         }
@@ -64,14 +64,14 @@ impl Bus {
         else if address < 0xFEA0 {
             // OAM 
             // todo!("OAM needs to be impl")
-            0
+            0x0
         }
         else if address < 0xFF00 {
             // reserved 
             0
         }
         else if address < 0xFF80 {
-            self.io.read(address, &cpu)
+            self.io.read(address, cpu)
         }
         else if address == 0xFFFF {
             cpu.get_ie_register()
@@ -121,8 +121,8 @@ impl Bus {
     }
 
     pub fn read16(&mut self, address: u16, cpu: &mut Cpu) -> u16 {
-        let lo: u16 = self.read(address, *cpu) as u16;
-        let hi: u16 = self.read(address, *cpu) as u16;
+        let lo: u16 = self.read(address, cpu) as u16;
+        let hi: u16 = self.read(address, cpu) as u16;
 
         lo | (hi << 8)
     }
@@ -133,6 +133,6 @@ impl Bus {
         let hi = (value >> 8) as u8;
 
         self.write(address, lo, cpu);
-        self.write(address + 1, hi, cpu);
+        self.write(address.wrapping_add(1), hi, cpu);
     }
 }

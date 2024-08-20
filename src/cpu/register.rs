@@ -33,7 +33,6 @@ impl Default for RegisterData {
     }
 }
 
-
 #[derive(Clone,Copy,Debug, Default)]
 pub enum RegisterType {
     #[default]
@@ -67,7 +66,7 @@ impl Cpu {
             F => self.f.into(),
             H => self.h.into(),
             L => self.l.into(),
-            AF => (self.a as u16) << 8 | (self.f as u16),
+            AF => (self.a as u16) << 8 | ((self.f & 0xF0) as u16),
             BC => (self.b as u16) << 8 | (self.c as u16),
             DE => (self.d as u16) << 8 | (self.e as u16),
             HL => (self.h as u16) << 8 | (self.l as u16), 
@@ -90,19 +89,19 @@ impl Cpu {
 
             RegisterType::AF => {
                 self.a = (val >> 8) as u8; 
-                self.f = (val & 0xFF) as u8; 
+                self.f = (val & 0x00F0) as u8; 
             }
             RegisterType::BC => {
                 self.b = (val >> 8) as u8; 
-                self.c = (val & 0xFF) as u8; 
+                self.c = (val & 0x00FF) as u8; 
             }
             RegisterType::DE => {
                 self.d = (val >> 8) as u8; 
-                self.e = (val & 0xFF) as u8;
+                self.e = (val & 0x00FF) as u8;
             }
             RegisterType::HL => {
                 self.h = (val >> 8) as u8;
-                self.l = (val & 0xFF) as u8;
+                self.l = (val & 0x00FF) as u8;
             }
 
             RegisterType::PC => self.pc = val,
@@ -142,7 +141,7 @@ impl Cpu {
             F => self.f,
             H => self.h,
             L => self.l,
-            HL => bus.read(self.read(HL), *self), 
+            HL => bus.read(self.read(HL), self), 
             _ => unreachable!(),
         }
     }
@@ -160,7 +159,6 @@ impl Cpu {
         self.f = bit_set(self.f, 4, c); 
     }                   
 
-    #[allow(dead_code)]
     pub fn get_z(&mut self) -> bool {
         nth_bit(self.f.into(), 7)
     }

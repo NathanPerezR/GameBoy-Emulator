@@ -1,3 +1,4 @@
+use crate::dbg::Debugger;
 use crate::{bus, cpu::Cpu};
 use crate::bus::Bus;
 use crate::ui::Ui;
@@ -12,6 +13,7 @@ pub struct EmuContext {
 
     pub cpu: Cpu,
     pub bus: Arc<Mutex<Bus>>,
+    pub dbg: Debugger
 }
 
 impl Default for EmuContext {
@@ -22,6 +24,7 @@ impl Default for EmuContext {
             ticks: 0,
             cpu: Cpu::default(),
             bus: Arc::new(Mutex::new(Bus::default())),
+            dbg: Debugger::new()
         } 
    } 
 }
@@ -46,7 +49,7 @@ impl EmuContext {
             }
             {
                 let mut bus = self.bus.lock().unwrap();
-                if !self.cpu.step(&mut bus) {
+                if !self.cpu.step(&mut bus, &mut self.dbg) {
                     println!("CPU Stopped");
                     return;
                 }

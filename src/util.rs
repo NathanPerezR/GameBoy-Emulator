@@ -1,10 +1,5 @@
 pub fn nth_bit(input: u32, nth_bit: u32) -> bool {
-    if (input & (1 << nth_bit)) != 0 {
-        return true
-    }
-    else {
-        return false
-    }
+    (input & (1 << nth_bit)) != 0
 }
 
 pub fn bit_set(mut input: u8, nth_bit: u8, on: bool) -> u8 {

@@ -10,32 +10,36 @@ pub struct Debugger {
 impl Debugger {
     pub fn new() -> Self {
         Debugger {
-            dbg_msg: [0 as u8; 1024],
-            msg_size:  0,
+            dbg_msg: [0; 1024],
+            msg_size: 0,
         }
     }
 
-    pub fn update(&mut self, mut cpu: Cpu, bus: &mut Bus) {
+    pub fn update(&mut self, cpu: &mut Cpu, bus: &mut Bus) {
         if bus.read(0xFF02, cpu) == 0x81 {
-            let c: u8 = bus.read(0xFF01, cpu) as u8;
-            self.dbg_msg[self.msg_size] = c;
-            self.msg_size += 1;
-            bus.write(0xFF02, 0, &mut cpu);
+            let c: u8 = bus.read(0xFF01, cpu);
+
+            // Ensure we do not exceed the buffer size
+            if self.msg_size < self.dbg_msg.len() {
+                self.dbg_msg[self.msg_size] = c;
+                self.msg_size = self.msg_size.wrapping_add(1);
+            }
+
+            bus.write(0xFF02, 0, cpu);
         }
     }
+
     pub fn print(&self) {
+        // Print the message as a C-style string
         if self.msg_size > 0 {
-            // Slice the dbg_msg buffer to only include the valid message part
+            // Convert to a slice and create a null-terminated string
             let dbg_msg_slice = &self.dbg_msg[0..self.msg_size];
-            
-            // Convert the slice to a String and print
             if let Ok(dbg_str) = std::str::from_utf8(dbg_msg_slice) {
                 println!("DBG: {}", dbg_str);
-            } else { 
-                // Handle invalid UTF-8 (if necessary)
+            } else {
                 println!("DBG: Invalid UTF-8 sequence detected.");
             }
         }
     }
-    
 }
+

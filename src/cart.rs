@@ -67,8 +67,8 @@ impl Cart {
     }
 
     // check that this works correctly
-    pub fn cart_write(&mut self, address: u16, value: u8) -> bool {
-        true
+    pub fn cart_write(&mut self, address: u16, value: u8) {
+        
     }
 
     fn save_cart_data(&mut self) {

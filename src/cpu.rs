@@ -7,8 +7,7 @@ use structs::InstructionName;
 
 use crate::interrupts::InterruptType;
 use crate::cpu::register::RegisterType;
-use crate::bus::{self, Bus};
-use crate::util::nth_bit;
+use crate::bus::Bus;
 use crate::cpu::structs::{AddressMode, ConditionType, Instruction};
 use crate::dbg::Debugger;
 
@@ -65,7 +64,7 @@ pub struct CpuContext {
 impl Cpu {
     
     fn fetch_opcode(&mut self, bus: &mut Bus) {
-        self.cpu_ctx.current_opcode = bus.read(self.pc, *self);
+        self.cpu_ctx.current_opcode = bus.read(self.pc, self);
         self.pc += 1;
         self.instruction_by_opcode();
     }
@@ -80,12 +79,16 @@ impl Cpu {
         }
     }
 
-    pub fn step(&mut self, bus: &mut Bus) -> bool {
+    pub fn step(&mut self, bus: &mut Bus, dbg: &mut Debugger) -> bool {
         if !self.cpu_ctx.halted {
 
-            let pc: u16 = self.pc;
+            // if self.a == 0x21 && self.f == 0x10 && self.c == 0x0E {
+            //     println!("hit");
+            //     println!("bang")
+            // }
 
-            println!("A: {:02X} F: {:02X} B: {:02X} C: {:02X} D: {:02X} E: {:02X} H: {:02X} L: {:02X} SP: {:04X} PC: 00:{:04X} ({:02X} {:02X} {:02X} {:02X})",
+            let inst = self.inst_to_str(bus);
+            println!("A: {:02X} F: {:02X} B: {:02X} C: {:02X} D: {:02X} E: {:02X} H: {:02X} L: {:02X} SP: {:04X} PC: 00:{:04X} ({:02X} {:02X} {:02X} {:02X}) {}",
             self.a,
             self.f,
             self.b,
@@ -97,10 +100,11 @@ impl Cpu {
             self.sp,
             self.pc,
 
-            bus.read(self.pc + 0, *self),
-            bus.read(self.pc + 1, *self),
-            bus.read(self.pc + 2, *self),
-            bus.read(self.pc + 3, *self),
+            bus.read(self.pc.wrapping_add(0), self),
+            bus.read(self.pc.wrapping_add(1), self),
+            bus.read(self.pc.wrapping_add(2), self),
+            bus.read(self.pc.wrapping_add(3), self),
+            inst
         );
 
             self.fetch_opcode(bus);
@@ -114,15 +118,15 @@ impl Cpu {
                     if self.f & (1 << 4) != 0 { 'C' } else { '-' }
                 );
         
-                let inst = self.inst_to_str(bus);
+                // let inst = self.inst_to_str(bus);
         
                 // println!(
                 //     "{:04X}: {:<12} ({:02X} {:02X} {:02X}) A:{:02X} F:{} BC:{:02X}{:02X} DE:{:02X}{:02X} HL:{:02X}{:02X} | Fetched Data: {:04X}",
                 //     pc,
                 //     inst,
                 //     self.cpu_ctx.current_opcode,
-                //     bus.read(pc + 1, *self),
-                //     bus.read(pc + 2, *self),
+                //     bus.read(pc + 1, self),
+                //     bus.read(pc + 2, self),
                 //     self.a,
                 //     flags,
                 //     self.b,
@@ -134,9 +138,11 @@ impl Cpu {
                 //     self.cpu_ctx.fetched_data,
                 // );
 
+
             // DEBUG INFO FOR BLARG 
-            self.dbg.update(*self, bus);
+            dbg.update(self, bus);
             self.dbg.print();
+        
 
             self.execute(bus);
 
@@ -190,13 +196,21 @@ impl Cpu {
     }
 
     pub fn stack_pop(&mut self, bus: &mut Bus) -> u8 {
-        let popped_value = bus.read(self.sp, *self);
+        let popped_value = bus.read(self.sp, self);
         self.sp = self.sp.wrapping_add(1);
         popped_value
     }
 
+pub fn stack_pop16(&mut self, bus: &mut Bus) -> u16 {
+    let lo: u16 = self.stack_pop(bus).into();
+    let hi: u16 = self.stack_pop(bus).into();
+
+    (lo) | (hi << 8)
+}
+
+
     pub fn emu_cycles(&mut self, cpu_cycles: u16, bus: &mut Bus) {
-        let n: u8 = (cpu_cycles * 4) as u8;
+        let n: u32 = (cpu_cycles * 4).into();
 
         for _ in 0..n {
             {
@@ -205,22 +219,15 @@ impl Cpu {
         }
     }
 
-    pub fn stack_pop16(&mut self, bus: &mut Bus) -> u16 {
-        let lo: u16 = self.stack_pop(bus).into();
-        let hi: u16 = self.stack_pop(bus).into();
-
-        (hi << 8) | lo
-    }
-
     pub fn set_ie_register(&mut self, n: u8) {
         self.cpu_ctx.ie_register = n;
     }
 
-    pub fn get_ie_register(self) -> u8 {
+    pub fn get_ie_register(&self) -> u8 {
         self.cpu_ctx.ie_register 
     }
 
-    pub fn get_interrupt_flags(self) -> u8 {
+    pub fn get_interrupt_flags(&self) -> u8 {
         self.cpu_ctx.interrupt_flag
     }
 
@@ -228,7 +235,7 @@ impl Cpu {
         self.cpu_ctx.interrupt_flag = value;
     }
 
-    pub fn request_interrupt(& mut self, t: InterruptType) {
+    pub fn request_interrupt(&mut self, t: InterruptType) {
         self.cpu_ctx.interrupt_flag |= t as u8;
     }
 
@@ -345,7 +352,7 @@ impl Cpu {
                 result = format!(
                     "{} ${:02X}, {}",
                     inst_name,
-                    bus.read(self.pc - 1, *self),
+                    bus.read(self.pc - 1, self),
                     self.rt_lookup(inst.register_2)
                 );
                 return result;
