@@ -23,7 +23,7 @@ impl Default for Timer {
 
 impl Timer {
 
-    pub fn tick(&mut self, mut cpu: Cpu) {
+    pub fn tick(&mut self, cpu: &mut Cpu) {
         let prev_div = self.div;
         self.div = self.div.wrapping_add(1);
 

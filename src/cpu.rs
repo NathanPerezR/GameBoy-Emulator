@@ -33,14 +33,14 @@ impl Default for Cpu {
         Cpu {
             cpu_ctx: CpuContext::default(),
             dbg: Debugger::new(),
-            a: 0xB0,
-            f: 0x01,
-            b: 0x13,
-            c: 0x00,
-            d: 0xD8,
-            e: 0x00,
-            h: 0x4D,
-            l: 0x01,
+            a: 0x01,
+            f: 0xB0,
+            b: 0x00,
+            c: 0x13,
+            d: 0x00,
+            e: 0xD8,
+            h: 0x01,
+            l: 0x4D,
             pc: 0x100,
             sp: 0xFFFE,
         }
@@ -85,6 +85,24 @@ impl Cpu {
 
             let pc: u16 = self.pc;
 
+            println!("A: {:02X} F: {:02X} B: {:02X} C: {:02X} D: {:02X} E: {:02X} H: {:02X} L: {:02X} SP: {:04X} PC: 00:{:04X} ({:02X} {:02X} {:02X} {:02X})",
+            self.a,
+            self.f,
+            self.b,
+            self.c,
+            self.d,
+            self.e,
+            self.h,
+            self.l,
+            self.sp,
+            self.pc,
+
+            bus.read(self.pc + 0, *self),
+            bus.read(self.pc + 1, *self),
+            bus.read(self.pc + 2, *self),
+            bus.read(self.pc + 3, *self),
+        );
+
             self.fetch_opcode(bus);
             self.fetch_data(bus);
 
@@ -98,29 +116,27 @@ impl Cpu {
         
                 let inst = self.inst_to_str(bus);
         
-                println!(
-                    "{:04X}: {:<12} ({:02X} {:02X} {:02X}) A:{:02X} F:{} BC:{:02X}{:02X} DE:{:02X}{:02X} HL:{:02X}{:02X} | Fetched Data: {:04X}",
-                    pc,
-                    inst,
-                    self.cpu_ctx.current_opcode,
-                    bus.read(pc + 1, *self),
-                    bus.read(pc + 2, *self),
-                    self.a,
-                    flags,
-                    self.b,
-                    self.c,
-                    self.d,
-                    self.e,
-                    self.h,
-                    self.l,
-                    self.cpu_ctx.fetched_data,
-                );
-            
+                // println!(
+                //     "{:04X}: {:<12} ({:02X} {:02X} {:02X}) A:{:02X} F:{} BC:{:02X}{:02X} DE:{:02X}{:02X} HL:{:02X}{:02X} | Fetched Data: {:04X}",
+                //     pc,
+                //     inst,
+                //     self.cpu_ctx.current_opcode,
+                //     bus.read(pc + 1, *self),
+                //     bus.read(pc + 2, *self),
+                //     self.a,
+                //     flags,
+                //     self.b,
+                //     self.c,
+                //     self.d,
+                //     self.e,
+                //     self.h,
+                //     self.l,
+                //     self.cpu_ctx.fetched_data,
+                // );
 
             // DEBUG INFO FOR BLARG 
             self.dbg.update(*self, bus);
             self.dbg.print();
-
 
             self.execute(bus);
 

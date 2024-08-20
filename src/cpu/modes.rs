@@ -1503,7 +1503,7 @@ impl Cpu {
                 self.cpu_ctx.instruction.mode       = AddressMode::D8;
                 self.cpu_ctx.instruction.condition  = ConditionType::Nc;
                 self.cpu_ctx.instruction.function   = Some(Cpu::jr)
-            }, 
+            },
             0x38 => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Jr;
                 self.cpu_ctx.instruction.register_1 = RegisterType::None;

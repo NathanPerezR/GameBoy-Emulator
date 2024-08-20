@@ -71,7 +71,7 @@ impl Bus {
             0
         }
         else if address < 0xFF80 {
-            self.io.read(address, cpu)
+            self.io.read(address, &cpu)
         }
         else if address == 0xFFFF {
             cpu.get_ie_register()
@@ -108,7 +108,7 @@ impl Bus {
             // reserved 
         }
         else if address < 0xFF80 {
-            self.io.write(address, value, *cpu);
+            self.io.write(address, value, cpu);
         }
         else if address == 0xFFFF {
             cpu.set_ie_register(value);
@@ -132,7 +132,7 @@ impl Bus {
         let lo = (value & 0xFF) as u8;
         let hi = (value >> 8) as u8;
 
-        self.write(address + 1, lo, cpu);
-        self.write(address, hi, cpu);
+        self.write(address, lo, cpu);
+        self.write(address + 1, hi, cpu);
     }
 }

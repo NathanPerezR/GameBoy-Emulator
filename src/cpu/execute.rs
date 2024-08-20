@@ -211,7 +211,7 @@ impl Cpu {
     
     pub fn add(&mut self, bus: &mut Bus) {
 
-        let mut val: u32 = self.read(self.cpu_ctx.instruction.register_1) as u32 + self.cpu_ctx.fetched_data as u32;
+        let mut val = (self.read(self.cpu_ctx.instruction.register_1) as u32).wrapping_add(self.cpu_ctx.fetched_data as i8 as u32);
 
         let is_16bit: bool = is_16_bit(self.cpu_ctx.instruction.register_1);
 
@@ -225,7 +225,7 @@ impl Cpu {
 
         let mut z = (val & 0xFF) == 0; 
         let mut h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF) + (self.cpu_ctx.fetched_data & 0xF) >= 0x10;
-        let mut c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xF) + (self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100; 
+        let mut c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF) + (self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100; 
 
         if is_16bit {
             z = false;
@@ -236,8 +236,8 @@ impl Cpu {
 
         if let RegisterType::SP = self.cpu_ctx.instruction.register_1 {
             z = false;
-            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF) + (self.cpu_ctx.fetched_data & 0xF) > 0x100;
-            c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF) + (self.cpu_ctx.fetched_data as u32 & 0xFF) > 0x100;
+            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF) + (self.cpu_ctx.fetched_data & 0xF) >= 0x10;
+            c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF) + (self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100;
         }
 
         self.set_reg(self.cpu_ctx.instruction.register_1, (val & 0xFFFF) as u16);
@@ -365,7 +365,7 @@ impl Cpu {
     pub fn ldh(&mut self, bus: &mut Bus) {
         
         if let RegisterType::A = self.cpu_ctx.instruction.register_1{
-            self.set_reg(self.cpu_ctx.instruction.register_1, bus.read(0xFF00 | self.cpu_ctx.fetched_data, *self) as u16);
+            self.set_reg(self.cpu_ctx.instruction.register_1, bus.read(0xFF00 | self.cpu_ctx.fetched_data, *self).into());
         }
         else {
             bus.write(self.cpu_ctx.mem_dest, self.a, self);

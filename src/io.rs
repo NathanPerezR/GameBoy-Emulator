@@ -8,7 +8,7 @@ pub struct Io {
 }
 
 impl Io {
-    pub fn read(self, address: u16, cpu: Cpu) -> u8 {
+    pub fn read(self, address: u16, cpu: &Cpu) -> u8 {
         match address {
             0xFF01 => self.serial[0],
             0xFF02 => self.serial[1],
@@ -21,7 +21,7 @@ impl Io {
         }
     }
 
-    pub fn write(mut self, address: u16, value: u8, mut cpu: Cpu) {
+    pub fn write(&mut self, address: u16, value: u8, cpu: &mut Cpu) {
         match address {
             0xFF01 => self.serial[0] = value,
             0xFF02 => self.serial[1] = value,
