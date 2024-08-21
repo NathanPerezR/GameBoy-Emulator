@@ -14,7 +14,6 @@ use crate::dbg::Debugger;
 #[derive(Clone, Copy, Debug)]
 pub struct Cpu {
     pub cpu_ctx: CpuContext,
-    pub dbg: Debugger,
     pub a: u8,
     pub b: u8,
     pub c: u8,
@@ -31,7 +30,6 @@ impl Default for Cpu {
     fn default() -> Self {
         Cpu {
             cpu_ctx: CpuContext::default(),
-            dbg: Debugger::new(),
             a: 0x01,
             f: 0xB0,
             b: 0x00,
@@ -141,7 +139,7 @@ impl Cpu {
 
             // DEBUG INFO FOR BLARG 
             dbg.update(self, bus);
-            self.dbg.print();
+            dbg.print();
         
 
             self.execute(bus);
