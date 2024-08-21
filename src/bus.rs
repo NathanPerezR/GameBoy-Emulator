@@ -41,44 +41,45 @@ impl Default for Bus {
 impl Bus {
 
     pub fn read(&mut self, address: u16, cpu: &Cpu) -> u8 {
+        
         if address < 0x8000 {
-            self.cart.cart_read(address)
+            return self.cart.cart_read(address);
         }
         else if address < 0xA000 {
             // char / map data
             // todo!("char and map data needs to be impl")
-            0
+            return 0;
         }
         else if address < 0xC000 {
             // Cart Ram
-            self.cart.cart_read(address)
+            return self.cart.cart_read(address);
         }
         else if address < 0xE000 {
             // WRAM (Working Ram) 
-            self.ram.wram_read(address)
+            return self.ram.wram_read(address);
         }
         else if address < 0xFE00 {
             //reserved echo RAM
-            0
+            return 0;
         }
         else if address < 0xFEA0 {
             // OAM 
             // todo!("OAM needs to be impl")
-            0x0
+            return 0x0;
         }
         else if address < 0xFF00 {
             // reserved 
-            0
+            return 0;
         }
         else if address < 0xFF80 {
-            self.io.read(address, cpu)
+            return self.io.read(address, cpu);
         }
         else if address == 0xFFFF {
-            cpu.get_ie_register()
+            return cpu.get_ie_register();
         }
-        else {
-            self.ram.hram_read(address)
-        }
+
+        self.ram.hram_read(address)
+        
     }
 
     pub fn write(&mut self, address: u16, value: u8, cpu: &mut Cpu) {
@@ -122,17 +123,13 @@ impl Bus {
 
     pub fn read16(&mut self, address: u16, cpu: &mut Cpu) -> u16 {
         let lo: u16 = self.read(address, cpu) as u16;
-        let hi: u16 = self.read(address, cpu) as u16;
+        let hi: u16 = self.read(address.wrapping_add(1), cpu) as u16;
 
         lo | (hi << 8)
     }
 
     pub fn write16(&mut self, address: u16, value: u16, cpu: &mut Cpu) {
-        
-        let lo = (value & 0xFF) as u8;
-        let hi = (value >> 8) as u8;
-
-        self.write(address, lo, cpu);
-        self.write(address.wrapping_add(1), hi, cpu);
+        self.write(address + 1, ((value >> 8) & 0xFF).try_into().unwrap(), cpu);
+        self.write(address, (value & 0xFF).try_into().unwrap(), cpu);
     }
 }

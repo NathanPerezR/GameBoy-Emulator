@@ -19,7 +19,6 @@ impl Debugger {
         if bus.read(0xFF02, cpu) == 0x81 {
             let c: u8 = bus.read(0xFF01, cpu);
 
-            // Ensure we do not exceed the buffer size
             if self.msg_size < self.dbg_msg.len() {
                 self.dbg_msg[self.msg_size] = c;
                 self.msg_size = self.msg_size.wrapping_add(1);
@@ -30,9 +29,7 @@ impl Debugger {
     }
 
     pub fn print(&self) {
-        // Print the message as a C-style string
         if self.msg_size > 0 {
-            // Convert to a slice and create a null-terminated string
             let dbg_msg_slice = &self.dbg_msg[0..self.msg_size];
             if let Ok(dbg_str) = std::str::from_utf8(dbg_msg_slice) {
                 println!("DBG: {}", dbg_str);

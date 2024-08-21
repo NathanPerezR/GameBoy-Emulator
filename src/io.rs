@@ -15,7 +15,7 @@ impl Io {
             0xFF04..=0xFF07 => self.timer.read(address),
             0xFF0F => cpu.get_interrupt_flags(),
             _ => {
-                println!("UNSUPPORTED bus_read({:04X})", address);
+                println!("UNSUPPORTED read in io({:04X})", address);
                 0
             }
         }
@@ -28,7 +28,7 @@ impl Io {
             0xFF04..=0xFF07 => self.timer.write(address, value),
             0xFF0F => cpu.set_interrupt_flags(value),
             _ => {
-                println!("UNSUPPORTED bus_write({:04X})", address);
+                println!("UNSUPPORTED write in io({:04X})", address);
             }
         }
     }
