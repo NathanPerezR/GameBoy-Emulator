@@ -6,7 +6,8 @@ impl Cpu {
 
     pub fn instruction_by_opcode(&mut self) {
         
-
+        self.cpu_ctx.fetched_data = 0x0000;
+        self.cpu_ctx.instruction = Instruction::default();
 
         match self.cpu_ctx.current_opcode {
             0xCB => {
@@ -602,7 +603,7 @@ impl Cpu {
             0xF0 => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Ldh;
                 self.cpu_ctx.instruction.register_1 = RegisterType::A;
-                self.cpu_ctx.instruction.mode       = AddressMode::R;
+                self.cpu_ctx.instruction.mode       = AddressMode::RA8;
                 self.cpu_ctx.instruction.function   = Some(Cpu::ldh)
             }, 
             
