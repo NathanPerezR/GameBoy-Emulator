@@ -33,7 +33,7 @@ impl Default for RegisterData {
     }
 }
 
-#[derive(Clone,Copy,Debug, Default)]
+#[derive(Clone,Copy,Debug, Default,Eq, PartialEq)]
 pub enum RegisterType {
     #[default]
     None,

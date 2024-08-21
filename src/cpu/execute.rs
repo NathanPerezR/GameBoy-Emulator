@@ -340,13 +340,11 @@ impl Cpu {
             self.emu_cycles(1, bus);
         }
 
-        if let RegisterType::HL = self.cpu_ctx.instruction.register_1 {
-            if let AddressMode::Mr = self.cpu_ctx.instruction.mode {
+        if RegisterType::HL == self.cpu_ctx.instruction.register_1 && AddressMode::Mr == self.cpu_ctx.instruction.mode {
                 let address = self.read(RegisterType::HL);
                 val = (bus.read(address, self) as u16).wrapping_add(1);
                 val &= 0xFF;
                 bus.write(self.read(RegisterType::HL), val as u8, self);
-            } 
         }
         else {
             self.set_reg(self.cpu_ctx.instruction.register_1, val);
@@ -365,7 +363,7 @@ impl Cpu {
 
     pub fn ldh(&mut self, bus: &mut Bus) {
         
-        if let RegisterType::A = self.cpu_ctx.instruction.register_1{
+        if RegisterType::A == self.cpu_ctx.instruction.register_1 {
             self.set_reg(self.cpu_ctx.instruction.register_1, bus.read(0xFF00 | self.cpu_ctx.fetched_data, self).into());
         }
         else {
@@ -544,7 +542,7 @@ impl Cpu {
     pub fn jr(&mut self, bus: &mut Bus) {
         let relitive_jump_amount = (self.cpu_ctx.fetched_data & 0xFF) as i8;
         let address = self.pc.wrapping_add(relitive_jump_amount as u16);
-        self.goto_address(bus, address, false)
+        self.goto_address(bus, address, false);
     }
 
     pub fn call(&mut self, bus: &mut Bus) {

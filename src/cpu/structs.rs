@@ -2,7 +2,7 @@ use crate::bus::Bus;
 use crate::cpu::register::RegisterType;
 use crate::cpu::Cpu;
 
-#[derive(Clone,Copy,Debug,Default)]
+#[derive(Clone,Copy,Debug,Default,PartialEq, Eq)]
 pub enum AddressMode {
     #[default]
     Imp,
