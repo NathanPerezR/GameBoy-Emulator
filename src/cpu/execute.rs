@@ -71,7 +71,7 @@ impl Cpu {
 
         self.emu_cycles(1, bus);
 
-        if let RegisterType::HL = reg {
+        if reg == RegisterType::HL {
             self.emu_cycles(2, bus);
         }
 
@@ -204,7 +204,7 @@ impl Cpu {
     
         self.set_reg(self.cpu_ctx.instruction.register_1, n);
     
-        if let RegisterType::AF = self.cpu_ctx.instruction.register_1 {
+        if self.cpu_ctx.instruction.register_1  == RegisterType::AF {
             self.set_reg(RegisterType::AF, n & 0xFFF0);
         }
     }
@@ -321,16 +321,16 @@ impl Cpu {
         self.set_c(false);
     } 
 
-    pub fn cp(&mut self, _bus: &mut Bus) {
+pub fn cp(&mut self, _bus: &mut Bus) {
 
-        let n = (self.a as i16).wrapping_sub(self.cpu_ctx.fetched_data as i16);
-        
-        self.set_z(n == 0);
-        self.set_n(true);
-        self.set_h( (self.a as i16 & 0x0F).wrapping_sub(self.cpu_ctx.fetched_data as i16 & 0x0F) < 0 );
-        self.set_c(n < 0);
-
-    }
+    let n = (self.a as i16).wrapping_sub(self.cpu_ctx.fetched_data as i16);
+    let half_carry = ((self.a as i16 & 0x0F) - (self.cpu_ctx.fetched_data as i16 & 0x0F)) < 0;
+    
+    self.set_z(n == 0);
+    self.set_n(true);
+    self.set_h(half_carry);
+    self.set_c(n < 0);
+}
     
     pub fn inc(&mut self, bus: &mut Bus) {
         
@@ -361,17 +361,17 @@ impl Cpu {
 
     }
 
-    pub fn ldh(&mut self, bus: &mut Bus) {
-        
-        if RegisterType::A == self.cpu_ctx.instruction.register_1 {
-            self.set_reg(self.cpu_ctx.instruction.register_1, bus.read(0xFF00 | self.cpu_ctx.fetched_data, self).into());
-        }
-        else {
-            bus.write(self.cpu_ctx.mem_dest, self.a, self);
-        }
-
-        self.emu_cycles(1, bus);
+pub fn ldh(&mut self, bus: &mut Bus) {
+    if  self.cpu_ctx.instruction.register_1 == RegisterType::A {
+        let value = bus.read(0xFF00 | self.cpu_ctx.fetched_data, self);
+        self.set_reg(self.cpu_ctx.instruction.register_1, value as u16);
+    } 
+    else {
+        bus.write(self.cpu_ctx.mem_dest, self.a , self);
     }
+
+    self.emu_cycles(1, bus);
+}
  
     pub fn dec(&mut self, bus: &mut Bus) {
         

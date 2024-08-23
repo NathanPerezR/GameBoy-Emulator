@@ -46,7 +46,7 @@ impl Cpu {
             RMr => {
                 let mut address: u16 = self.read(self.cpu_ctx.instruction.register_2);
 
-                if let RegisterType::C = self.cpu_ctx.instruction.register_2 {
+                if RegisterType::C == self.cpu_ctx.instruction.register_2 {
                     address |= 0xFF00;
                 }
 
