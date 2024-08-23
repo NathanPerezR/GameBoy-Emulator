@@ -11,6 +11,7 @@ mod io;
 mod timer;
 mod interrupts;
 mod dbg;
+mod stack;
 use std::path::Path;
 use emu::EmuContext;
 use std::sync::{Arc, Mutex,atomic::AtomicBool};
