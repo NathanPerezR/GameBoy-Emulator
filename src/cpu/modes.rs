@@ -1524,7 +1524,7 @@ impl Cpu {
                 self.cpu_ctx.instruction.register_1 = RegisterType::None;
                 self.cpu_ctx.instruction.register_2 = RegisterType::None;
                 self.cpu_ctx.instruction.mode       = AddressMode::D16;
-                self.cpu_ctx.instruction.condition  = ConditionType::C;
+                self.cpu_ctx.instruction.condition  = ConditionType::Nz;
                 self.cpu_ctx.instruction.function   = Some(Cpu::call)
             }, 
             0xCC => {
