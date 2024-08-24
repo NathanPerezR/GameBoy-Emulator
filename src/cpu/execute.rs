@@ -1,5 +1,3 @@
-use std::num::Wrapping;
-
 use crate::bus::Bus;
 use crate::cpu::{RegisterType, ConditionType};
 use crate::cpu::register::is_16_bit;
@@ -299,7 +297,7 @@ impl Cpu {
         self.a &= self.cpu_ctx.fetched_data as u8;
         self.set_z(self.a == 0);
         self.set_n(false);
-        self.set_h(false);
+        self.set_h(true);
         self.set_c(false);
     }
 
@@ -321,16 +319,16 @@ impl Cpu {
         self.set_c(false);
     } 
 
-pub fn cp(&mut self, _bus: &mut Bus) {
+    pub fn cp(&mut self, _bus: &mut Bus) {
 
-    let n = (self.a as i16).wrapping_sub(self.cpu_ctx.fetched_data as i16);
-    let half_carry = ((self.a as i16 & 0x0F) - (self.cpu_ctx.fetched_data as i16 & 0x0F)) < 0;
-    
-    self.set_z(n == 0);
-    self.set_n(true);
-    self.set_h(half_carry);
-    self.set_c(n < 0);
-}
+        let n = (self.a as i16) - (self.cpu_ctx.fetched_data as i16);
+        let half_carry = ((self.a as i16 & 0x0F) - (self.cpu_ctx.fetched_data as i16 & 0x0F)) < 0;
+        
+        self.set_z(n == 0);
+        self.set_n(true);
+        self.set_h(half_carry);
+        self.set_c(n < 0);
+    }
     
     pub fn inc(&mut self, bus: &mut Bus) {
         
@@ -361,17 +359,17 @@ pub fn cp(&mut self, _bus: &mut Bus) {
 
     }
 
-pub fn ldh(&mut self, bus: &mut Bus) {
-    if  self.cpu_ctx.instruction.register_1 == RegisterType::A {
-        let value = bus.read(0xFF00 | self.cpu_ctx.fetched_data, self);
-        self.set_reg(self.cpu_ctx.instruction.register_1, value as u16);
-    } 
-    else {
-        bus.write(self.cpu_ctx.mem_dest, self.a , self);
-    }
+    pub fn ldh(&mut self, bus: &mut Bus) {
+        if  self.cpu_ctx.instruction.register_1 == RegisterType::A {
+            let value = bus.read(0xFF00 | self.cpu_ctx.fetched_data, self);
+            self.set_reg(self.cpu_ctx.instruction.register_1, value as u16);
+        } 
+        else {
+            bus.write(self.cpu_ctx.mem_dest, self.a , self);
+        }
 
-    self.emu_cycles(1, bus);
-}
+        self.emu_cycles(1, bus);
+    }
  
     pub fn dec(&mut self, bus: &mut Bus) {
         
@@ -406,28 +404,30 @@ pub fn ldh(&mut self, bus: &mut Bus) {
 
     pub fn daa(&mut self, _bus: &mut Bus) {
 
-        let a = self.a;
+        let mut a = self.a;
+        let mut u = 0;
+        let mut fc = false;
 
-        if !self.get_n() {
-            if self.get_c() || a > 0x99 {
-                self.a = a.wrapping_add(0x60);
-                self.set_c(true);
-            }
-            if self.get_h() || (a & 0xF) > 0x09 {
-                self.a = self.a.wrapping_sub(0x06);
-            }
+        if self.get_h() || (!self.get_n() && (a & 0x0F) > 0x09) {
+            u = 0x06;
         }
+
+        if self.get_c() || (!self.get_n() && a > 0x99) {
+            u |= 0x60;
+            fc = true;
+        }
+
+        a = if self.get_n() {
+            a.wrapping_sub(u)
+        } 
         else {
-            if self.get_c() {
-                self.a = self.a.wrapping_sub(0x60)
-            }
-            if self.get_h() {
-                self.a = self.a.wrapping_sub(0x06);  
-            }
-        }
+            a.wrapping_add(u)
+        };
 
-        self.set_z(self.a == 0);
+        self.a = a;
+        self.set_z(a == 0);
         self.set_h(false);
+        self.set_c(fc);
     }
 
     pub fn cpl(&mut self, _bus: &mut Bus) {
