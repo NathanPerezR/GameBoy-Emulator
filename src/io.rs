@@ -14,6 +14,7 @@ impl Io {
             0xFF02 => self.serial[1],
             0xFF04..=0xFF07 => self.timer.read(address),
             0xFF0F => cpu.get_interrupt_flags(),
+            0xFF44 => 0x90,
             _ => {
                 // println!("UNSUPPORTED read in io({:04X})", address);
                 0
