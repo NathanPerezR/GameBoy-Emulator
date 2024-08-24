@@ -124,7 +124,6 @@ impl Cpu {
                 self.emu_cycles(1, bus);
 
                 let address: u16 = lo | (hi << 8);
-                self.cpu_ctx.dest_is_mem = true;
 
                 self.pc = self.pc.wrapping_add(2);
                 self.cpu_ctx.fetched_data = bus.read(address, self) as u16;
