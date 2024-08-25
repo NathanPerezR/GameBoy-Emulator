@@ -212,9 +212,11 @@ impl Cpu {
         }
     }
     
-    pub fn add(&mut self, bus: &mut Bus) {
 
-        let mut val = (self.read(self.cpu_ctx.instruction.register_1) as u32).wrapping_add(self.cpu_ctx.fetched_data as i8 as u32);
+ 
+    pub fn add(&mut self, bus: &mut Bus) {
+        let mut val = (self.read(self.cpu_ctx.instruction.register_1) as u32)
+            .wrapping_add(self.cpu_ctx.fetched_data as u32);
 
         let is_16bit: bool = is_16_bit(self.cpu_ctx.instruction.register_1);
 
@@ -222,29 +224,37 @@ impl Cpu {
             self.emu_cycles(1, bus);
         }
 
-        if let RegisterType::SP = self.cpu_ctx.instruction.register_1 {
-            val = (self.read(self.cpu_ctx.instruction.register_1) as u32).wrapping_add(self.cpu_ctx.fetched_data as i8 as u32);
+        if self.cpu_ctx.instruction.register_1 == RegisterType::SP {
+            val = (self.read(self.cpu_ctx.instruction.register_1) as u32)
+                .wrapping_add(self.cpu_ctx.fetched_data as i8 as u32);
         }
 
-        let mut z = (val & 0xFF) == 0; 
-        let mut h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF).wrapping_add(self.cpu_ctx.fetched_data & 0xF) >= 0x10;
-        let mut c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF).wrapping_add(self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100; 
+        let mut z = (val & 0xFF) == 0;
+        let mut h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF)
+            .wrapping_add(self.cpu_ctx.fetched_data & 0xF) >= 0x10;
+        let mut c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF)
+            .wrapping_add(self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100;
 
         if is_16bit {
-            z = false;
-            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xFFF).wrapping_add(self.cpu_ctx.fetched_data & 0xFFF) >= 0x1000;
-            let n = (self.read(self.cpu_ctx.instruction.register_1) as u32).wrapping_add(self.cpu_ctx.fetched_data as u32);
-            c = n >= 0x10000
+            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xFFF)
+                .wrapping_add(self.cpu_ctx.fetched_data & 0xFFF) >= 0x1000;
+            let n = (self.read(self.cpu_ctx.instruction.register_1) as u32)
+                .wrapping_add(self.cpu_ctx.fetched_data as u32);
+            c = n >= 0x10000;
         }
 
-        if let RegisterType::SP = self.cpu_ctx.instruction.register_1 {
+        if self.cpu_ctx.instruction.register_1 == RegisterType::SP {
             z = false;
-            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF).wrapping_add(self.cpu_ctx.fetched_data & 0xF) >= 0x10;
-            c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF).wrapping_add(self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100;
+            h = (self.read(self.cpu_ctx.instruction.register_1) & 0xF)
+                .wrapping_add(self.cpu_ctx.fetched_data & 0xF) >= 0x10;
+            c = (self.read(self.cpu_ctx.instruction.register_1) as u32 & 0xFF)
+                .wrapping_add(self.cpu_ctx.fetched_data as u32 & 0xFF) >= 0x100;
         }
 
         self.set_reg(self.cpu_ctx.instruction.register_1, (val & 0xFFFF) as u16);
-        self.set_z(z);
+        if !is_16bit {
+            self.set_z(z);
+        }
         self.set_n(false);
         self.set_h(h);
         self.set_c(c);
@@ -286,15 +296,22 @@ impl Cpu {
 
     pub fn sbc(&mut self, _bus: &mut Bus) {
         let carry = if self.get_c() { 1 } else { 0 };
-        let reg_value = self.read(self.cpu_ctx.instruction.register_1) as i16;
-        let fetched_value = self.cpu_ctx.fetched_data as i16;
-        let result = reg_value.wrapping_sub(fetched_value).wrapping_sub(carry);
-        
-        self.set_z(result == 0);
+        let reg_value = self.read(self.cpu_ctx.instruction.register_1) as u8;
+        let fetched_data = self.cpu_ctx.fetched_data;
+
+        let val = fetched_data.wrapping_add(carry);
+        let result = reg_value.wrapping_sub(val as u8);
+
+        let z = result == 0;
+        let h = ((reg_value & 0xF).wrapping_sub(fetched_data as u8 & 0xF).wrapping_sub(carry as u8)) & 0x10 != 0;
+        let c = (reg_value as u16) < (val);
+
+        self.set_reg(self.cpu_ctx.instruction.register_1, result as u16);
+
+        self.set_z(z);
         self.set_n(true);
-        self.set_h((reg_value & 0x0F) < (fetched_value & 0x0F).wrapping_add(carry));
-        self.set_c(result < 0);
-        self.set_reg(self.cpu_ctx.instruction.register_1, result.try_into().unwrap());
+        self.set_h(h);
+        self.set_c(c);
     }
 
     pub fn and(&mut self, _bus: &mut Bus) {
