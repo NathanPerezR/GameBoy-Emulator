@@ -252,7 +252,7 @@ impl Cpu {
         }
 
         self.set_reg(self.cpu_ctx.instruction.register_1, (val & 0xFFFF) as u16);
-        if !is_16bit {
+        if !is_16bit || self.cpu_ctx.instruction.register_1 == RegisterType::SP {
             self.set_z(z);
         }
         self.set_n(false);
