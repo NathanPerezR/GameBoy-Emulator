@@ -1289,7 +1289,7 @@ impl Cpu {
             0x35 => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Dec;
                 self.cpu_ctx.instruction.register_1 = RegisterType::HL;
-                self.cpu_ctx.instruction.mode       = AddressMode::R;
+                self.cpu_ctx.instruction.mode       = AddressMode::Mr;
                 self.cpu_ctx.instruction.function   = Some(Cpu::dec);
             }, 
             0x09 => {
