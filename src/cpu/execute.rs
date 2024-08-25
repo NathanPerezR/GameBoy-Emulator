@@ -21,22 +21,27 @@ impl Cpu {
             return;
         }
 
-        if let AddressMode::HlSpr = self.cpu_ctx.instruction.mode {
-            let h_flag: bool = (self.read(self.cpu_ctx.instruction.register_2) & 0xF).wrapping_add 
-                (self.cpu_ctx.fetched_data & 0xF) >= 0x10;
-            let c_flag: bool = (self.read(self.cpu_ctx.instruction.register_2) & 0xFF).wrapping_add
-                (self.cpu_ctx.fetched_data & 0xFF) >= 0x100;
-            
+
+        if self.cpu_ctx.instruction.mode == AddressMode::HlSpr {
+            let fetched_data_signed = self.cpu_ctx.fetched_data as i8 as u16;
+
+            let h_flag: bool = (self.read(self.cpu_ctx.instruction.register_2) & 0xF)
+                .wrapping_add(fetched_data_signed & 0xF) >= 0x10;
+                
+            let c_flag: bool = (self.read(self.cpu_ctx.instruction.register_2) & 0xFF)
+                .wrapping_add(fetched_data_signed & 0xFF) >= 0x100;
+
             self.set_z(false);
             self.set_n(false);
             self.set_h(h_flag);
             self.set_c(c_flag);
 
             let value_reg_2 = self.read(self.cpu_ctx.instruction.register_2);
-            let new_value = value_reg_2.wrapping_add(self.cpu_ctx.fetched_data);
+            let new_value = value_reg_2.wrapping_add(fetched_data_signed);
             self.set_reg(self.cpu_ctx.instruction.register_1, new_value);
             return;
         }
+
 
         self.set_reg(self.cpu_ctx.instruction.register_1, self.cpu_ctx.fetched_data)
     }

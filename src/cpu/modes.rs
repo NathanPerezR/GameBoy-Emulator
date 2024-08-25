@@ -393,7 +393,7 @@ impl Cpu {
             0x6D => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::L;
-                self.cpu_ctx.instruction.register_2 = RegisterType::H;
+                self.cpu_ctx.instruction.register_2 = RegisterType::L;
                 self.cpu_ctx.instruction.mode       = AddressMode::RR;
                 self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
@@ -435,7 +435,7 @@ impl Cpu {
             0x74 => {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::HL;
-                self.cpu_ctx.instruction.register_2 = RegisterType::L;
+                self.cpu_ctx.instruction.register_2 = RegisterType::H;
                 self.cpu_ctx.instruction.mode       = AddressMode::MrR;
                 self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
@@ -443,7 +443,7 @@ impl Cpu {
                 self.cpu_ctx.instruction.in_type    = InstructionName::Ld;
                 self.cpu_ctx.instruction.register_1 = RegisterType::HL;
                 self.cpu_ctx.instruction.register_2 = RegisterType::L;
-                self.cpu_ctx.instruction.mode       = AddressMode::RR;
+                self.cpu_ctx.instruction.mode       = AddressMode::MrR;
                 self.cpu_ctx.instruction.function   = Some(Cpu::load);
             }, 
             0x36 => {
