@@ -395,33 +395,32 @@ impl Cpu {
  
     pub fn dec(&mut self, bus: &mut Bus) {
         
-        let reg_value = self.read(self.cpu_ctx.instruction.register_1);
-        let mut val = reg_value.wrapping_sub(1);
-    
+        let mut reg_value = self.read(self.cpu_ctx.instruction.register_1);
+        reg_value = reg_value.wrapping_sub(1);
+
         if is_16_bit(self.cpu_ctx.instruction.register_1) {
             self.emu_cycles(1, bus);
         }
 
-        if let RegisterType::HL = self.cpu_ctx.instruction.register_1 {
-            if let AddressMode::Mr = self.cpu_ctx.instruction.mode {
-                let address = self.read(RegisterType::HL);
-                let current_value = bus.read(address, self);
-                let new_value = current_value.wrapping_sub(1); 
-                bus.write(address, new_value, self);
-            }
-        }
-        else {
-            self.set_reg(self.cpu_ctx.instruction.register_1, val);
-            val = self.read(self.cpu_ctx.instruction.register_1);
+        if self.cpu_ctx.instruction.register_1 == RegisterType::HL && self.cpu_ctx.instruction.mode == AddressMode::Mr {
+            let address = self.read(RegisterType::HL);
+            let mut current_value = bus.read(address, self);
+            current_value = current_value.wrapping_sub(1);
+            bus.write(address, current_value, self);
+            reg_value = current_value as u16;
+        } else {
+            self.set_reg(self.cpu_ctx.instruction.register_1, reg_value);
+            reg_value = self.read(self.cpu_ctx.instruction.register_1);
         }
 
-        if self.cpu_ctx.current_opcode & 0x0B == 0x0B {
+        if (self.cpu_ctx.current_opcode & 0x0B) == 0x0B {
             return;
         }
 
-        self.set_z(val == 0);
+        self.set_z(reg_value == 0);
         self.set_n(true);
-        self.set_h((val & 0x0F) == 0x0F);
+        self.set_h((reg_value & 0x0F) == 0x0F);
+
     } 
 
     pub fn daa(&mut self, _bus: &mut Bus) {
