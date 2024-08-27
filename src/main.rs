@@ -17,8 +17,7 @@ use emu::EmuContext;
 use std::sync::{Arc, Mutex,atomic::AtomicBool};
 
 fn main() {
-    let emu = Arc::new(Mutex::new(EmuContext::default())); 
-    let stop_flag = Arc::new(AtomicBool::new(false));
+    let mut emu = EmuContext::default(); 
 
     // Get the command-line arguments
     let args: Vec<String> = env::args().collect();
@@ -41,5 +40,5 @@ fn main() {
         return;
     }
 
-    emu::EmuContext::emu_run(Arc::clone(&emu), rom_path.to_str().expect(""), Arc::clone(&stop_flag));
+    emu.emu_run(rom_path.to_str().expect("")); 
 }

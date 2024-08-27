@@ -1,8 +1,7 @@
 use crate::dbg::Debugger;
-use crate::{bus, cpu::Cpu};
+use crate::{cpu::Cpu};
 use crate::bus::Bus;
 use crate::ui::Ui;
-use std::sync::{Arc, Mutex, atomic::{AtomicBool, Ordering}};
 use std::time::Duration;
 use std::thread;
 
@@ -12,7 +11,7 @@ pub struct EmuContext {
     pub ticks: u64,
 
     pub cpu: Cpu,
-    pub bus: Arc<Mutex<Bus>>,
+    pub bus: Bus,
     pub dbg: Debugger
 }
 
@@ -23,7 +22,7 @@ impl Default for EmuContext {
             paused: false,
             ticks: 0,
             cpu: Cpu::default(),
-            bus: Arc::new(Mutex::new(Bus::default())),
+            bus: Bus::default(),
             dbg: Debugger::new()
         } 
    } 
@@ -37,61 +36,44 @@ impl EmuContext {
     }
 
 
+
     pub fn cpu_run(&mut self) {
         self.running = true;
         self.paused = false;
         self.ticks = 0;
+        let mut ui = Ui::new(800, 800).expect("Failed to initialize UI");
 
         while self.running {
             if self.paused {
                 self.delay(10);
                 continue;
             }
-            {
-                let mut bus = self.bus.lock().unwrap();
-                if !self.cpu.step(&mut bus, &mut self.dbg) {
-                    println!("CPU Stopped");
-                    return;
-                }
+
+            let step_result = {
+                ui.handle_events();
+                ui.render();
+                self.cpu.step(&mut self.bus, &mut self.dbg)
+            };
+
+            if !step_result {
+                println!("CPU Stopped");
+                return;
             }
+
             self.ticks += 1;
         }
     }
 
-    pub fn emu_run(emu_context: Arc<Mutex<EmuContext>>, rom_path: &str, stop_flag: Arc<AtomicBool>) -> i16 {
-        let emu = emu_context.lock().unwrap();
+    pub fn emu_run(&mut self, rom_path: &str) -> i16 {
 
-        {
-            let mut bus = emu.bus.lock().unwrap();
-            if !bus.cart.cart_load(rom_path) {
-                println!("Failed to load ROM file: {}", rom_path);
-                return -1;
-            }
-        } // drop lock here
-
-        let bus_arc = Arc::clone(&emu.bus);
-        let stop_flag_clone = Arc::clone(&stop_flag);
-
-        drop(emu); 
-
-        let mut ui = Ui::new(800, 800, bus_arc).expect("Failed to initialize UI");
-
-        let cpu_thread = thread::spawn(move || {
-            let mut emu = emu_context.lock().unwrap();
-            while !stop_flag_clone.load(Ordering::Relaxed) {
-                emu.cpu_run();
-            }
-        });
-
-        while !stop_flag.load(Ordering::Relaxed) {
-            thread::sleep(Duration::from_millis(1000));
-            ui.handle_events(stop_flag.clone());
-            ui.render();
+        if !self.bus.cart.cart_load(rom_path) {
+            println!("Failed to load ROM file: {}", rom_path);
+            return -1;
         }
 
-        stop_flag.store(true, Ordering::Relaxed);
-        cpu_thread.join().unwrap();
 
+        self.cpu_run();
+        thread::sleep(Duration::from_millis(10));
         0
     }
 }
