@@ -1,10 +1,9 @@
 use crate::dbg::Debugger;
-use crate::{cpu::Cpu};
+use crate::cpu::Cpu;
 use crate::bus::Bus;
 use crate::ui::Ui;
 use std::time::Duration;
 use std::thread;
-use std::sync::atomic::{AtomicBool, Ordering};
 
 pub struct EmuContext {
     pub running: bool,

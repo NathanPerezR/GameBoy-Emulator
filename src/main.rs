@@ -14,7 +14,6 @@ mod dbg;
 mod stack;
 use std::path::Path;
 use emu::EmuContext;
-use std::sync::{Arc, Mutex,atomic::AtomicBool};
 
 fn main() {
     let mut emu = EmuContext::default(); 
