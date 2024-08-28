@@ -40,5 +40,5 @@ fn main() {
         return;
     }
 
-    emu.emu_run(rom_path.to_str().expect("")); 
+    EmuContext::emu_run(emu, rom_path.to_str().expect("")); 
 }
