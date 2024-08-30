@@ -481,9 +481,6 @@ impl Cpu {
 
     pub fn stop(&mut self, _bus: &mut Bus) {
 
-        println!("Not Done: stop");
-        self.cpu_ctx.halted = true;
-
     }
     
     pub fn di(&mut self, _bus: &mut Bus) {
