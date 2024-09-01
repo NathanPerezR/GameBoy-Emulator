@@ -32,7 +32,7 @@ impl Default for Bus {
         Bus {
             cart: Cart::default(),
             ram: Ram::new(),
-            ppu: Ppu::default(),
+            ppu: Ppu::new(),
             io: Io::default(),
         }
     }
@@ -46,16 +46,12 @@ impl Bus {
             return self.cart.cart_read(address);
         }
         else if address < 0xA000 {
-            // char / map data
-            // todo!("char and map data needs to be impl")
-            return 0;
+            return self.ppu.vram_read(address);
         }
         else if address < 0xC000 {
-            // Cart Ram
             return self.cart.cart_read(address);
         }
         else if address < 0xE000 {
-            // WRAM (Working Ram) 
             return self.ram.wram_read(address);
         }
         else if address < 0xFE00 {
@@ -63,9 +59,7 @@ impl Bus {
             return 0;
         }
         else if address < 0xFEA0 {
-            // OAM 
-            // todo!("OAM needs to be impl")
-            return 0x0;
+            return self.ppu.oam_read(address);
         }
         else if address < 0xFF00 {
             // reserved 
@@ -88,22 +82,19 @@ impl Bus {
             self.cart.cart_write(address, value);
         }
         else if address < 0xA000 {
-            // char / map data
+            self.ppu.vram_write(address, value);
         }
         else if address < 0xC000 {
-            // Cart Ram
             self.cart.cart_write(address, value);
         }
         else if address < 0xE000 {
-            // WRAM (Working Ram) 
             self.ram.wram_write(address, value);
         }
         else if address < 0xFE00 {
             //reserved echo RAM
         }
         else if address < 0xFEA0 {
-            // OAM 
-            // todo!("OAM write needs to be impl");
+            self.ppu.oam_write(address, value);
         }
         else if address < 0xFF00 {
             // reserved 
