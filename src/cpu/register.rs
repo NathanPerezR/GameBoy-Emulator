@@ -42,6 +42,7 @@ pub enum RegisterType {
     C,
     D,
     E,
+    #[allow(dead_code)]
     F,
     H,
     L,
@@ -49,6 +50,7 @@ pub enum RegisterType {
     BC,
     DE,
     HL,
+    #[allow(dead_code)]
     PC,
     SP,
 }

@@ -97,7 +97,7 @@ impl Cpu {
                 self.emu_cycles(1, bus);
                 self.pc = self.pc.wrapping_add(1);
             },
-            A16R | D16R => {   
+            A16R => {   
                 let lo: u16 = bus.read(self.pc, self) as u16;
                 self.emu_cycles(1, bus);
 

@@ -40,7 +40,7 @@ impl Default for Bus {
 
 impl Bus {
 
-    pub fn read(&mut self, address: u16, cpu: &Cpu) -> u8 {
+    pub fn read(&self, address: u16, cpu: &Cpu) -> u8 {
         
         if address < 0x8000 {
             return self.cart.cart_read(address);
@@ -112,12 +112,12 @@ impl Bus {
         //TODO
     }
 
-    pub fn read16(&mut self, address: u16, cpu: &mut Cpu) -> u16 {
-        let lo: u16 = self.read(address, cpu) as u16;
-        let hi: u16 = self.read(address.wrapping_add(1), cpu) as u16;
+    // pub fn read16(&mut self, address: u16, cpu: &mut Cpu) -> u16 {
+    //     let lo: u16 = self.read(address, cpu) as u16;
+    //     let hi: u16 = self.read(address.wrapping_add(1), cpu) as u16;
 
-        lo | (hi << 8)
-    }
+    //     lo | (hi << 8)
+    // }
 
     pub fn write16(&mut self, address: u16, value: u16, cpu: &mut Cpu) {
         self.write(address + 1, ((value >> 8) & 0xFF).try_into().unwrap(), cpu);
