@@ -28,8 +28,6 @@ impl Dma {
         self.value = start;
     }
 
-
-
     pub fn transferring(&self) -> bool {
         self.active
     }
