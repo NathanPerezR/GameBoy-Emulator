@@ -156,7 +156,7 @@ impl Cpu {
             }
         }
 
-        // DMA must be added  
+        bus.dma_tick(self);
     }
 
     pub fn set_ie_register(&mut self, n: u8) {
