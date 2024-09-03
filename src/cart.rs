@@ -57,7 +57,7 @@ impl Cart {
             passed_check_sum = "PASSED";
         } 
 
-        println!("\t Check Sum: {}", passed_check_sum);
+        // println!("\t Check Sum: {}", passed_check_sum);
     
         true
     }
@@ -91,13 +91,13 @@ impl Cart {
     }
 
     fn print_cart_info(&self) {
-        println!("Cartridge Loaded:");
-        println!("\t Title    : {}", self.header.title);
-        println!("\t Type     : {:02X}: {}", self.header.cart_type, self.print_rom_type());
-        println!("\t ROM Size : {} KB", 32 << self.header.rom_size);
-        println!("\t RAM Size : {:02X}", self.header.ram_size);
-        println!("\t LIC Code : {:02X}: {}", self.header.new_lic_code, self.print_lic_code());
-        println!("\t ROM Vers : {:02X}", self.header.version);
+        // println!("Cartridge Loaded:");
+        // println!("\t Title    : {}", self.header.title);
+        // println!("\t Type     : {:02X}: {}", self.header.cart_type, self.print_rom_type());
+        // println!("\t ROM Size : {} KB", 32 << self.header.rom_size);
+        // println!("\t RAM Size : {:02X}", self.header.ram_size);
+        // println!("\t LIC Code : {:02X}: {}", self.header.new_lic_code, self.print_lic_code());
+        // println!("\t ROM Vers : {:02X}", self.header.version);
     }
 
     fn print_lic_code(&self) -> &str {
