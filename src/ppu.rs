@@ -16,34 +16,22 @@ impl Ppu {
     pub fn oam_write(&mut self, address: u16, value: u8) {
         if address >= 0xFE00 {
             let index = (address - 0xFE00) as usize;
-            let entry_index = index / 4;
-            let offset = index % 4;
-
-            match offset {
-                0 => self.oam_ram[entry_index].y = value,
-                1 => self.oam_ram[entry_index].x = value,
-                2 => self.oam_ram[entry_index].tile = value,
-                3 => self.oam_ram[entry_index].flags = value,
-                _ => unreachable!(),
-            }
+            let bytes = unsafe {
+                std::slice::from_raw_parts_mut(self.oam_ram.as_mut_ptr() as *mut u8, 40 * std::mem::size_of::<OamEntry>())
+            };
+            bytes[index] = value;
         }
     }
 
     pub fn oam_read(&self, address: u16) -> u8 {
         if address >= 0xFE00 {
             let index = (address - 0xFE00) as usize;
-            let entry_index = index / 4;
-            let offset = index % 4;
-
-            match offset {
-                0 => self.oam_ram[entry_index].y,
-                1 => self.oam_ram[entry_index].x,
-                2 => self.oam_ram[entry_index].tile,
-                3 => self.oam_ram[entry_index].flags,
-                _ => unreachable!(),
-            }
+            let bytes = unsafe {
+                std::slice::from_raw_parts(self.oam_ram.as_ptr() as *const u8, 40 * std::mem::size_of::<OamEntry>())
+            };
+            bytes[index]
         } else {
-            0 
+            0
         }
     }
 
@@ -68,5 +56,25 @@ pub struct OamEntry {
 impl OamEntry {
     pub fn new(y: u8, x: u8, tile: u8, flags: u8) -> Self {
         OamEntry { y, x, tile, flags }
+    }
+
+    pub fn set_f_cgb_pn(&mut self, value: u8) {
+        self.flags = (self.flags & 0xF8) | (value & 0x07);
+    }
+
+    pub fn f_cgb_pn(&self) -> u8 {
+        self.flags & 0x07
+    }
+
+    pub fn set_f_x_flip(&mut self, value: bool) {
+        if value {
+            self.flags |= 0x20;
+        } else {
+            self.flags &= !0x20;
+        }
+    }
+
+    pub fn f_x_flip(&self) -> bool {
+        self.flags & 0x20 != 0
     }
 }

@@ -7,6 +7,7 @@ use sdl2::rect::Rect;
 use sdl2::render::TextureAccess;
 use sdl2::pixels::Color;
 use std::time::Duration;
+use std::cell::RefCell;
 use crate::bus::Bus;
 use crate::cpu::Cpu;
 
@@ -22,14 +23,14 @@ const TILE_COLORS: [Color; 4] = [
 ];
 
 pub struct UI {
-    sdl_context: Sdl,
-    video_subsystem: VideoSubsystem,
+    pub sdl_context: Sdl,
+    pub video_subsystem: VideoSubsystem,
     pub event_pump: EventPump,
-    sdl_renderer: Canvas<Window>,
-    sdl_texture_creator: TextureCreator<WindowContext>,
-    sdl_debug_renderer: Canvas<Window>,
-    sdl_debug_texture_creator: TextureCreator<WindowContext>,
-    debug_screen: Surface<'static>,
+    pub sdl_renderer: Canvas<Window>,
+    pub sdl_texture_creator: TextureCreator<WindowContext>,
+    pub sdl_debug_renderer: RefCell<Canvas<Window>>,
+    pub sdl_debug_texture_creator: TextureCreator<WindowContext>,
+    pub debug_screen: Surface<'static>,
 }
 
 impl UI {
@@ -48,7 +49,7 @@ impl UI {
             event_pump,
             sdl_renderer,
             sdl_texture_creator,
-            sdl_debug_renderer,
+            sdl_debug_renderer: sdl_debug_renderer.into(),
             sdl_debug_texture_creator,
             debug_screen,
         })
@@ -133,17 +134,17 @@ impl UI {
     }
                                                                                       
     pub fn update_dbg_window(&mut self, bus: &Bus, cpu: &Cpu) {
+        // 1. Draw everything to `self.debug_screen`
         let mut x_draw = 0;
         let mut y_draw = 0;
         let mut tile_num = 0;
-                                                                                          
+
         let rc = Rect::new(0, 0, self.debug_screen.width(), self.debug_screen.height());
         self.debug_screen.fill_rect(rc, Color::RGBA(17, 17, 17, 255)).unwrap();
-                                                                                          
+
         let addr = 0x8000;
         for _ in 0..24 {
             for _ in 0..16 {
-                // double check this
                 self.display_tile(bus, cpu, addr, tile_num, x_draw, y_draw);
                 x_draw += 8 * SCALE as i32;
                 tile_num += 1;
@@ -151,5 +152,15 @@ impl UI {
             x_draw = 0;
             y_draw += 8 * SCALE as i32;
         }
+
+        // 2. Update the SDL renderer with the content of `self.debug_screen`
+        let texture_creator = &self.sdl_debug_texture_creator;
+        let debug_texture = texture_creator.create_texture_from_surface(&self.debug_screen).unwrap();
+
+        // 3. Use the texture in the renderer
+        let mut renderer = self.sdl_debug_renderer.borrow_mut();
+        renderer.clear();
+        renderer.copy(&debug_texture, None, None).expect("Failed to copy debug texture");
+        renderer.present();
     }
 }

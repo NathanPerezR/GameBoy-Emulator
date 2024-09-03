@@ -94,7 +94,6 @@ impl EmuContext {
                 let bus = emu.bus.lock().unwrap();
                 let cpu = emu.cpu.lock().unwrap();
 
-
                 ui.update_dbg_window(&bus, &cpu);
             }
 
