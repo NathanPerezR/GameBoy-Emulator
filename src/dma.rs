@@ -51,7 +51,7 @@ impl Bus {
         self.dma.active = self.dma.byte < 0xA0;
 
         if !self.dma.active {
-            println!("DMA DONE!");
+            // println!("DMA DONE!");
             sleep(Duration::from_millis(2));
         }
     }
