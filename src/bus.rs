@@ -3,6 +3,7 @@ use crate::cart::Cart;
 use crate::ram::Ram;
 use crate::cpu::Cpu;
 use crate::io::Io;
+use crate::dma::Dma;
 
 // the following memory map info is from the gbdev.io pandocs
 //
@@ -25,6 +26,7 @@ pub struct Bus {
     pub ram: Ram,
     pub ppu: Ppu, 
     pub io: Io,
+    pub dma: Dma,
 }
 
 impl Default for Bus {
@@ -34,6 +36,7 @@ impl Default for Bus {
             ram: Ram::new(),
             ppu: Ppu::new(),
             io: Io::default(),
+            dma: Dma::new(),
         }
     }
 }
@@ -66,7 +69,7 @@ impl Bus {
             return 0;
         }
         else if address < 0xFF80 {
-            return self.io.read(address, cpu);
+            return self.io.clone().read(address, cpu);
         }
         else if address == 0xFFFF {
             return cpu.get_ie_register();
@@ -100,7 +103,7 @@ impl Bus {
             // reserved 
         }
         else if address < 0xFF80 {
-            self.io.write(address, value, cpu);
+            self.io.write(address, value, cpu, &mut self.dma);
         }
         else if address == 0xFFFF {
             cpu.set_ie_register(value);
@@ -109,7 +112,6 @@ impl Bus {
             self.ram.hram_write(address, value);
         }
 
-        //TODO
     }
 
     // pub fn read16(&mut self, address: u16, cpu: &mut Cpu) -> u16 {

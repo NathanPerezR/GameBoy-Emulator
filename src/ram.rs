@@ -12,7 +12,7 @@ impl Ram {
         }
     }
 
-    pub fn wram_read(&mut self, address: u16) -> u8 {
+    pub fn wram_read(&self, address: u16) -> u8 {
         let addr = address.wrapping_sub(0xC000);
 
         if addr >= 0x2000 {

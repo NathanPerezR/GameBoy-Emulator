@@ -80,11 +80,6 @@ impl Cpu {
     pub fn step(&mut self, bus: &mut Bus, dbg: &mut Debugger) -> bool {
         if !self.cpu_ctx.halted {
 
-            // if self.a == 0x21 && self.f == 0x10 && self.c == 0x0E {
-            //     println!("hit");
-            //     println!("bang")
-            // }
-
             let inst = self.inst_to_str(bus);
             println!("A: {:02X} F: {:02X} B: {:02X} C: {:02X} D: {:02X} E: {:02X} H: {:02X} L: {:02X} SP: {:04X} PC: 00:{:04X} ({:02X} {:02X} {:02X} {:02X}) {}",
             self.a,
@@ -160,6 +155,8 @@ impl Cpu {
                 bus.io.timer.tick(self);
             }
         }
+
+        // DMA must be added  
     }
 
     pub fn set_ie_register(&mut self, n: u8) {

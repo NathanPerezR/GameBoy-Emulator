@@ -1,3 +1,4 @@
+#[derive(Clone, Copy)]
 pub struct Ppu {
     oam_ram: [OamEntry; 40],
     vram: [u8; 0x2000],

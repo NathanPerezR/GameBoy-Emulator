@@ -5,18 +5,21 @@ mod cpu;
 mod emu;
 mod ppu;
 mod ram;
-use std::env;
 mod ui;
 mod io;
 mod timer;
 mod interrupts;
 mod dbg;
 mod stack;
-use std::path::Path;
+mod dma;
 use emu::EmuContext;
+use std::path::Path;
+use std::env;
+use std::sync::{Arc, Mutex};
 
 fn main() {
-    let mut emu = EmuContext::default(); 
+    // Initialize EmuContext
+    let emu = Arc::new(Mutex::new(EmuContext::default())); 
 
     // Get the command-line arguments
     let args: Vec<String> = env::args().collect();
@@ -31,7 +34,7 @@ fn main() {
     let file_name = &args[1];
 
     // Construct the file path
-    let rom_path = Path::new("../Testroms/").join(file_name);
+    let rom_path = Path::new("../Roms/").join(file_name);
 
     // Check if the file exists
     if !rom_path.exists() {
@@ -39,5 +42,17 @@ fn main() {
         return;
     }
 
-    EmuContext::emu_run(emu, rom_path.to_str().expect("")); 
+    // Convert the path to a string slice
+    let rom_path_str = rom_path.to_str().expect("Failed to convert path to string");
+
+    // Call the emu_run function with shared ownership
+    let result = EmuContext::emu_run(Arc::clone(&emu), rom_path_str);
+
+    if result != 0 {
+        eprintln!("An error occurred during emulation.");
+    }
 }
+
+
+
+
