@@ -62,6 +62,11 @@ impl Bus {
             return 0;
         }
         else if address < 0xFEA0 {
+
+            if self.dma.transferring() {
+                return 0xFF;
+            }
+
             return self.ppu.oam_read(address);
         }
         else if address < 0xFF00 {
@@ -97,6 +102,9 @@ impl Bus {
             //reserved echo RAM
         }
         else if address < 0xFEA0 {
+            if self.dma.transferring() {
+                return; 
+            }
             self.ppu.oam_write(address, value);
         }
         else if address < 0xFF00 {
