@@ -559,7 +559,7 @@ impl Cpu {
 
     pub fn jr(&mut self, bus: &mut Bus) {
         let relitive_jump_amount = (self.cpu_ctx.fetched_data & 0xFF) as i8;
-        let address = self.pc.wrapping_add(relitive_jump_amount as u16);
+        let address = self.pc.wrapping_add(relitive_jump_amount as i16 as u16);
         self.goto_address(bus, address, false);
     }
 
