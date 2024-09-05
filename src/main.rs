@@ -12,6 +12,7 @@ mod interrupts;
 mod dbg;
 mod stack;
 mod dma;
+mod lcd;
 use emu::EmuContext;
 use std::path::Path;
 use std::env;

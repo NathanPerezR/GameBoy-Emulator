@@ -111,7 +111,7 @@ impl UI {
         ::std::thread::sleep(Duration::from_millis(ms as u64));
     }
 
-    pub fn display_tile(&mut self, bus: &Bus, cpu: &Cpu, start_location: u16, tile_num: u16, x: i32, y: i32) {
+    pub fn display_tile(&mut self, bus: &mut Bus, cpu: &Cpu, start_location: u16, tile_num: u16, x: i32, y: i32) {
         let tile_size = 16;
         for tile_y in (0..tile_size).step_by(2) {
             let b1 = bus.read(start_location + (tile_num * tile_size) + tile_y, cpu);
@@ -133,7 +133,7 @@ impl UI {
         }
     }
                                                                                       
-    pub fn update_dbg_window(&mut self, bus: &Bus, cpu: &Cpu) {
+    pub fn update_dbg_window(&mut self, bus: &mut Bus, cpu: &Cpu) {
 
         let mut x_draw = 0;
         let mut y_draw = 0;

@@ -4,7 +4,7 @@ use crate::ram::Ram;
 use crate::cpu::Cpu;
 use crate::io::Io;
 use crate::dma::Dma;
-
+use crate::lcd::Lcd;
 // the following memory map info is from the gbdev.io pandocs
 //
 // START END  DESCRIPTION                     NOTES 
@@ -26,6 +26,7 @@ pub struct Bus {
     pub ram: Ram,
     pub ppu: Ppu, 
     pub io: Io,
+    pub lcd: Lcd,
     pub dma: Dma,
 }
 
@@ -37,13 +38,14 @@ impl Default for Bus {
             ppu: Ppu::new(),
             io: Io::default(),
             dma: Dma::new(),
+            lcd: Lcd::default()
         }
     }
 }
 
 impl Bus {
 
-    pub fn read(&self, address: u16, cpu: &Cpu) -> u8 {
+    pub fn read(&mut self, address: u16, cpu: &Cpu) -> u8 {
         
         if address < 0x8000 {
             return self.cart.cart_read(address);
@@ -74,7 +76,7 @@ impl Bus {
             return 0;
         }
         else if address < 0xFF80 {
-            return self.io.clone().read(address, cpu);
+            return self.io_read(address, cpu);
         }
         else if address == 0xFFFF {
             return cpu.get_ie_register();
@@ -111,7 +113,7 @@ impl Bus {
             // reserved 
         }
         else if address < 0xFF80 {
-            self.io.write(address, value, cpu, &mut self.dma);
+            self.io_write(address, value, cpu);
         }
         else if address == 0xFFFF {
             cpu.set_ie_register(value);

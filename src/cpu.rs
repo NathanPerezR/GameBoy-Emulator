@@ -79,6 +79,24 @@ impl Cpu {
 
     pub fn step(&mut self, bus: &mut Bus, dbg: &mut Debugger) -> bool {
         if !self.cpu_ctx.halted {
+           if bus.read(self.pc.wrapping_add(0), self) == 240 // 0xF0
+            && bus.read(self.pc.wrapping_add(1), self) == 68  // 0x44
+            && bus.read(self.pc.wrapping_add(2), self) == 254 // 0xFE
+            && bus.read(self.pc.wrapping_add(3), self) == 144 // 0x90
+            && self.a == 255  // 0xFF
+            && self.f == 0    // 0x00
+            && self.b == 251  // 0xFB
+            && self.c == 31   // 0x1F
+            && self.d == 208  // 0xD0
+            && self.e == 0    // 0x00
+            && self.h == 203  // 0xCB
+            && self.l == 20   // 0x14
+            && self.sp == 57331  // 0xDFF3
+            && self.pc == 50889  // 0xC6C9
+            {
+                print!("ruhoh");
+            }
+
 
             let inst = self.inst_to_str(bus);
             println!("A: {:02X} F: {:02X} B: {:02X} C: {:02X} D: {:02X} E: {:02X} H: {:02X} L: {:02X} SP: {:04X} PC: 00:{:04X} ({:02X} {:02X} {:02X} {:02X}) {}",

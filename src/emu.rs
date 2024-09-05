@@ -91,10 +91,10 @@ impl EmuContext {
             // Update emulator state and frame buffer
             {
                 let emu = emu_context.lock().unwrap();
-                let bus = emu.bus.lock().unwrap();
+                let mut bus = emu.bus.lock().unwrap();
                 let cpu = emu.cpu.lock().unwrap();
 
-                ui.update_dbg_window(&bus, &cpu);
+                ui.update_dbg_window(&mut bus, &cpu);
             }
 
 
