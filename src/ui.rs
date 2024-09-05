@@ -11,8 +11,8 @@ use std::cell::RefCell;
 use crate::bus::Bus;
 use crate::cpu::Cpu;
 
-pub const SCREEN_WIDTH: u32 = 160;
-pub const SCREEN_HEIGHT: u32 = 144;
+pub const SCREEN_WIDTH: u32 = 1024;
+pub const SCREEN_HEIGHT: u32 = 768;
 const SCALE: u32 = 4;
 
 const TILE_COLORS: [Color; 4] = [
@@ -134,7 +134,7 @@ impl UI {
     }
                                                                                       
     pub fn update_dbg_window(&mut self, bus: &Bus, cpu: &Cpu) {
-        // 1. Draw everything to `self.debug_screen`
+
         let mut x_draw = 0;
         let mut y_draw = 0;
         let mut tile_num = 0;
@@ -153,11 +153,9 @@ impl UI {
             y_draw += 8 * SCALE as i32;
         }
 
-        // 2. Update the SDL renderer with the content of `self.debug_screen`
         let texture_creator = &self.sdl_debug_texture_creator;
         let debug_texture = texture_creator.create_texture_from_surface(&self.debug_screen).unwrap();
 
-        // 3. Use the texture in the renderer
         let mut renderer = self.sdl_debug_renderer.borrow_mut();
         renderer.clear();
         renderer.copy(&debug_texture, None, None).expect("Failed to copy debug texture");
