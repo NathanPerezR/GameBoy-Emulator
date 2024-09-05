@@ -21,6 +21,7 @@ use crate::lcd::Lcd;
 // FF80	FFFE	High RAM (HRAM)	
 // FFFF	FFFF	Interrupt Enable register (IE)
 
+#[derive(Clone)]
 pub struct Bus {
     pub cart: Cart,
     pub ram: Ram,
@@ -76,7 +77,7 @@ impl Bus {
             return 0;
         }
         else if address < 0xFF80 {
-            return self.io_read(address, cpu);
+            return self.io.read(address, cpu, &self.lcd);
         }
         else if address == 0xFFFF {
             return cpu.get_ie_register();
@@ -113,7 +114,7 @@ impl Bus {
             // reserved 
         }
         else if address < 0xFF80 {
-            self.io_write(address, value, cpu);
+            self.io.write(address, value, cpu, &mut self.lcd, &mut self.dma);
         }
         else if address == 0xFFFF {
             cpu.set_ie_register(value);
@@ -135,4 +136,5 @@ impl Bus {
         self.write(address + 1, ((value >> 8) & 0xFF).try_into().unwrap(), cpu);
         self.write(address, (value & 0xFF).try_into().unwrap(), cpu);
     }
+
 }

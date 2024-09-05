@@ -1,7 +1,8 @@
 use crate::bus::Bus;
 use crate::util::{nth_bit,bit_set};
+use crate::dma::Dma;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Lcd {
     lcdc: u8, 
     lcds: u8,
@@ -40,39 +41,41 @@ impl Default for Lcd {
             sp2_colors: DEFAULT_COLRORS,
 
             dma: 0,
-            lcds: 0,
+            lcds: (LcdMode::Oam as u8),
         }
     }
 }
 
-enum LcdMode {
-    Hblack,
-    Vblank,
-    Oam,
-    Xfer,
+#[repr(u8)]
+pub enum LcdMode {
+    Hblank = 0,
+    Vblank = 1,
+    Oam = 2,
+    Xfer = 3,
 }
 
 #[repr(u8)]
-enum StatSrc {
+pub enum StatSrc {
     HBlank = 1 << 3,
     VBlank = 1 << 4,
     Oam = 1 << 5,
     Lyc = 1 << 6,
 }
 
-impl Bus {
-    pub fn lcd_read(&self, address: u16) -> u8 {
+impl Lcd {
+
+    pub fn read(&self, address: u16) -> u8 {
         let offset = (address - 0xFF40) as usize;
-        let p = &self.lcd as *const Lcd as *const u8;
+        let p = self as *const Lcd as *const u8;
 
         unsafe { *p.add(offset) }
     }
 
     pub fn update_palette(&mut self, palette_data: u8, pal: u8) {
         let p_colors = match pal {
-            1 => &mut self.lcd.sp1_colors,
-            2 => &mut self.lcd.sp2_colors,
-            _ => &mut self.lcd.bg_colors,
+            1 => &mut self.sp1_colors,
+            2 => &mut self.sp2_colors,
+            _ => &mut self.bg_colors,
         };
 
         p_colors[0] = DEFAULT_COLRORS[(palette_data & 0b11) as usize];
@@ -81,16 +84,15 @@ impl Bus {
         p_colors[3] = DEFAULT_COLRORS[((palette_data >> 6) & 0b11) as usize];
     }
 
-    pub fn lcd_write(&mut self, address: u16, value: u8) {
+    pub fn write(&mut self, address: u16, value: u8, dma: &mut Dma) {
         let offset = (address - 0xFF40) as usize;
-        let lcd_ref = &mut self.lcd;
-        let p = lcd_ref as *mut Lcd as *mut u8;
+        let p = self as *mut Lcd as *mut u8;
 
         unsafe { *p.add(offset) = value; }
 
         if offset == 6 {
             // 0xFF46 = DMA
-            self.dma_start(value);
+            dma.start(value);
         }
 
         match address {
@@ -100,10 +102,6 @@ impl Bus {
             _ => {}
         }
     }
-
-}
-
-impl Lcd {
 
 
     pub fn lcds_stat_int(&self, src: u8) -> bool {

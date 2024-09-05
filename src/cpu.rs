@@ -173,8 +173,8 @@ impl Cpu {
                 bus.io.timer.tick(self);
             }
         }
-
-        bus.dma_tick(self);
+        
+        bus.dma.tick(&mut bus.clone(), self);
     }
 
     pub fn set_ie_register(&mut self, n: u8) {

@@ -1,14 +1,30 @@
-#[derive(Clone, Copy)]
+use crate::bus::Bus;
+use crate::lcd::LcdMode;
+
+#[derive(Clone)]
 pub struct Ppu {
-    oam_ram: [OamEntry; 40],
-    vram: [u8; 0x2000],
+    pub current_frame: u32,
+    pub line_ticks: u32,
+    // pub video_buffer: Vec<u32>,
+    pub oam_ram: [OamEntry; 40],
+    pub vram: [u8; 0x2000],
 }
+
+
+const LINES_PER_FRAME: u16 = 154;
+const TICKS_PER_LINE: u16 = 456;
+const YRES: u8 = 144;
+const XRES: u8 = 160;
 
 impl Ppu {
 
     pub fn new() -> Self {
+        // let video_buffer = vec![0; (YRES * XRES) as usize]; 
         Ppu {
-            oam_ram: [OamEntry::new(0,0,0,0); 40],
+            current_frame: 0,
+            line_ticks: 0,
+            // video_buffer,
+            oam_ram: [OamEntry::new(0, 0, 0, 0); 40],
             vram: [0; 0x2000],
         }
     }
@@ -42,6 +58,18 @@ impl Ppu {
     pub fn vram_read(&self, address: u16) -> u8 {
         self.vram[(address - 0x8000) as usize]
     }
+
+    pub fn ppu_tick(&mut self) {
+        self.line_ticks += 1;
+
+        // match self.get_mode() {
+        //     LcdMode::Oam => self.mode_oam(),
+        //     LcdMode::Xfer => self.mode_xfer(),
+        //     LcdMode::VBlank => self.mode_vblank(),
+        //     LcdMode::HBlank => self.mode_hblank(),
+        // }
+    }
+
 }
 
 #[repr(C)]

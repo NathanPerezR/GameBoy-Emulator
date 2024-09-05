@@ -35,7 +35,7 @@ fn main() {
     let file_name = &args[1];
 
     // Construct the file path
-    let rom_path = Path::new("../Testroms/").join(file_name);
+    let rom_path = Path::new("../").join(file_name);
 
     // Check if the file exists
     if !rom_path.exists() {

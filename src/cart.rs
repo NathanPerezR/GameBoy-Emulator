@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{self, Read};
 
 
-#[derive(Default,Debug)]
+#[derive(Default,Debug, Clone)]
 struct CartHeader {
     entry: [u8; 4],
     logo: Vec<u8>,
@@ -21,14 +21,14 @@ struct CartHeader {
 }
 
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 struct CartContext {
     filename: String,
     rom_size: usize,
     rom_data: Vec<u8>
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Cart {
     header: CartHeader,
     cart_ctx: CartContext,

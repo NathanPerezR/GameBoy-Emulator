@@ -100,7 +100,7 @@ impl EmuContext {
 
 
             // Control frame rate
-            ui.delay(16); // ~60 FPS
+            ui.delay(16);
         }
 
         stop_flag.store(true, std::sync::atomic::Ordering::Relaxed);
