@@ -6,7 +6,6 @@ use sdl2::{Sdl, VideoSubsystem, EventPump};
 use sdl2::rect::Rect;
 use sdl2::render::TextureAccess;
 use sdl2::pixels::Color;
-use std::time::Duration;
 use std::cell::RefCell;
 use crate::bus::Bus;
 use crate::cpu::Cpu;
@@ -31,6 +30,7 @@ pub struct UI {
     pub sdl_debug_renderer: RefCell<Canvas<Window>>,
     pub sdl_debug_texture_creator: TextureCreator<WindowContext>,
     pub debug_screen: Surface<'static>,
+    pub timer: sdl2::TimerSubsystem,
 }
 
 impl UI {
@@ -38,6 +38,7 @@ impl UI {
         let sdl_context = sdl2::init().map_err(|e| e.to_string())?;
         let video_subsystem = sdl_context.video().map_err(|e| e.to_string())?;
         let event_pump = sdl_context.event_pump().map_err(|e| e.to_string())?;
+        let timer = sdl_context.timer().map_err(|e| e.to_string())?;
 
         let (sdl_renderer, sdl_texture_creator) = UI::create_renderer(&video_subsystem)?;
         let (sdl_debug_renderer, sdl_debug_texture_creator) = UI::create_debug_renderer(&video_subsystem)?;
@@ -52,6 +53,7 @@ impl UI {
             sdl_debug_renderer: sdl_debug_renderer.into(),
             sdl_debug_texture_creator,
             debug_screen,
+            timer,
         })
     }
 
@@ -107,9 +109,7 @@ impl UI {
         ).map_err(|e| e.to_string())
     }
 
-    pub fn delay(&self, ms: u32) {
-        ::std::thread::sleep(Duration::from_millis(ms as u64));
-    }
+
 
     pub fn display_tile(&mut self, bus: &mut Bus, cpu: &Cpu, start_location: u16, tile_num: u16, x: i32, y: i32) {
         let tile_size = 16;
@@ -160,5 +160,9 @@ impl UI {
         renderer.clear();
         renderer.copy(&debug_texture, None, None).expect("Failed to copy debug texture");
         renderer.present();
+    }
+
+    pub fn get_ticks(&self) -> u32 {
+        self.timer.ticks()
     }
 }

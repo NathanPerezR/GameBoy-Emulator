@@ -97,10 +97,7 @@ impl EmuContext {
                 ui.update_dbg_window(&mut bus, &cpu);
             }
 
-
-
-            // Control frame rate
-            ui.delay(16);
+            ui.timer.delay(16);
         }
 
         stop_flag.store(true, std::sync::atomic::Ordering::Relaxed);

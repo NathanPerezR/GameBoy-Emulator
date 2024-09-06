@@ -1,24 +1,26 @@
 use crate::bus::Bus;
 use crate::util::{nth_bit,bit_set};
 use crate::dma::Dma;
+use crate::cpu::Cpu;
+use crate::interrupts::InterruptType;
 
 #[derive(Debug, Clone)]
 pub struct Lcd {
-    lcdc: u8, 
-    lcds: u8,
-    scroll_y: u8,
-    scroll_x: u8,
-    ly: u8,
-    ly_compare: u8,
-    dma: u8,
-    bg_palette: u8,
-    obj_palette: [u8; 2],
-    win_y: u8,
-    win_x: u8,
+    pub lcdc: u8, 
+    pub lcds: u8,
+    pub scroll_y: u8,
+    pub scroll_x: u8,
+    pub ly: u8,
+    pub ly_compare: u8,
+    pub dma: u8,
+    pub bg_palette: u8,
+    pub obj_palette: [u8; 2],
+    pub win_y: u8,
+    pub win_x: u8,
 
-    bg_colors: [u32; 4],
-    sp1_colors: [u32; 4],
-    sp2_colors: [u32;  4],
+    pub bg_colors: [u32; 4],
+    pub sp1_colors: [u32; 4],
+    pub sp2_colors: [u32;  4],
 }
 
 const DEFAULT_COLRORS: [u32; 4] = [0xFFFFFFFF, 0xFFAAAAAA, 0xFF555555, 0xFF000000];
@@ -103,6 +105,23 @@ impl Lcd {
         }
     }
 
+    pub fn get_mode(&self) -> u8 {
+        self.lcds & 0b11
+    }
+
+    pub fn increment_ly(&mut self, cpu: &mut Cpu) {
+        self.ly += 1;
+
+        if self.ly == self.ly_compare {
+            self.lcds_lyc_set(true);
+
+            if self.lcds_stat_int(StatSrc::Lyc as u8) {
+                cpu.request_interrupt(InterruptType::LcdStat);
+            }
+        } else {
+            self.lcds_lyc_set(false);
+        }
+    }
 
     pub fn lcds_stat_int(&self, src: u8) -> bool {
         (self.lcds & src) != 0
@@ -174,3 +193,19 @@ impl Lcd {
     }
 
 }
+
+impl TryFrom<u8> for LcdMode {
+    type Error = ();
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(LcdMode::Hblank),
+            1 => Ok(LcdMode::Vblank),
+            2 => Ok(LcdMode::Oam),
+            3 => Ok(LcdMode::Xfer),
+            _ => Err(()),
+        }
+    }
+}
+
+

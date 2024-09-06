@@ -171,6 +171,8 @@ impl Cpu {
         for _ in 0..n {
             {
                 bus.io.timer.tick(self);
+                //TODO: make the ui shared between emucontex and the cpu????
+                // bus.ppu.tick(bus.lcd.clone(), self);
             }
         }
         

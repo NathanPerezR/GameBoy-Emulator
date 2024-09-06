@@ -1,13 +1,24 @@
 use crate::bus::Bus;
-use crate::lcd::LcdMode;
+use crate::lcd::{LcdMode, Lcd, StatSrc};
+use crate::cpu::Cpu;
+use crate::interrupts::InterruptType;
+use crate::ui::UI;
+use std::time::Duration;
 
 #[derive(Clone)]
 pub struct Ppu {
-    pub current_frame: u32,
-    pub line_ticks: u32,
+    
+    
     // pub video_buffer: Vec<u32>,
     pub oam_ram: [OamEntry; 40],
     pub vram: [u8; 0x2000],
+
+
+    current_frame: u32,
+    line_ticks: u32,
+    prev_frame_time: u32,
+    start_timer: u32,
+    frame_count: u32,
 }
 
 
@@ -23,6 +34,9 @@ impl Ppu {
         Ppu {
             current_frame: 0,
             line_ticks: 0,
+            frame_count: 0,
+            prev_frame_time: 0,
+            start_timer: 0,
             // video_buffer,
             oam_ram: [OamEntry::new(0, 0, 0, 0); 40],
             vram: [0; 0x2000],
@@ -59,15 +73,89 @@ impl Ppu {
         self.vram[(address - 0x8000) as usize]
     }
 
-    pub fn ppu_tick(&mut self) {
+    pub fn tick(&mut self, lcd: &mut Lcd, cpu: &mut Cpu, ui: &UI) {
         self.line_ticks += 1;
 
-        // match self.get_mode() {
-        //     LcdMode::Oam => self.mode_oam(),
-        //     LcdMode::Xfer => self.mode_xfer(),
-        //     LcdMode::VBlank => self.mode_vblank(),
-        //     LcdMode::HBlank => self.mode_hblank(),
-        // }
+        match LcdMode::try_from(lcd.get_mode()) {
+            Ok(LcdMode::Oam) => self.mode_oam(lcd),
+            Ok(LcdMode::Xfer) => self.mode_xfer(lcd),
+            Ok(LcdMode::Vblank) => self.mode_vblank(lcd, cpu),
+            Ok(LcdMode::Hblank) => self.mode_hblank(lcd, cpu, ui),
+            Err(..) => unreachable!()
+        }
+    }
+
+    fn mode_oam(&mut self, lcd: &mut Lcd) {
+        if self.line_ticks >= 80 {
+            lcd.lcds_mode_set(LcdMode::Xfer as u8);
+        }
+    }
+
+    fn mode_xfer(&mut self, lcd: &mut Lcd) {
+        if self.line_ticks >= (80 + 172) {
+            lcd.lcds_mode_set(LcdMode::Hblank as u8);
+        }
+    }
+
+    fn mode_vblank(&mut self, lcd: &mut Lcd, cpu: &mut Cpu, ) {
+        if self.line_ticks >= TICKS_PER_LINE.into() {
+            lcd.increment_ly(cpu);
+
+            if u16::from(lcd.ly) >= LINES_PER_FRAME {
+                lcd.lcds_mode_set(LcdMode::Oam as u8);
+                lcd.ly = 0;
+            }
+
+            self.line_ticks = 0;
+        }
+    }
+
+    const TARGET_FRAME_TIME: u32 = 1000 / 60;
+
+    fn mode_hblank(&mut self, lcd: &mut Lcd, cpu: &mut Cpu, ui: &UI) {
+        if self.line_ticks >= TICKS_PER_LINE.into() { 
+            lcd.increment_ly(cpu);
+
+            if lcd.ly >= YRES {
+                lcd.lcds_mode_set(LcdMode::Vblank as u8);
+
+                cpu.request_interrupt(InterruptType::VbBlank);
+
+                if lcd.lcds_stat_int(StatSrc::VBlank as u8) {
+                    cpu.request_interrupt(InterruptType::LcdStat);
+                }
+
+                self.current_frame += 1;
+
+
+                let end = ui.get_ticks();
+                let frame_time = end - self.prev_frame_time;
+
+                if frame_time < Self::TARGET_FRAME_TIME {
+                    self.delay(Self::TARGET_FRAME_TIME - frame_time);
+                }
+
+                if end - self.start_timer >= 1000 {
+                    let fps = self.frame_count;
+                    self.start_timer = end;
+                    self.frame_count = 0;
+
+                    println!("FPS: {}", fps);
+                }
+
+                self.frame_count += 1;
+                self.prev_frame_time = ui.get_ticks();
+
+            } else {
+                lcd.lcds_mode_set(LcdMode::Oam as u8);
+            }
+
+            self.line_ticks = 0;
+        }
+    }
+
+    pub fn delay(&self, ms: u32) {
+        std::thread::sleep(Duration::from_millis(ms as u64));
     }
 
 }
